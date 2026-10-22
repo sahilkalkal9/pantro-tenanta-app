@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   AlertCircle, Receipt, IndianRupee, User, FileText, DoorOpen, Bell,
   LogOut, Calendar, MessageSquare, Settings, ChevronRight, HelpCircle,
+  Shield,
 } from 'lucide-react-native';
 import { logout } from '../../../slices/authSlice';
 import {
@@ -45,6 +46,7 @@ const MENU = [
       { icon: HelpCircle, color: COLORS.secondary, label: 'Support', subtitle: 'Contact your manager & help', route: '/more/support' },
       { icon: Bell, color: COLORS.info, label: 'Notifications', subtitle: 'Your recent notifications', route: '/more/notifications' },
       { icon: Settings, color: COLORS.gray500, label: 'Settings', subtitle: 'Password & account', route: '/more/settings' },
+      { icon: Shield, color: '#7c3aed', label: 'Privacy Policy', subtitle: 'How we protect your data', route: '/more/privacy-policy' },
     ],
   },
 ];

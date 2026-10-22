@@ -54,7 +54,7 @@ export default function TenantBottomBar({ state, descriptors, navigation }) {
               });
 
               if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate({ name: tab.name, merge: true });
+                navigation.navigate(tab.name, { merge: true });
               }
             } else {
               navigation.navigate(tab.name);

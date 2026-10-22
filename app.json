@@ -2,12 +2,13 @@
   "expo": {
     "name": "Pantro Tenant",
     "slug": "pantro-tenant",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "jsEngine": "hermes",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "scheme": "pantro-tenant",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -16,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pantro.tenant",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "infoPlist": {
         "NSContactsUsageDescription": "Allow Pantro to access contacts for emergency contact selection",
         "NSCameraUsageDescription": "Allow Pantro to access camera for document uploads and profile photos",
@@ -26,20 +27,14 @@
     },
     "android": {
       "package": "com.pantro.tenant",
-      "versionCode": 2,
+      "versionCode": 4,
+      "googleServicesFile": "./google-services.json",
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#ffffff",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "androidStatusBar": {
-        "barStyle": "dark-content",
-        "backgroundColor": "#ffffff",
-        "translucent": false
-      },
-      "androidNavigationBar": {
-        "barStyle": "dark-content",
-        "backgroundColor": "#ffffff"
       },
       "permissions": [
         "android.permission.CAMERA",
@@ -59,7 +54,22 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-notifications"
+      "expo-notifications",
+      "./plugins/with-release-signing",
+      "./plugins/with-gradle-tuning",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36,
+            "buildToolsVersion": "36.0.0",
+            "minSdkVersion": 24,
+            "enableProguardInReleaseBuilds": false,
+            "enableShrinkResourcesInReleaseBuilds": false
+          }
+        }
+      ]
     ],
     "extra": {
       "apiBaseUrl": "https://stayverse-backend-zyl7.onrender.com/api"

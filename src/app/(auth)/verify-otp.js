@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Image,
+  Linking,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -305,6 +306,15 @@ export default function VerifyOtpScreen() {
           <Text style={styles.footerBrand}>
             A Product of <Text style={styles.footerBrandBold}>Wabsyte Studio OPC Private Limited</Text>
           </Text>
+          <View style={styles.legalLinks}>
+            <TouchableOpacity onPress={() => Linking.openURL('https://pantro.in/privacy')} activeOpacity={0.7}>
+              <Text style={styles.legalLink}>Privacy Policy</Text>
+            </TouchableOpacity>
+            <Text style={styles.legalSeparator}>·</Text>
+            <TouchableOpacity onPress={() => Linking.openURL('https://pantro.in/terms')} activeOpacity={0.7}>
+              <Text style={styles.legalLink}>Terms of Service</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -577,5 +587,21 @@ const styles = StyleSheet.create({
   footerBrandBold: {
     fontWeight: '600',
     color: '#94a3b8',
+  },
+  legalLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: SPACING.md,
+  },
+  legalLink: {
+    fontSize: 11,
+    color: '#2dd4bf',
+    textDecorationLine: 'underline',
+  },
+  legalSeparator: {
+    fontSize: 11,
+    color: '#64748b',
   },
 });

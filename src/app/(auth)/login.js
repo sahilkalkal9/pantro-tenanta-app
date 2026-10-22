@@ -10,13 +10,12 @@ import {
   ActivityIndicator,
   StyleSheet,
   Image,
-  Linking,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { ArrowRight, Check, RotateCcw, AlertTriangle, Home } from 'lucide-react-native';
+import { ArrowRight, Check, RotateCcw, AlertTriangle } from 'lucide-react-native';
 import { requestOtp, clearError } from '../../slices/authSlice';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../constants/colors';
 
@@ -70,10 +69,6 @@ export default function LoginScreen() {
     } catch (err) {
       setLocalError(typeof err === 'string' ? err : err?.message || 'Failed to send OTP');
     }
-  };
-
-  const openOwnerPortal = () => {
-    Linking.openURL('https://owner.pantro.in').catch(() => {});
   };
 
   const formatDisplayPhone = (digits) => {
@@ -206,15 +201,6 @@ export default function LoginScreen() {
             </Text>
           </View>
 
-          {/* ── Switcher link to Owner Portal ────────────────── */}
-          <TouchableOpacity
-            style={styles.ownerLink}
-            onPress={openOwnerPortal}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.ownerLinkMuted}>Are you a property owner? </Text>
-            <Text style={styles.ownerLinkHighlight}>Owner Portal →</Text>
-          </TouchableOpacity>
         </View>
 
         {/* ── Corporate Identity Footer ──────────────────────── */}
@@ -454,23 +440,6 @@ const styles = StyleSheet.create({
     color: '#64748b',
     textAlign: 'center',
     marginTop: 12,
-  },
-  ownerLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: SPACING.lg,
-    paddingVertical: 6,
-  },
-  ownerLinkMuted: {
-    fontSize: 12,
-    color: '#94a3b8',
-  },
-  ownerLinkHighlight: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#2dd4bf',
-    textDecorationLine: 'underline',
   },
   footer: {
     alignItems: 'center',

@@ -84,12 +84,12 @@ export default function ImageKitUploader({
 
       const result = useCamera
         ? await picker.launchCameraAsync({
-            mediaTypes: picker.MediaTypeOptions?.Images || 'Images',
+            mediaTypes: ['images'],
             allowsEditing: true,
             quality: 0.8,
           })
         : await picker.launchImageLibraryAsync({
-            mediaTypes: picker.MediaTypeOptions?.Images || 'Images',
+            mediaTypes: ['images'],
             allowsEditing: true,
             quality: 0.8,
           });
