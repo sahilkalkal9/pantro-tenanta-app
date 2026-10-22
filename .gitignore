@@ -1,8 +1,2 @@
 /node_modules
-.expo/
-/dist
-*.jks
-*.keystore
-android/app/keystore.properties
-keystore.properties
-google-services.json
+
