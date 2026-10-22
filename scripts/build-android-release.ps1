@@ -100,6 +100,10 @@ if (Test-Path $repairScript) {
     & $repairScript | Out-Null
 }
 
+# Stop any lingering daemons to free JVM Metaspace and memory
+Write-Host 'Stopping any lingering Gradle daemons...' -ForegroundColor DarkGray
+& $gradlew --stop | Out-Null
+
 $tasks = @()
 if ($Target -eq 'aab' -or $Target -eq 'both') { $tasks += 'bundleRelease' }
 if ($Target -eq 'apk' -or $Target -eq 'both') { $tasks += 'assembleRelease' }

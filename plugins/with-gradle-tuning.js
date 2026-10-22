@@ -45,6 +45,8 @@ const path = require('path');
 const { withDangerousMod } = require('expo/config-plugins');
 
 const FLAGS = {
+  'org.gradle.jvmargs': '-Xmx3584m -XX:MaxMetaspaceSize=1536m -XX:+UseG1GC',
+  'kotlin.daemon.jvmargs': '-Xmx2560m -XX:MaxMetaspaceSize=1024m -XX:+UseG1GC',
   'org.gradle.caching': 'false',
   'org.gradle.vfs.watch': 'false',
 };
