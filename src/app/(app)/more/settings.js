@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Switch } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { User, Shield, LogOut, CheckCircle2, Moon, Sun, Settings } from 'lucide-react-native';
+import { User, Shield, LogOut, CheckCircle2, Moon, Sun, Settings, Radio, RefreshCw } from 'lucide-react-native';
 import { logout } from '../../../slices/authSlice';
 import { tenantService } from '../../../services/tenantService';
 import { useToast } from '../../../hooks/useToast';
+import { useOtaUpdates } from '../../../hooks/useOtaUpdates';
 import { getErrorMessage } from '../../../lib/normalize';
 import {
   Screen, TenantPageHeader, Card, Button, TextField, KeyValue, ConfirmModal,
@@ -23,6 +24,21 @@ export default function SettingsScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [changing, setChanging] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
+
+  const {
+    isChecking,
+    checkForUpdates,
+    installedInfo,
+  } = useOtaUpdates({ autoCheck: false });
+
+  const handleManualCheck = async () => {
+    const res = await checkForUpdates();
+    if (res?.updateAvailable) {
+      toast.info(`Update v${res.update?.version} available! Follow the on-screen prompt.`);
+    } else {
+      toast.success(res?.message || 'You are on the latest version!');
+    }
+  };
 
   const changePassword = async () => {
     if (!currentPassword) {
@@ -70,6 +86,27 @@ export default function SettingsScreen() {
             onValueChange={toggleTheme}
             trackColor={{ false: '#cbd5e1', true: '#2563eb' }}
             thumbColor={isDark ? '#ffffff' : '#f8fafc'}
+          />
+        </View>
+      </Card>
+
+      <Card style={styles.card}>
+        <View style={styles.head}>
+          <Radio size={16} color={colors.textSecondary} />
+          <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>App Updates</Text>
+        </View>
+        <KeyValue label="Installed Version" value={installedInfo?.displayVersion || 'v1.0.2'} />
+        <KeyValue label="Build Number" value={String(installedInfo?.buildNumber || 4)} />
+        <KeyValue label="Update Channel" value="Production (OTA)" />
+        <View style={{ marginTop: SPACING.sm }}>
+          <Button
+            title={isChecking ? 'Checking for updates...' : 'Check for Updates'}
+            icon={RefreshCw}
+            variant="outline"
+            size="sm"
+            onPress={handleManualCheck}
+            loading={isChecking}
+            fullWidth
           />
         </View>
       </Card>

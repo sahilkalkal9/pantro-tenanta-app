@@ -11,3 +11,4 @@ export { default as TenantBottomBar } from './tenants/TenantBottomBar';
 export { default as TenantDrawer } from './tenants/TenantDrawer';
 export { default as PaymentSheet } from './tenants/PaymentSheet';
 export { default as ImageKitUploader } from './ImageKitUploader';
+export { default as OtaUpdateModal } from './OtaUpdateModal';

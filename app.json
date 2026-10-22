@@ -9,6 +9,14 @@
     "userInterfaceStyle": "light",
     "scheme": "pantro-tenant",
     "newArchEnabled": true,
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://stayverse-backend-zyl7.onrender.com/api/ota/expo-manifest",
+      "enabled": true,
+      "checkAutomatically": "NEVER"
+    },
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",

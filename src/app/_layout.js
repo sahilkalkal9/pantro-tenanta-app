@@ -10,7 +10,7 @@ import { preventAutoHideAsync, hideAsync } from 'expo-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setTheme } from '../slices/uiSlice';
 import { useTheme } from '../hooks/useTheme';
-import { Toaster, PantroLoader } from '../components';
+import { Toaster, PantroLoader, OtaUpdateModal } from '../components';
 import { warmupBackend } from '../lib/api';
 import apiCache from '../services/apiCache';
 
@@ -26,6 +26,7 @@ export default function RootLayout() {
         <RootNav />
         <GlobalLoader />
         <Toaster />
+        <OtaUpdateModal />
       </PersistGate>
     </Provider>
   );
