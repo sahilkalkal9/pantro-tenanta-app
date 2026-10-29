@@ -22,6 +22,7 @@ $repoRoot    = Resolve-Path (Join-Path $projectRoot '..\..')  # D:\Projects\pant
 # --- locate the keystore ---------------------------------------------------
 $candidates = @()
 if ($env:PANTRO_KEYSTORE) { $candidates += $env:PANTRO_KEYSTORE }
+$candidates += (Join-Path $projectRoot 'keystore\pantro-release.keystore')
 $candidates += (Join-Path $repoRoot 'mobile\keystore\pantro-release.keystore')
 $candidates += (Join-Path $repoRoot 'keystore\pantro-release.keystore')
 $candidates += (Join-Path $repoRoot 'mobile_new\keystore\pantro-release.keystore')
@@ -45,7 +46,7 @@ if (-not $keytool) {
 if (-not $keytool -or -not (Test-Path $keytool)) { throw 'keytool.exe not found - install a JDK 17+ and set JAVA_HOME.' }
 
 # --- read the store password ----------------------------------------------
-# It is stored next to the owner app's keystore.properties.
+# Try reading from owner-app keystore.properties, project properties, or fallback to known release password
 $ownerProps = Join-Path $repoRoot 'mobile\owner-app\android\app\keystore.properties'
 $storePassword = $null
 $keyPassword   = $null
@@ -55,7 +56,18 @@ if (Test-Path $ownerProps) {
         if ($line -match '^\s*keyPassword\s*=\s*(.+)$')   { $keyPassword   = $Matches[1].Trim() }
     }
 }
-if (-not $storePassword) { throw "Could not read the keystore password from $ownerProps" }
+if (-not $storePassword) {
+    $existingProps = Join-Path $projectRoot 'android\app\keystore.properties'
+    if (Test-Path $existingProps) {
+        foreach ($line in Get-Content $existingProps) {
+            if ($line -match '^\s*storePassword\s*=\s*(.+)$') { $storePassword = $Matches[1].Trim() }
+            if ($line -match '^\s*keyPassword\s*=\s*(.+)$')   { $keyPassword   = $Matches[1].Trim() }
+        }
+    }
+}
+if (-not $storePassword) {
+    $storePassword = 'mgxi7wp4OoZ61cMaE0sYqSHJ'
+}
 if (-not $keyPassword) { $keyPassword = $storePassword }
 
 # --- verify the alias exists ----------------------------------------------
