@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Smartphone,
   Wallet,
+  Zap,
 } from 'lucide-react-native';
 import { tenantService } from '../../services/tenantService';
 import { useToast } from '../../hooks/useToast';
@@ -265,27 +266,39 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
     setView('proof');
   };
 
+  const cleanUtr = (transactionId || '').replace(/\D/g, '');
+  const isFullUtr = cleanUtr.length === 12;
+
   const submitProof = async () => {
     const meta = PROOF_METHODS[method] || PROOF_METHODS.upi;
     if (meta.refRequired && !transactionId.trim()) {
       toast.error(`Please enter the ${meta.refLabel}`);
       return;
     }
-    if (!screenshotUrl) {
-      toast.error('Please upload the payment screenshot');
+    // Screenshot is mandatory ONLY if 12-digit UTR is not entered
+    if (!screenshotUrl && !isFullUtr) {
+      toast.error('Please enter the 12-digit UPI UTR number or upload a screenshot');
       return;
     }
     setSubmitting(true);
     try {
-      await tenantService.submitDuesPayment({
+      const res = await tenantService.submitDuesPayment({
         items,
         paymentMethod: method,
         transactionId: transactionId.trim(),
-        screenshotUrl,
+        screenshotUrl: screenshotUrl || undefined,
       });
-      toast.success('Payment submitted for owner approval');
-      close();
-      onSuccess?.();
+
+      const autoApproved = res?.data?.autoApproved || res?.autoApproved;
+      if (autoApproved) {
+        setView('auto-approved');
+        toast.success('⚡ Payment verified automatically!');
+        onSuccess?.();
+      } else {
+        toast.success('Payment submitted for owner approval');
+        close();
+        onSuccess?.();
+      }
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
@@ -508,12 +521,22 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
         {view === 'upi' ? (
           <View style={{ gap: SPACING.md }}>
             <View style={[styles.banner, { backgroundColor: blueBg, borderColor: blueBorder }]}>
-              <Info size={16} color="#2563eb" style={{ marginTop: 1 }} />
+              <Zap size={18} color="#2563eb" style={{ marginTop: 1 }} />
               <Text style={[styles.bannerText, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
-                Pay <Text style={{ fontWeight: 'bold' }}>{formatCurrency(amount)}</Text> via UPI, then submit the transaction
-                reference so the owner can verify and approve it.
+                Pay <Text style={{ fontWeight: 'bold' }}>{formatCurrency(amount)}</Text> via UPI. Enter your{' '}
+                <Text style={{ fontWeight: 'bold' }}>12-digit UPI Reference (UTR)</Text> for{' '}
+                <Text style={{ fontWeight: 'bold' }}>instant 1-second auto-approval</Text>!
               </Text>
             </View>
+
+            {isFullUtr ? (
+              <View style={[styles.banner, { backgroundColor: greenBg, borderColor: greenBorder }]}>
+                <CheckCircle size={16} color="#059669" style={{ marginTop: 1 }} />
+                <Text style={[styles.bannerText, { color: isDark ? '#6ee7b7' : '#065f46' }]}>
+                  ✨ 12-digit UTR detected! Screenshot is optional. Tap submit to auto-verify against the owner&apos;s bank feed.
+                </Text>
+              </View>
+            ) : null}
 
             {upiLoading ? (
               <View style={styles.centerRow}>
@@ -554,25 +577,26 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
             )}
 
             <TextField
-              label={proofMeta.refLabel}
-              placeholder={proofMeta.refPlaceholder}
+              label="12-Digit UPI Reference / UTR Number"
+              placeholder="e.g. 429812345678"
               value={transactionId}
               onChangeText={setTransactionId}
-              helper="Required — the owner uses this to verify your payment"
-              required={proofMeta.refRequired}
+              helper={isFullUtr ? "✨ Valid 12-digit UTR detected" : "Copied from Google Pay, PhonePe, or Paytm payment receipt"}
+              required
+              keyboardType="numeric"
             />
 
             <ImageKitUploader
-              label="Payment screenshot (required)"
+              label={isFullUtr ? "Payment screenshot (optional)" : "Payment screenshot (required)"}
               value={screenshotUrl}
               onChange={setScreenshotUrl}
               folder="/tenants/payments"
-              required
+              required={!isFullUtr}
             />
 
             <Button
-              title="Submit for Approval"
-              icon={CreditCard}
+              title={isFullUtr ? "Submit & Auto-Verify" : "Submit for Approval"}
+              icon={isFullUtr ? Zap : CreditCard}
               onPress={submitProof}
               loading={submitting}
               fullWidth
@@ -828,6 +852,64 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                 </TouchableOpacity>
               </>
             )}
+          </View>
+        ) : null}
+
+        {/* ── 2B. Instant Auto-Approved State ───────────────────── */}
+        {view === 'auto-approved' ? (
+          <View style={{ alignItems: 'center', paddingVertical: SPACING.lg, gap: SPACING.md }}>
+            <View
+              style={{
+                width: 68,
+                height: 68,
+                borderRadius: 34,
+                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.2)' : '#d1fae5',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 2,
+                borderColor: '#10b981',
+              }}
+            >
+              <CheckCircle size={38} color="#10b981" />
+            </View>
+
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 20, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' }}>
+                Payment Auto-Verified! 🎉
+              </Text>
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: colors.textSecondary,
+                  textAlign: 'center',
+                  marginTop: 6,
+                  lineHeight: 19,
+                }}
+              >
+                Your payment of{' '}
+                <Text style={{ fontWeight: '800', color: '#10b981' }}>{formatCurrency(amount)}</Text> was verified
+                automatically via the owner&apos;s bank feed.
+              </Text>
+              <Text style={{ fontSize: 11.5, color: colors.textTertiary, marginTop: 8 }}>
+                UTR:{' '}
+                <Text style={{ fontFamily: 'monospace', fontWeight: '700', color: colors.textPrimary }}>
+                  {cleanUtr || transactionId}
+                </Text>{' '}
+                · Zero manual delay
+              </Text>
+            </View>
+
+            <View style={{ width: '100%', marginTop: SPACING.sm }}>
+              <Button
+                title="Done"
+                icon={Check}
+                onPress={() => {
+                  close();
+                  onSuccess?.();
+                }}
+                fullWidth
+              />
+            </View>
           </View>
         ) : null}
       </View>

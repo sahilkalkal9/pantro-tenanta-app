@@ -406,6 +406,16 @@ export const tenantService = {
     return unwrapItem(res, 'data') || res.data;
   },
 
+  async getMyVerification() {
+    const res = await api.get('/tenant/verification');
+    return unwrapItem(res, 'data') || res.data;
+  },
+
+  async refreshMyVerification() {
+    const res = await api.post('/tenant/verification/refresh');
+    return unwrapItem(res, 'data') || res.data;
+  },
+
   // Notice Period
   async getMyNoticePeriodRequests(options = {}) {
     const bypassCache = options?.bypassCache || false;

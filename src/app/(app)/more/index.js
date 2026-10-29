@@ -1,19 +1,20 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   AlertCircle, Receipt, IndianRupee, User, FileText, DoorOpen, Bell,
   LogOut, Calendar, MessageSquare, Settings, ChevronRight, HelpCircle,
-  Shield,
+  Shield, RefreshCw,
 } from 'lucide-react-native';
 import { logout } from '../../../slices/authSlice';
 import {
   Screen, TenantPageHeader, Card, Avatar, ListItem, SectionHeader, Divider, Button, Badge,
 } from '../../../components';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
-
+import { useToast } from '../../../hooks/useToast';
 import { useTheme } from '../../../hooks/useTheme';
+import { otaService } from '../../../services/otaService';
 
 const MENU = [
   {
@@ -53,8 +54,30 @@ const MENU = [
 
 export default function MoreScreen() {
   const { colors } = useTheme();
+  const toast = useToast();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const [versionInfo, setVersionInfo] = useState(null);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+
+  useEffect(() => {
+    otaService.getInstalledVersionInfo().then(setVersionInfo).catch(() => {});
+  }, []);
+
+  const handleCheckUpdate = async () => {
+    if (checkingUpdate) return;
+    setCheckingUpdate(true);
+    try {
+      const res = await otaService.checkForUpdate();
+      if (!res?.updateAvailable) {
+        toast.info(res?.message || 'Tenant app is up to date');
+      }
+    } catch (_) {
+      toast.info('Tenant app is up to date');
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
 
   const name = user?.name || user?.fullName || 'Tenant';
   const email = user?.email || user?.phone || '';
@@ -112,7 +135,17 @@ export default function MoreScreen() {
         fullWidth
       />
 
-      <Text style={[styles.version, { color: colors.textTertiary }]}>Pantro Tenant</Text>
+      <TouchableOpacity
+        onPress={handleCheckUpdate}
+        activeOpacity={0.7}
+        style={{ marginTop: SPACING.md, alignItems: 'center' }}
+      >
+        <Text style={[styles.version, { color: colors.textTertiary, marginTop: 0 }]}>
+          {checkingUpdate
+            ? 'Checking for updates...'
+            : `${versionInfo?.displayVersion ? `Pantro Tenant ${versionInfo.displayVersion}` : 'Pantro Tenant v1.0.3'} • Check for updates`}
+        </Text>
+      </TouchableOpacity>
     </Screen>
   );
 }

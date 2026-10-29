@@ -69,6 +69,8 @@ function AppEffects() {
         dispatch(setTheme(saved));
       }
     }).catch(() => {});
+
+    
     dispatch(initializeAuth());
     dispatch(requestAllPermissions());
     dispatch(initializeNetworkListener());
