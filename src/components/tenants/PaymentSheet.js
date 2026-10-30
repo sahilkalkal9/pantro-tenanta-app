@@ -282,10 +282,11 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
     }
     setSubmitting(true);
     try {
+      const finalTxnId = isFullUtr ? cleanUtr : transactionId.trim();
       const res = await tenantService.submitDuesPayment({
         items,
         paymentMethod: method,
-        transactionId: transactionId.trim(),
+        transactionId: finalTxnId,
         screenshotUrl: screenshotUrl || undefined,
       });
 
