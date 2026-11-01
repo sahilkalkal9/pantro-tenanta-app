@@ -75,7 +75,7 @@ function StatTile({ title, value, icon: Icon, tone = 'blue', onPress }) {
           <Icon size={16} color={fg} strokeWidth={2.2} />
         </View>
       </View>
-      <Text style={[styles.statValue, { color: colors.textPrimary }]} numberOfLines={1}>
+      <Text style={[styles.statValue, { color: colors.textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
         {value ?? '—'}
       </Text>
     </Wrapper>
@@ -473,109 +473,113 @@ export default function DashboardScreen() {
           </View>
 
           <View style={styles.quickGrid}>
-            <TouchableOpacity
-              style={[styles.quickTile, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={currentRent?.hasPendingProof ? () => router.push('/payments') : openPay}
-              activeOpacity={0.7}
-            >
-              <View
-                style={[
-                  styles.quickIconWrap,
-                  {
-                    backgroundColor: currentRent?.hasPendingProof
-                      ? (isDark ? 'rgba(217, 119, 6, 0.18)' : '#fef3c7')
-                      : (isDark ? 'rgba(37, 99, 235, 0.18)' : '#eff6ff'),
-                    borderColor: currentRent?.hasPendingProof
-                      ? (isDark ? 'rgba(217, 119, 6, 0.35)' : '#fde68a')
-                      : (isDark ? 'rgba(37, 99, 235, 0.35)' : '#bfdbfe'),
-                  },
-                ]}
+            <View style={styles.quickRow}>
+              <TouchableOpacity
+                style={[styles.quickTile, { backgroundColor: colors.card, borderColor: colors.border }]}
+                onPress={currentRent?.hasPendingProof ? () => router.push('/payments') : openPay}
+                activeOpacity={0.7}
               >
-                {currentRent?.hasPendingProof ? (
-                  <Clock size={18} color={isDark ? '#fbbf24' : '#d97706'} strokeWidth={2.2} />
-                ) : (
-                  <CreditCard size={18} color={isDark ? '#60a5fa' : '#2563eb'} strokeWidth={2.2} />
-                )}
-              </View>
-              <View style={styles.quickTextWrap}>
-                <Text style={[styles.quickTitle, { color: colors.textPrimary }]}>
-                  {currentRent?.hasPendingProof ? 'Pending Approval' : 'Pay Rent'}
-                </Text>
-              </View>
-              {!currentRent?.hasPendingProof && totalDues > 0 && <View style={styles.quickPulseDot} />}
-              <ChevronRight size={16} color={colors.textTertiary} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.quickTile, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={() => router.push('/complaints')}
-              activeOpacity={0.7}
-            >
-              <View
-                style={[
-                  styles.quickIconWrap,
-                  {
-                    backgroundColor: isDark ? 'rgba(217, 119, 6, 0.18)' : '#fef3c7',
-                    borderColor: isDark ? 'rgba(217, 119, 6, 0.35)' : '#fde68a',
-                  },
-                ]}
-              >
-                <Wrench size={18} color={isDark ? '#fbbf24' : '#d97706'} strokeWidth={2.2} />
-              </View>
-              <View style={styles.quickTextWrap}>
-                <Text style={[styles.quickTitle, { color: colors.textPrimary }]}>Raise Issue</Text>
-              </View>
-              <ChevronRight size={16} color={colors.textTertiary} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.quickTile, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={() => router.push('/payments')}
-              activeOpacity={0.7}
-            >
-              <View
-                style={[
-                  styles.quickIconWrap,
-                  {
-                    backgroundColor: isDark ? 'rgba(22, 163, 74, 0.18)' : '#dcfce7',
-                    borderColor: isDark ? 'rgba(22, 163, 74, 0.35)' : '#bbf7d0',
-                  },
-                ]}
-              >
-                <Receipt size={18} color={isDark ? '#4ade80' : '#16a34a'} strokeWidth={2.2} />
-              </View>
-              <View style={styles.quickTextWrap}>
-                <Text style={[styles.quickTitle, { color: colors.textPrimary }]}>Payments</Text>
-              </View>
-              <ChevronRight size={16} color={colors.textTertiary} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.quickTile, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={() => router.push('/more/notices')}
-              activeOpacity={0.7}
-            >
-              <View
-                style={[
-                  styles.quickIconWrap,
-                  {
-                    backgroundColor: isDark ? 'rgba(124, 58, 237, 0.18)' : '#f5f3ff',
-                    borderColor: isDark ? 'rgba(124, 58, 237, 0.35)' : '#ddd6fe',
-                  },
-                ]}
-              >
-                <Bell size={18} color={isDark ? '#a78bfa' : '#7c3aed'} strokeWidth={2.2} />
-              </View>
-              <View style={styles.quickTextWrap}>
-                <Text style={[styles.quickTitle, { color: colors.textPrimary }]}>Notices</Text>
-              </View>
-              {recentNotices.length > 0 && (
-                <View style={styles.quickBadge}>
-                  <Text style={styles.quickBadgeText}>{recentNotices.length > 9 ? '9+' : recentNotices.length}</Text>
+                <View
+                  style={[
+                    styles.quickIconWrap,
+                    {
+                      backgroundColor: currentRent?.hasPendingProof
+                        ? (isDark ? 'rgba(217, 119, 6, 0.18)' : '#fef3c7')
+                        : (isDark ? 'rgba(37, 99, 235, 0.18)' : '#eff6ff'),
+                      borderColor: currentRent?.hasPendingProof
+                        ? (isDark ? 'rgba(217, 119, 6, 0.35)' : '#fde68a')
+                        : (isDark ? 'rgba(37, 99, 235, 0.35)' : '#bfdbfe'),
+                    },
+                  ]}
+                >
+                  {currentRent?.hasPendingProof ? (
+                    <Clock size={17} color={isDark ? '#fbbf24' : '#d97706'} strokeWidth={2.2} />
+                  ) : (
+                    <CreditCard size={17} color={isDark ? '#60a5fa' : '#2563eb'} strokeWidth={2.2} />
+                  )}
                 </View>
-              )}
-              <ChevronRight size={16} color={colors.textTertiary} />
-            </TouchableOpacity>
+                <View style={styles.quickTextWrap}>
+                  <Text style={[styles.quickTitle, { color: colors.textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
+                    {currentRent?.hasPendingProof ? 'Pending Approval' : 'Pay Rent'}
+                  </Text>
+                </View>
+                {!currentRent?.hasPendingProof && totalDues > 0 && <View style={styles.quickPulseDot} />}
+                <ChevronRight size={14} color={colors.textTertiary} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.quickTile, { backgroundColor: colors.card, borderColor: colors.border }]}
+                onPress={() => router.push('/complaints')}
+                activeOpacity={0.7}
+              >
+                <View
+                  style={[
+                    styles.quickIconWrap,
+                    {
+                      backgroundColor: isDark ? 'rgba(217, 119, 6, 0.18)' : '#fef3c7',
+                      borderColor: isDark ? 'rgba(217, 119, 6, 0.35)' : '#fde68a',
+                    },
+                  ]}
+                >
+                  <Wrench size={17} color={isDark ? '#fbbf24' : '#d97706'} strokeWidth={2.2} />
+                </View>
+                <View style={styles.quickTextWrap}>
+                  <Text style={[styles.quickTitle, { color: colors.textPrimary }]} numberOfLines={1}>Raise Issue</Text>
+                </View>
+                <ChevronRight size={14} color={colors.textTertiary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.quickRow}>
+              <TouchableOpacity
+                style={[styles.quickTile, { backgroundColor: colors.card, borderColor: colors.border }]}
+                onPress={() => router.push('/payments')}
+                activeOpacity={0.7}
+              >
+                <View
+                  style={[
+                    styles.quickIconWrap,
+                    {
+                      backgroundColor: isDark ? 'rgba(22, 163, 74, 0.18)' : '#dcfce7',
+                      borderColor: isDark ? 'rgba(22, 163, 74, 0.35)' : '#bbf7d0',
+                    },
+                  ]}
+                >
+                  <Receipt size={17} color={isDark ? '#4ade80' : '#16a34a'} strokeWidth={2.2} />
+                </View>
+                <View style={styles.quickTextWrap}>
+                  <Text style={[styles.quickTitle, { color: colors.textPrimary }]} numberOfLines={1}>Payments</Text>
+                </View>
+                <ChevronRight size={14} color={colors.textTertiary} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.quickTile, { backgroundColor: colors.card, borderColor: colors.border }]}
+                onPress={() => router.push('/more/notices')}
+                activeOpacity={0.7}
+              >
+                <View
+                  style={[
+                    styles.quickIconWrap,
+                    {
+                      backgroundColor: isDark ? 'rgba(124, 58, 237, 0.18)' : '#f5f3ff',
+                      borderColor: isDark ? 'rgba(124, 58, 237, 0.35)' : '#ddd6fe',
+                    },
+                  ]}
+                >
+                  <Bell size={17} color={isDark ? '#a78bfa' : '#7c3aed'} strokeWidth={2.2} />
+                </View>
+                <View style={styles.quickTextWrap}>
+                  <Text style={[styles.quickTitle, { color: colors.textPrimary }]} numberOfLines={1}>Notices</Text>
+                </View>
+                {recentNotices.length > 0 && (
+                  <View style={styles.quickBadge}>
+                    <Text style={styles.quickBadgeText}>{recentNotices.length > 9 ? '9+' : recentNotices.length}</Text>
+                  </View>
+                )}
+                <ChevronRight size={14} color={colors.textTertiary} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       )}
@@ -1045,12 +1049,15 @@ const styles = StyleSheet.create({
     color: '#2563eb',
   },
   quickGrid: {
+    gap: 10,
+  },
+  quickRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
   },
   quickTile: {
-    width: (Dimensions.get('window').width - 40) / 2,
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ffffff',
@@ -1058,7 +1065,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e2e8f0',
     padding: 12,
-    gap: 10,
+    gap: 8,
     ...SHADOWS.small,
   },
   quickIconWrap: {

@@ -88,12 +88,12 @@ export default function RentStatusCard({ rent, onPay, loading = false, style }) 
       <View style={[styles.metricsBox, { backgroundColor: colors.cardSecondary, borderColor: colors.border }]}>
         <View style={styles.metricCol}>
           <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>TOTAL RENT</Text>
-          <Text style={[styles.metricVal, { color: colors.textPrimary }]}>{formatCurrency(rent.rentAmount)}</Text>
+          <Text style={[styles.metricVal, { color: colors.textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>{formatCurrency(rent.rentAmount)}</Text>
         </View>
 
         <View style={[styles.metricCol, styles.metricDivider, { borderLeftColor: colors.border }]}>
           <Text style={[styles.metricLabel, { color: '#059669' }]}>PAID</Text>
-          <Text style={[styles.metricVal, { color: '#059669' }]}>
+          <Text style={[styles.metricVal, { color: '#059669' }]} numberOfLines={1} adjustsFontSizeToFit>
             {formatCurrency(rent.paidAmount || 0)}
           </Text>
         </View>
@@ -107,6 +107,8 @@ export default function RentStatusCard({ rent, onPay, loading = false, style }) 
               styles.metricVal,
               { color: isPaid ? colors.textSecondary : '#e11d48' },
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
           >
             {formatCurrency(pendingAmount)}
           </Text>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Platform } from 'react-native';
 import { Tabs, Redirect } from 'expo-router';
 import { useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,7 +24,7 @@ export default function AppLayout() {
   const bgColor = isDark ? '#070b14' : '#ffffff';
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: bgColor }}>
+    <SafeAreaView edges={Platform.OS === 'ios' ? ['top'] : []} style={{ flex: 1, backgroundColor: bgColor }}>
       <StatusBar
         style={isDark ? 'light' : 'dark'}
         backgroundColor={bgColor}

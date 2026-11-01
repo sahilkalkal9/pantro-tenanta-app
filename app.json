@@ -37,7 +37,7 @@
       "package": "com.pantro.tenant",
       "versionCode": 5,
       "googleServicesFile": "./google-services.json",
-      "edgeToEdgeEnabled": true,
+      "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -81,6 +81,16 @@
     ],
     "extra": {
       "apiBaseUrl": "https://stayverse-backend-zyl7.onrender.com/api"
+    },
+    "androidStatusBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#ffffff",
+      "translucent": false
+    },
+    "androidNavigationBar": {
+      "visible": "always",
+      "barStyle": "dark-content",
+      "backgroundColor": "#ffffff"
     }
   }
 }

@@ -267,17 +267,17 @@ export default function RentScreen() {
           <View style={styles.depositRow}>
             <View style={[styles.depositCell, { backgroundColor: colors.cardSecondary }]}>
               <Text style={[styles.cellLabel, { color: colors.textSecondary }]}>Expected</Text>
-              <Text style={[styles.cellValue, { color: colors.textPrimary }]}>{formatCurrency(securityDeposit.expected || 0)}</Text>
+              <Text style={[styles.cellValue, { color: colors.textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>{formatCurrency(securityDeposit.expected || 0)}</Text>
             </View>
             <View style={[styles.depositCell, { backgroundColor: isDark ? 'rgba(5, 150, 105, 0.15)' : `${COLORS.success}12` }]}>
               <Text style={[styles.cellLabel, { color: '#059669' }]}>Paid</Text>
-              <Text style={[styles.cellValue, { color: '#059669' }]}>{formatCurrency(depositPaid)}</Text>
+              <Text style={[styles.cellValue, { color: '#059669' }]} numberOfLines={1} adjustsFontSizeToFit>{formatCurrency(depositPaid)}</Text>
             </View>
             <View style={[styles.depositCell, depositPending > 0 ? { backgroundColor: isDark ? 'rgba(217, 119, 6, 0.15)' : `${COLORS.warning}12` } : { backgroundColor: colors.cardSecondary }]}>
               <Text style={[styles.cellLabel, depositPending > 0 ? { color: '#d97706' } : { color: colors.textSecondary }]}>
                 {depositPending > 0 ? 'Pending' : 'Balance'}
               </Text>
-              <Text style={[styles.cellValue, depositPending > 0 ? { color: '#d97706' } : { color: colors.textPrimary }]}>
+              <Text style={[styles.cellValue, depositPending > 0 ? { color: '#d97706' } : { color: colors.textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
                 {formatCurrency(depositPending > 0 ? depositPending : securityDeposit.balance || 0)}
               </Text>
             </View>

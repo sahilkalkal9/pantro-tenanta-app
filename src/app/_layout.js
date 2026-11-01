@@ -6,6 +6,7 @@ import { initializeAuth } from '../slices/authSlice';
 import { requestAllPermissions } from '../slices/permissionsSlice';
 import { initializeNetworkListener, loadOfflineQueue } from '../slices/offlineSlice';
 import { Stack } from 'expo-router';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { preventAutoHideAsync, hideAsync } from 'expo-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setTheme } from '../slices/uiSlice';
@@ -23,10 +24,12 @@ export default function RootLayout() {
         loading={<PantroLoader fullScreen message="Loading Pantro Tenant Portal…" />}
         persistor={persistor}
       >
-        <RootNav />
-        <GlobalLoader />
-        <Toaster />
-        <OtaUpdateModal />
+        <SafeAreaProvider>
+          <RootNav />
+          <GlobalLoader />
+          <Toaster />
+          <OtaUpdateModal />
+        </SafeAreaProvider>
       </PersistGate>
     </Provider>
   );
