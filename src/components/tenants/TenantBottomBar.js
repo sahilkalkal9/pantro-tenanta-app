@@ -88,12 +88,20 @@ export default function TenantBottomBar({ state, descriptors, navigation }) {
                 isFocused && { backgroundColor: activeBg },
               ]}
             >
+              {Icon ? (
+                <Icon
+                  size={19}
+                  color={isFocused ? activeColor : inactiveColor}
+                  strokeWidth={isFocused ? 2.4 : 1.9}
+                />
+              ) : null}
               <Text
                 style={[
                   styles.tabLabel,
                   {
                     color: isFocused ? activeColor : inactiveColor,
                     fontWeight: isFocused ? '800' : '600',
+                    marginTop: 2,
                   },
                 ]}
               >
@@ -133,11 +141,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
+    paddingVertical: 5,
     borderRadius: 12,
   },
   tabLabel: {
-    fontSize: 12,
+    fontSize: 10.5,
     letterSpacing: 0.1,
   },
 });

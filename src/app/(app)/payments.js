@@ -7,6 +7,7 @@ import {
   MessageSquareWarning,
 } from 'lucide-react-native';
 import { tenantService } from '../../services/tenantService';
+import { subscribeLiveUpdates } from '../../services/liveSocket';
 import { useToast } from '../../hooks/useToast';
 import { getErrorMessage } from '../../lib/normalize';
 import { resolveMediaUrl, api } from '../../lib/api';
@@ -203,8 +204,13 @@ export default function PaymentsScreen() {
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const unsubscribe = subscribeLiveUpdates(() => {
+      fetchData({ refresh: true });
+    });
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [fetchData]);
 
   // Sync filter with URL param
   useEffect(() => {
@@ -476,15 +482,9 @@ function TransactionRow({ tx, onPress }) {
             </Text>
           ) : null}
           {!!tx.rejectionReason ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
-              <Text style={styles.txRejected} numberOfLines={1}>
-                Rejected: {tx.rejectionReason}
-              </Text>
-              <View style={[styles.chatPill, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.2)' : '#eff6ff' }]}>
-                <MessageSquare size={10} color={isDark ? '#93c5fd' : '#2563eb'} />
-                <Text style={[styles.chatPillText, { color: isDark ? '#93c5fd' : '#2563eb' }]}>Chat / Clarify</Text>
-              </View>
-            </View>
+            <Text style={styles.txRejected} numberOfLines={1}>
+              Rejected: {tx.rejectionReason}
+            </Text>
           ) : tx.conversation && tx.conversation.length > 0 ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
               <MessageSquare size={12} color={isDark ? '#93c5fd' : '#2563eb'} />
@@ -503,6 +503,26 @@ function TransactionRow({ tx, onPress }) {
           ) : null}
         </View>
       </View>
+
+      {/* Separate line with big Chat / Clarify button */}
+      {(isRejected || (tx.conversation && tx.conversation.length > 0)) && (
+        <TouchableOpacity
+          onPress={() => onSelect(tx)}
+          activeOpacity={0.7}
+          style={[
+            styles.clarifyBigBtn,
+            {
+              backgroundColor: isDark ? 'rgba(37, 99, 235, 0.16)' : '#eff6ff',
+              borderColor: isDark ? 'rgba(59, 130, 246, 0.3)' : '#bfdbfe',
+            },
+          ]}
+        >
+          <MessageSquare size={14} color={isDark ? '#93c5fd' : '#2563eb'} />
+          <Text style={[styles.clarifyBigBtnText, { color: isDark ? '#93c5fd' : '#1d4ed8' }]}>
+            Chat &amp; Clarify with Owner {tx.conversation?.length ? `(${tx.conversation.length} msgs)` : ''}
+          </Text>
+        </TouchableOpacity>
+      )}
     </Card>
   );
 }
@@ -1009,6 +1029,21 @@ const styles = StyleSheet.create({
   rejectBannerText: { fontSize: FONT_SIZES.xs, lineHeight: 18 },
   chatPill: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
   chatPillText: { fontSize: 10, fontWeight: FONT_WEIGHTS.bold },
+  clarifyBigBtn: {
+    marginTop: 10,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  clarifyBigBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
   chatBubble: { padding: SPACING.sm, borderRadius: BORDER_RADIUS.md, marginBottom: SPACING.xs },
   chatMe: { alignSelf: 'flex-end', maxWidth: '85%' },
   chatThem: { alignSelf: 'flex-start', maxWidth: '85%' },

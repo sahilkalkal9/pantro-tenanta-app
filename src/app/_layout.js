@@ -14,6 +14,7 @@ import { useTheme } from '../hooks/useTheme';
 import { Toaster, PantroLoader, OtaUpdateModal } from '../components';
 import { warmupBackend } from '../lib/api';
 import apiCache from '../services/apiCache';
+import { initLiveSocket } from '../services/liveSocket';
 
 preventAutoHideAsync();
 
@@ -67,6 +68,7 @@ function AppEffects() {
   useEffect(() => {
     warmupBackend();
     apiCache.hydrate();
+    initLiveSocket();
     AsyncStorage.getItem('pantro_theme_mode').then((saved) => {
       if (saved === 'dark' || saved === 'light') {
         dispatch(setTheme(saved));

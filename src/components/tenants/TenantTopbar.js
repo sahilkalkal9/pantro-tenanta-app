@@ -162,11 +162,6 @@ export default function TenantTopbar({ onMenuToggle }) {
             <View style={styles.brandTitleWrap}>
               <Text style={[styles.brandText, isDark && styles.brandTextDark]} numberOfLines={1}>
                 PANTRO
-                {!!propertyName && (
-                  <Text style={[styles.propertyNameSub, isDark && styles.propertyNameSubDark]}>
-                    {'  ·  '}{propertyName}
-                  </Text>
-                )}
               </Text>
             </View>
           </TouchableOpacity>

@@ -29,6 +29,7 @@ import {
   LayoutDashboard,
 } from 'lucide-react-native';
 import { tenantService } from '../../services/tenantService';
+import { subscribeLiveUpdates } from '../../services/liveSocket';
 import { useToast } from '../../hooks/useToast';
 import { getErrorMessage } from '../../lib/normalize';
 import { formatCurrency, formatBedNumber, formatMonthYear } from '../../lib/format';
@@ -142,8 +143,13 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const unsubscribe = subscribeLiveUpdates(() => {
+      fetchData(true);
+    });
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [fetchData]);
 
   const onRefresh = () => {
     setRefreshing(true);

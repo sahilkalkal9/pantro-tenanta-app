@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
-    marginTop: 10,
+    marginBottom: 10,
   },
   noticeText: {
     fontSize: 12,
@@ -233,7 +233,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1,
-    marginTop: 10,
   },
   pendingApprovalText: {
     fontSize: 13,

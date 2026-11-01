@@ -11,8 +11,9 @@ import {
   TouchableWithoutFeedback,
   Alert,
   useWindowDimensions,
+  Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePathname, router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -58,6 +59,7 @@ export default function TenantDrawer({ visible, onClose }) {
   const pathname = usePathname();
   const { user } = useSelector((state) => state.auth);
   const { isDark, toggleTheme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
 
   // Slide-out drawer: never full screen, leaves at least 24% backdrop visible, capped at 280px
@@ -147,7 +149,7 @@ export default function TenantDrawer({ visible, onClose }) {
       visible={showModal}
       animationType="none"
       onRequestClose={onClose}
-      statusBarTranslucent
+      statusBarTranslucent={false}
     >
       <View style={styles.container}>
         {/* Backdrop */}
@@ -172,10 +174,12 @@ export default function TenantDrawer({ visible, onClose }) {
               backgroundColor: drawerBg,
               borderRightColor: borderColor,
               transform: [{ translateX: slideAnim }],
+              marginTop: Platform.OS === 'android' ? 0 : Math.max(insets.top, 0),
+              marginBottom: Math.max(insets.bottom, 0),
             },
           ]}
         >
-          <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
+          <View style={styles.safeArea}>
             {/* Header: Brand + Close */}
             <View style={[styles.header, { borderBottomColor: borderColor }]}>
               <View style={styles.brandRow}>
@@ -312,7 +316,7 @@ export default function TenantDrawer({ visible, onClose }) {
                 </Text>
               </View>
             </View>
-          </SafeAreaView>
+          </View>
         </Animated.View>
       </View>
     </Modal>
