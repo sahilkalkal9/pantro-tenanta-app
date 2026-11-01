@@ -43,16 +43,31 @@ export async function registerForPushNotifications() {
     return null;
   }
 
+  let token = null;
+
+  // 1. Try Expo push service
   try {
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
     const tokenResponse = await Notifications.getExpoPushTokenAsync(
       projectId ? { projectId } : undefined
     );
-    return tokenResponse.data;
+    token = tokenResponse?.data;
   } catch (err) {
-    console.warn('[Push] Error getting push token:', err?.message || err);
-    return null;
+    console.warn('[Push] Expo push token failed, falling back to native device token:', err?.message || err);
   }
+
+  // 2. Fallback to native FCM/APNs token
+  if (!token) {
+    try {
+      const deviceToken = await Notifications.getDevicePushTokenAsync();
+      token = deviceToken?.data;
+      console.log('[Push] Acquired native tenant device token');
+    } catch (deviceErr) {
+      console.warn('[Push] Native device token also failed:', deviceErr?.message || deviceErr);
+    }
+  }
+
+  return token;
 }
 
 export async function registerDeviceToken() {
