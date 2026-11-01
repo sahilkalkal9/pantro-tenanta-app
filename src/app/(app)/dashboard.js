@@ -12,6 +12,7 @@ import {
 import { useSelector } from 'react-redux';
 import { router } from 'expo-router';
 import {
+  Clock,
   Home,
   BedDouble,
   CreditCard,
@@ -474,24 +475,34 @@ export default function DashboardScreen() {
           <View style={styles.quickGrid}>
             <TouchableOpacity
               style={[styles.quickTile, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={openPay}
+              onPress={currentRent?.hasPendingProof ? () => router.push('/payments') : openPay}
               activeOpacity={0.7}
             >
               <View
                 style={[
                   styles.quickIconWrap,
                   {
-                    backgroundColor: isDark ? 'rgba(37, 99, 235, 0.18)' : '#eff6ff',
-                    borderColor: isDark ? 'rgba(37, 99, 235, 0.35)' : '#bfdbfe',
+                    backgroundColor: currentRent?.hasPendingProof
+                      ? (isDark ? 'rgba(217, 119, 6, 0.18)' : '#fef3c7')
+                      : (isDark ? 'rgba(37, 99, 235, 0.18)' : '#eff6ff'),
+                    borderColor: currentRent?.hasPendingProof
+                      ? (isDark ? 'rgba(217, 119, 6, 0.35)' : '#fde68a')
+                      : (isDark ? 'rgba(37, 99, 235, 0.35)' : '#bfdbfe'),
                   },
                 ]}
               >
-                <CreditCard size={18} color={isDark ? '#60a5fa' : '#2563eb'} strokeWidth={2.2} />
+                {currentRent?.hasPendingProof ? (
+                  <Clock size={18} color={isDark ? '#fbbf24' : '#d97706'} strokeWidth={2.2} />
+                ) : (
+                  <CreditCard size={18} color={isDark ? '#60a5fa' : '#2563eb'} strokeWidth={2.2} />
+                )}
               </View>
               <View style={styles.quickTextWrap}>
-                <Text style={[styles.quickTitle, { color: colors.textPrimary }]}>Pay Rent</Text>
+                <Text style={[styles.quickTitle, { color: colors.textPrimary }]}>
+                  {currentRent?.hasPendingProof ? 'Pending Approval' : 'Pay Rent'}
+                </Text>
               </View>
-              {totalDues > 0 && <View style={styles.quickPulseDot} />}
+              {!currentRent?.hasPendingProof && totalDues > 0 && <View style={styles.quickPulseDot} />}
               <ChevronRight size={16} color={colors.textTertiary} />
             </TouchableOpacity>
 

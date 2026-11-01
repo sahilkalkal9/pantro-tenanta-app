@@ -97,6 +97,7 @@ export default function RentScreen() {
     () =>
       rents.filter(
         (r) =>
+          !r.hasPendingProof &&
           ['unpaid', 'partial', 'overdue'].includes(r.status || 'unpaid') &&
           Number(r.pendingAmount ?? r.rentAmount) > 0
       ),

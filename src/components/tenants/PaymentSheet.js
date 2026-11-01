@@ -526,7 +526,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
               <Text style={[styles.bannerText, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
                 Pay <Text style={{ fontWeight: 'bold' }}>{formatCurrency(amount)}</Text> via UPI. Enter your{' '}
                 <Text style={{ fontWeight: 'bold' }}>12-digit UPI Reference (UTR)</Text> for{' '}
-                <Text style={{ fontWeight: 'bold' }}>instant 1-second auto-approval</Text>!
+                <Text style={{ fontWeight: 'bold' }}>verification & approval</Text>!
               </Text>
             </View>
 
@@ -534,7 +534,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
               <View style={[styles.banner, { backgroundColor: greenBg, borderColor: greenBorder }]}>
                 <CheckCircle size={16} color="#059669" style={{ marginTop: 1 }} />
                 <Text style={[styles.bannerText, { color: isDark ? '#6ee7b7' : '#065f46' }]}>
-                  ✨ 12-digit UTR detected! Screenshot is optional. Tap submit to auto-verify against the owner&apos;s bank feed.
+                  ✨ 12-digit UTR detected! Screenshot is optional. Tap submit to send for owner approval.
                 </Text>
               </View>
             ) : null}
@@ -596,8 +596,8 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
             />
 
             <Button
-              title={isFullUtr ? "Submit & Auto-Verify" : "Submit for Approval"}
-              icon={isFullUtr ? Zap : CreditCard}
+              title="Submit for Approval"
+              icon={CreditCard}
               onPress={submitProof}
               loading={submitting}
               fullWidth

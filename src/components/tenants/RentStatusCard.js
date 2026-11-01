@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Calendar, ArrowRight } from 'lucide-react-native';
+import { Calendar, ArrowRight, Clock, AlertCircle } from 'lucide-react-native';
 import { formatCurrency, formatMonthYear } from '../../lib/format';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../constants/colors';
 import { useTheme } from '../../hooks/useTheme';
@@ -61,11 +61,27 @@ export default function RentStatusCard({ rent, onPay, loading = false, style }) 
           ) : null}
         </View>
 
-        <View style={[styles.statusPill, { backgroundColor: theme.bg, borderColor: theme.border }]}>
-          <Text style={[styles.statusText, { color: theme.text }]}>
-            {String(status).toLowerCase().replace(/\b\w/g, (m) => m.toUpperCase())}
-          </Text>
-        </View>
+        {rent.hasPendingProof ? (
+          <View style={[styles.statusPill, { backgroundColor: isDark ? 'rgba(217, 119, 6, 0.18)' : '#fef3c7', borderColor: isDark ? 'rgba(217, 119, 6, 0.35)' : '#fde68a' }]}>
+            <Clock size={11} color={isDark ? '#fbbf24' : '#d97706'} style={{ marginRight: 4 }} />
+            <Text style={[styles.statusText, { color: isDark ? '#fbbf24' : '#d97706' }]}>
+              Pending Approval
+            </Text>
+          </View>
+        ) : rent.hasRejectedProof ? (
+          <View style={[styles.statusPill, { backgroundColor: isDark ? 'rgba(225, 29, 72, 0.18)' : '#ffe4e6', borderColor: isDark ? 'rgba(225, 29, 72, 0.35)' : '#fecdd3' }]}>
+            <AlertCircle size={11} color={isDark ? '#fb7185' : '#e11d48'} style={{ marginRight: 4 }} />
+            <Text style={[styles.statusText, { color: isDark ? '#fb7185' : '#e11d48' }]}>
+              Rejected
+            </Text>
+          </View>
+        ) : (
+          <View style={[styles.statusPill, { backgroundColor: theme.bg, borderColor: theme.border }]}>
+            <Text style={[styles.statusText, { color: theme.text }]}>
+              {String(status).toLowerCase().replace(/\b\w/g, (m) => m.toUpperCase())}
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* 3 Metrics Box */}
@@ -114,8 +130,49 @@ export default function RentStatusCard({ rent, onPay, loading = false, style }) 
         </View>
       ) : null}
 
-      {/* Pay CTA */}
-      {pendingAmount > 0 && onPay ? (
+      {/* Pending Approval notice banner */}
+      {rent.hasPendingProof ? (
+        <View style={[styles.noticeBanner, { backgroundColor: isDark ? 'rgba(217, 119, 6, 0.12)' : '#fffbeb', borderColor: isDark ? 'rgba(217, 119, 6, 0.25)' : '#fef3c7' }]}>
+          <Clock size={15} color={isDark ? '#fbbf24' : '#d97706'} style={{ marginTop: 1 }} />
+          <Text style={[styles.noticeText, { color: isDark ? '#fbbf24' : '#b45309' }]}>
+            Payment proof submitted — awaiting owner verification.
+          </Text>
+        </View>
+      ) : null}
+
+      {/* Rejected notice banner */}
+      {rent.hasRejectedProof ? (
+        <View style={[styles.noticeBanner, { backgroundColor: isDark ? 'rgba(225, 29, 72, 0.12)' : '#fff1f2', borderColor: isDark ? 'rgba(225, 29, 72, 0.25)' : '#fecdd3' }]}>
+          <AlertCircle size={15} color={isDark ? '#fb7185' : '#e11d48'} style={{ marginTop: 1 }} />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.noticeTextBold, { color: isDark ? '#fb7185' : '#be123c' }]}>Payment Rejected</Text>
+            <Text style={[styles.noticeText, { color: isDark ? '#fda4af' : '#9f1239' }]}>
+              {rent.rejectionReason || 'Please resubmit payment proof with corrected details.'}
+            </Text>
+          </View>
+        </View>
+      ) : null}
+
+      {/* Action CTA */}
+      {rent.hasPendingProof ? (
+        <View style={[styles.pendingApprovalBox, { backgroundColor: isDark ? 'rgba(217, 119, 6, 0.15)' : '#fef3c7', borderColor: isDark ? 'rgba(217, 119, 6, 0.3)' : '#fde68a' }]}>
+          <Clock size={16} color={isDark ? '#fbbf24' : '#b45309'} />
+          <Text style={[styles.pendingApprovalText, { color: isDark ? '#fbbf24' : '#b45309' }]}>
+            Payment Pending Approval
+          </Text>
+        </View>
+      ) : rent.hasRejectedProof && pendingAmount > 0 && onPay ? (
+        <TouchableOpacity
+          style={[styles.payButton, { backgroundColor: '#e11d48' }, loading && { opacity: 0.7 }]}
+          onPress={onPay}
+          disabled={loading}
+          activeOpacity={0.85}
+        >
+          {loading ? <ActivityIndicator size="small" color="#ffffff" /> : null}
+          <Text style={styles.payButtonText}>Resubmit Payment ({formatCurrency(pendingAmount)})</Text>
+          <ArrowRight size={16} color="#ffffff" strokeWidth={2.4} />
+        </TouchableOpacity>
+      ) : pendingAmount > 0 && onPay ? (
         <TouchableOpacity
           style={[styles.payButton, loading && { opacity: 0.7 }]}
           onPress={onPay}
@@ -148,6 +205,40 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#64748b',
+  },
+  noticeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 10,
+  },
+  noticeText: {
+    fontSize: 12,
+    fontWeight: '500',
+    flex: 1,
+  },
+  noticeTextBold: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  pendingApprovalBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 10,
+  },
+  pendingApprovalText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
   headerRow: {
     flexDirection: 'row',
