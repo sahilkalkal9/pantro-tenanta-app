@@ -60,9 +60,13 @@ function parseDuesData(d, pRes) {
 
   const rents = Array.isArray(d?.unpaidRents) ? d.unpaidRents : [];
   const missing = Array.isArray(d?.missingRents) ? d.missingRents : [];
+  const seenRentMonths = new Set();
   [...rents, ...missing].forEach((r) => {
     const pending = Number(r.pendingAmount ?? r.rentAmount ?? 0);
     if (pending <= 0) return;
+    const monthKey = `${r.year}-${r.month}`;
+    if (seenRentMonths.has(monthKey)) return;
+    seenRentMonths.add(monthKey);
     list.push({
       id: r._id || `rent-${r.year}-${r.month}`,
       type: 'rent',
@@ -246,9 +250,10 @@ export default function DuesScreen() {
     try {
       await tenantService.replyPaymentProof(clarificationTarget.rejectedProofId, {
         message: clarificationMsg.trim(),
+        imageUrl: clarificationShot || undefined,
         screenshotUrl: clarificationShot || undefined,
       });
-      toast.success('Clarification sent to owner. The owner will review and can directly approve this transaction.');
+      toast.success('Clarification submitted for approval');
       setClarificationTarget(null);
       setClarificationMsg('');
       setClarificationShot('');
@@ -499,7 +504,7 @@ export default function DuesScreen() {
             />
 
             <Button
-              title="Send Clarification to Owner"
+              title="Submit Clarification for Approval"
               onPress={submitClarification}
               loading={clarificationLoading}
               fullWidth

@@ -137,7 +137,30 @@ export function ModalSheet({
       ) : (
         <View style={styles.sheetBody}>{children}</View>
       )}
-      {actions ? <View style={[styles.sheetActions, { borderTopColor: colors.border }]}>{actions}</View> : null}
+      {actions ? (
+        <View style={[styles.sheetActions, { borderTopColor: colors.border }]}>
+          {Array.isArray(actions)
+            ? actions.map((act, idx) => {
+                if (!act) return null;
+                if (React.isValidElement(act)) return act;
+                if (typeof act === 'object') {
+                  return (
+                    <Button
+                      key={idx}
+                      title={act.label || act.title || 'Action'}
+                      variant={act.variant || 'primary'}
+                      onPress={act.onPress}
+                      loading={act.loading}
+                      disabled={act.disabled}
+                      style={{ flex: 1 }}
+                    />
+                  );
+                }
+                return null;
+              })
+            : actions}
+        </View>
+      ) : null}
     </View>
   );
 

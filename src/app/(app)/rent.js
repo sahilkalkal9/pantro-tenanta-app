@@ -73,7 +73,17 @@ export default function RentScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const rents = useMemo(() => (Array.isArray(payload) ? payload : payload?.rents || []), [payload]);
+  const rents = useMemo(() => {
+    const raw = Array.isArray(payload) ? payload : payload?.rents || [];
+    const seen = new Set();
+    return raw.filter((r) => {
+      const key = r?.month && r?.year ? `${r.year}-${r.month}` : r?._id || r?.id;
+      if (!key) return true;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [payload]);
   const securityDeposit = payload?.securityDeposit || null;
   const additionalFeesPaid = payload?.additionalFeesPaid || [];
   const nextMonthsUpToNotice = payload?.nextMonthsUpToNotice || [];

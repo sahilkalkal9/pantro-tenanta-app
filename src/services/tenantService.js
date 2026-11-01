@@ -169,10 +169,26 @@ export const tenantService = {
   },
 
   async replyPaymentProof(id, data) {
-    const res = await api.post(`/payment-proofs/${id}/reply`, data);
-    apiCache.invalidate('proofs');
-    apiCache.invalidate('dashboard');
-    return unwrapItem(res, 'data') || res.data;
+    const payload = {
+      message: (data?.message || '').trim(),
+      imageUrl: data?.imageUrl || data?.screenshotUrl || undefined,
+    };
+    try {
+      const res = await api.post(`/payment-proofs/${id}/reply`, payload);
+      apiCache.invalidate('proofs');
+      apiCache.invalidate('dashboard');
+      apiCache.invalidate('dues');
+      return unwrapItem(res, 'data') || res.data;
+    } catch (err) {
+      if (err?.response?.status === 404) {
+        const res = await api.post(`/pending-payments/${id}/reply`, payload);
+        apiCache.invalidate('proofs');
+        apiCache.invalidate('dashboard');
+        apiCache.invalidate('dues');
+        return unwrapItem(res, 'data') || res.data;
+      }
+      throw err;
+    }
   },
   
   // Complaints

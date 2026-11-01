@@ -174,7 +174,15 @@ export default function PaymentsScreen() {
         else throw proofRes.reason;
         if (rentRes.status === 'fulfilled') {
           const payload = rentRes.value;
-          setRents(Array.isArray(payload) ? payload : payload?.rents || []);
+          const raw = Array.isArray(payload) ? payload : payload?.rents || [];
+          const seen = new Set();
+          setRents(raw.filter((r) => {
+            const key = r?.month && r?.year ? `${r.year}-${r.month}` : r?._id || r?.id;
+            if (!key) return true;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          }));
         } else throw rentRes.reason;
         if (payInfoRes.status === 'fulfilled') {
           setPayInfo(payInfoRes.value?.data || payInfoRes.value || null);
@@ -533,15 +541,19 @@ function TransactionDetail({ tx, onClose, onReplySuccess }) {
     }
     setReplying(true);
     try {
-      // Match web: multipart FormData with message + imageUrl
-      const formData = new FormData();
-      formData.append('message', replyMsg.trim());
-      if (replyShot) {
-        formData.append('imageUrl', replyShot);
+      const payload = {
+        message: replyMsg.trim(),
+        imageUrl: replyShot || undefined,
+      };
+      try {
+        await api.post(`/payment-proofs/${tx.proofId}/reply`, payload);
+      } catch (postErr) {
+        if (postErr?.response?.status === 404) {
+          await api.post(`/pending-payments/${tx.proofId}/reply`, payload);
+        } else {
+          throw postErr;
+        }
       }
-      await api.post(`/payment-proofs/${tx.proofId}/reply`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
       // Optimistic append
       const newMsg = {
         role: 'tenant',
@@ -571,7 +583,14 @@ function TransactionDetail({ tx, onClose, onReplySuccess }) {
   };
 
   return (
-    <ModalSheet visible={!!tx} onClose={onClose} title={isProof ? 'Payment Proof Details' : 'Rent Payment Details'} actions={[{ label: 'Close', variant: 'secondary', onPress: onClose }]}>
+    <ModalSheet
+      visible={!!tx}
+      onClose={onClose}
+      title={isProof ? 'Payment Proof Details' : 'Rent Payment Details'}
+      actions={[
+        <Button key="close" title="Close" variant="secondary" onPress={onClose} style={{ flex: 1 }} />,
+      ]}
+    >
       <View style={[styles.detailBanner, { backgroundColor: `${statusColorOf(tx.status)}12` }]}>
         <View style={styles.detailBannerRow}>
           <View>

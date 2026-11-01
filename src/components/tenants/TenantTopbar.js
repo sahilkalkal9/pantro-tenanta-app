@@ -159,52 +159,30 @@ export default function TenantTopbar({ onMenuToggle }) {
               style={styles.logoIcon}
               resizeMode="contain"
             />
-            <Text style={[styles.brandText, isDark && styles.brandTextDark]}>
-              PANTRO
-            </Text>
-
-            {!!propertyName && (
-              <View style={styles.propertyWrap}>
-                <Text style={[styles.slashText, isDark && styles.slashTextDark]}>/</Text>
-                <View style={[styles.propertyPill, isDark && styles.propertyPillDark]}>
-                  <Text
-                    style={[styles.propertyName, isDark && styles.propertyNameDark]}
-                    numberOfLines={1}
-                  >
-                    {propertyName}
+            <View style={styles.brandTitleWrap}>
+              <Text style={[styles.brandText, isDark && styles.brandTextDark]} numberOfLines={1}>
+                PANTRO
+                {!!propertyName && (
+                  <Text style={[styles.propertyNameSub, isDark && styles.propertyNameSubDark]}>
+                    {'  ·  '}{propertyName}
                   </Text>
-                </View>
-              </View>
-            )}
+                )}
+              </Text>
+            </View>
           </TouchableOpacity>
         </View>
 
-        {/* ── Right: Theme Toggle, Notifications, Profile ─── */}
+        {/* ── Right: Notifications & Profile (Unclustered & clean) ─── */}
         <View style={styles.actionsRow}>
-          {/* Theme Switcher Button */}
-          <TouchableOpacity
-            style={[styles.iconBtn, isDark && styles.iconBtnDark]}
-            onPress={toggleTheme}
-            activeOpacity={0.7}
-            hitSlop={6}
-            aria-label="Toggle theme"
-          >
-            {isDark ? (
-              <Sun size={17} color="#fbbf24" strokeWidth={2.2} />
-            ) : (
-              <Moon size={17} color="#0284c7" strokeWidth={2.2} />
-            )}
-          </TouchableOpacity>
-
           {/* Notification Bell */}
           <TouchableOpacity
             style={[styles.iconBtn, isDark && styles.iconBtnDark]}
             onPress={handleOpenNotifications}
             activeOpacity={0.7}
-            hitSlop={6}
+            hitSlop={8}
             aria-label="Notifications"
           >
-            <Bell size={17} color={isDark ? '#cbd5e1' : '#475569'} strokeWidth={2.2} />
+            <Bell size={18} color={isDark ? '#cbd5e1' : '#475569'} strokeWidth={2} />
             {unreadCount > 0 && (
               <View style={styles.badgePill}>
                 <Text style={styles.badgeText}>
@@ -219,7 +197,7 @@ export default function TenantTopbar({ onMenuToggle }) {
             style={styles.avatarBtn}
             onPress={() => setProfileMenuOpen(true)}
             activeOpacity={0.7}
-            hitSlop={6}
+            hitSlop={8}
             aria-label="Account menu"
           >
             <Text style={styles.avatarInitial}>{initial}</Text>
@@ -391,6 +369,27 @@ export default function TenantTopbar({ onMenuToggle }) {
               <ChevronRight size={15} color="#94a3b8" />
             </TouchableOpacity>
 
+            {/* Theme Switcher in Profile Menu */}
+            <TouchableOpacity
+              style={[styles.profileMenuItem, isDark && styles.profileMenuItemDark]}
+              onPress={toggleTheme}
+              activeOpacity={0.7}
+            >
+              {isDark ? (
+                <Sun size={16} color="#fbbf24" strokeWidth={2.2} />
+              ) : (
+                <Moon size={16} color="#0284c7" strokeWidth={2.2} />
+              )}
+              <Text style={[styles.profileMenuItemText, isDark && styles.profileMenuItemTextDark, { flex: 1 }]}>
+                {isDark ? 'Light Mode' : 'Dark Mode'}
+              </Text>
+              <View style={[styles.themePill, isDark && styles.themePillDark]}>
+                <Text style={[styles.themePillText, isDark && styles.themePillTextDark]}>
+                  {isDark ? 'Dark' : 'Light'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
             <TouchableOpacity
               style={[styles.profileMenuItem, styles.profileMenuItemDanger, isDark && styles.profileMenuItemDangerDark]}
               onPress={handleSignOut}
@@ -448,62 +447,62 @@ const styles = StyleSheet.create({
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexShrink: 1,
+    flex: 1,
+    minWidth: 0,
   },
   logoIcon: {
     width: 24,
     height: 24,
     borderRadius: 7,
-    marginRight: 6,
+    marginRight: 8,
+  },
+  brandTitleWrap: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
   },
   brandText: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '900',
     color: '#2563eb',
-    letterSpacing: -0.4,
+    letterSpacing: -0.3,
   },
   brandTextDark: {
     color: '#3b82f6',
   },
-  propertyWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexShrink: 1,
-  },
-  slashText: {
-    fontSize: 12,
-    color: '#cbd5e1',
-    marginHorizontal: 5,
+  propertyNameSub: {
+    fontSize: 11.5,
     fontWeight: '600',
+    color: '#64748b',
   },
-  slashTextDark: {
-    color: '#334155',
-  },
-  propertyPill: {
-    backgroundColor: '#f1f5f9',
-    paddingHorizontal: 8,
-    paddingVertical: 2.5,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    maxWidth: 130,
-  },
-  propertyPillDark: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  propertyName: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#334155',
-  },
-  propertyNameDark: {
-    color: '#cbd5e1',
+  propertyNameSubDark: {
+    color: '#94a3b8',
   },
   actionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
+    marginLeft: 8,
+  },
+  themePill: {
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  themePillDark: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  themePillText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  themePillTextDark: {
+    color: '#cbd5e1',
   },
   iconBtn: {
     width: 36,
