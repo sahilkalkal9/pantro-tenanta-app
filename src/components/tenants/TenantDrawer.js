@@ -219,6 +219,7 @@ export default function TenantDrawer({ visible, onClose }) {
                   {displayContact}
                 </Text>
               </View>
+              <ChevronRight size={16} color={textFaint} />
             </TouchableOpacity>
 
             {/* Navigation links */}
@@ -229,6 +230,7 @@ export default function TenantDrawer({ visible, onClose }) {
             >
               {MENU_ITEMS.map((item) => {
                 const active = isActive(item.href);
+                const Icon = item.icon;
                 return (
                   <TouchableOpacity
                     key={item.key}
@@ -241,6 +243,11 @@ export default function TenantDrawer({ visible, onClose }) {
                       },
                     ]}
                   >
+                    <Icon
+                      size={18}
+                      color={active ? '#2563eb' : textSecondary}
+                      strokeWidth={active ? 2.4 : 1.9}
+                    />
                     <Text
                       style={[
                         styles.navLabel,
@@ -272,9 +279,16 @@ export default function TenantDrawer({ visible, onClose }) {
                   },
                 ]}
               >
-                <Text style={[styles.themeLabel, { color: textPrimary }]}>
-                  {isDark ? 'Dark Mode' : 'Light Mode'}
-                </Text>
+                <View style={styles.themeLeft}>
+                  {isDark ? (
+                    <Moon size={16} color="#38bdf8" strokeWidth={2.2} />
+                  ) : (
+                    <Sun size={16} color="#f59e0b" strokeWidth={2.2} />
+                  )}
+                  <Text style={[styles.themeLabel, { color: textPrimary }]}>
+                    {isDark ? 'Dark Mode' : 'Light Mode'}
+                  </Text>
+                </View>
                 <Text style={styles.themeSwitchText}>Switch</Text>
               </TouchableOpacity>
 
@@ -284,6 +298,7 @@ export default function TenantDrawer({ visible, onClose }) {
                 onPress={handleSignOut}
                 style={styles.signOutBtn}
               >
+                <LogOut size={16} color="#e11d48" strokeWidth={2.2} />
                 <Text style={styles.signOutText}>Sign Out</Text>
               </TouchableOpacity>
 
