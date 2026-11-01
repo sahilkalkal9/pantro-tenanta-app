@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-  Dimensions,
   Animated,
   TouchableWithoutFeedback,
   Alert,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePathname, router } from 'expo-router';
@@ -38,8 +38,6 @@ import { useTheme } from '../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../constants/colors';
 
 const PANTRO_ICON = require('../../../assets/pantro-icon.png');
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const DRAWER_WIDTH = Math.min(SCREEN_WIDTH * 0.82, 320);
 
 const MENU_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -60,9 +58,13 @@ export default function TenantDrawer({ visible, onClose }) {
   const pathname = usePathname();
   const { user } = useSelector((state) => state.auth);
   const { isDark, toggleTheme } = useTheme();
+  const { width: screenWidth } = useWindowDimensions();
+
+  // Slide-out drawer: never full screen, leaves at least 24% backdrop visible, capped at 280px
+  const drawerWidth = Math.min(Math.round(screenWidth * 0.76), 280);
 
   const [showModal, setShowModal] = useState(visible);
-  const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
+  const slideAnim = useRef(new Animated.Value(-280)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -71,32 +73,32 @@ export default function TenantDrawer({ visible, onClose }) {
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: 0,
-          duration: 220,
+          duration: 230,
           useNativeDriver: true,
         }),
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 220,
+          duration: 230,
           useNativeDriver: true,
         }),
       ]).start();
     } else {
       Animated.parallel([
         Animated.timing(slideAnim, {
-          toValue: -DRAWER_WIDTH,
-          duration: 180,
+          toValue: -drawerWidth,
+          duration: 190,
           useNativeDriver: true,
         }),
         Animated.timing(fadeAnim, {
           toValue: 0,
-          duration: 180,
+          duration: 190,
           useNativeDriver: true,
         }),
       ]).start(() => {
         setShowModal(false);
       });
     }
-  }, [visible, slideAnim, fadeAnim]);
+  }, [visible, drawerWidth, slideAnim, fadeAnim]);
 
   if (!showModal) return null;
 
@@ -166,7 +168,7 @@ export default function TenantDrawer({ visible, onClose }) {
           style={[
             styles.drawer,
             {
-              width: DRAWER_WIDTH,
+              width: drawerWidth,
               backgroundColor: drawerBg,
               borderRightColor: borderColor,
               transform: [{ translateX: slideAnim }],
@@ -328,7 +330,10 @@ const styles = StyleSheet.create({
   drawer: {
     height: '100%',
     borderRightWidth: 1,
-    ...SHADOWS.lg,
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 20,
+    overflow: 'hidden',
+    ...SHADOWS.large,
   },
   safeArea: {
     flex: 1,
