@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../lib/api';
 import { setAuthToken, getAuthToken, removeAuthToken, setUserData, getUserData, removeUserData } from '../lib/storage';
+import { registerDeviceToken, unregisterDeviceToken } from '../services/pushNotifications';
 
 // ── Role gate (web: login/page.js rejects non-tenant accounts) ───────────────
 export const ROLE_ACCESS_ERROR = 'This account does not have access to the Tenant portal.';
@@ -30,6 +31,7 @@ async function isSessionInactive() {
 
 // Wipe the stored session (token + user + last-active stamp) without navigating.
 async function clearSession() {
+  await unregisterDeviceToken().catch(() => {});
   await removeAuthToken();
   await removeUserData();
   await AsyncStorage.removeItem(LAST_ACTIVE_KEY).catch(() => {});
@@ -66,6 +68,7 @@ export const login = createAsyncThunk('auth/login', async (credentials, { reject
     await setUserData(user);
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     touchLastActive();
+    registerDeviceToken().catch(() => {});
     return { token, user };
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || 'Login failed');
@@ -92,6 +95,7 @@ export const verifyOtp = createAsyncThunk('auth/verifyOtp', async ({ phone, otp 
     await setUserData(user);
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     touchLastActive();
+    registerDeviceToken().catch(() => {});
     return { token, user };
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || 'OTP verification failed');

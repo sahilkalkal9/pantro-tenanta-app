@@ -15,6 +15,7 @@ import { Toaster, PantroLoader, OtaUpdateModal } from '../components';
 import { warmupBackend } from '../lib/api';
 import apiCache from '../services/apiCache';
 import { initLiveSocket } from '../services/liveSocket';
+import { setupPushNotifications } from '../services/pushNotifications';
 
 preventAutoHideAsync();
 
@@ -69,6 +70,7 @@ function AppEffects() {
     warmupBackend();
     apiCache.hydrate();
     initLiveSocket();
+    setupPushNotifications();
     AsyncStorage.getItem('pantro_theme_mode').then((saved) => {
       if (saved === 'dark' || saved === 'light') {
         dispatch(setTheme(saved));
