@@ -158,7 +158,6 @@ export default function RentStatusCard({ rent, onPay, loading = false, style }) 
       {/* Action CTA */}
       {rent.hasPendingProof ? (
         <View style={[styles.pendingApprovalBox, { backgroundColor: isDark ? 'rgba(217, 119, 6, 0.15)' : '#fef3c7', borderColor: isDark ? 'rgba(217, 119, 6, 0.3)' : '#fde68a' }]}>
-          <Clock size={16} color={isDark ? '#fbbf24' : '#b45309'} />
           <Text style={[styles.pendingApprovalText, { color: isDark ? '#fbbf24' : '#b45309' }]}>
             Payment Pending Approval
           </Text>
@@ -172,7 +171,6 @@ export default function RentStatusCard({ rent, onPay, loading = false, style }) 
         >
           {loading ? <ActivityIndicator size="small" color="#ffffff" /> : null}
           <Text style={styles.payButtonText}>Resubmit Payment ({formatCurrency(pendingAmount)})</Text>
-          <ArrowRight size={16} color="#ffffff" strokeWidth={2.4} />
         </TouchableOpacity>
       ) : pendingAmount > 0 && onPay ? (
         <TouchableOpacity
@@ -183,7 +181,6 @@ export default function RentStatusCard({ rent, onPay, loading = false, style }) 
         >
           {loading ? <ActivityIndicator size="small" color="#ffffff" /> : null}
           <Text style={styles.payButtonText}>Pay {formatCurrency(pendingAmount)}</Text>
-          <ArrowRight size={16} color="#ffffff" strokeWidth={2.4} />
         </TouchableOpacity>
       ) : null}
     </View>

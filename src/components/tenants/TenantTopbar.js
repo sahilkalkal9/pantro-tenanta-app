@@ -362,11 +362,9 @@ export default function TenantTopbar({ onMenuToggle }) {
               }}
               activeOpacity={0.7}
             >
-              <User size={16} color={isDark ? '#cbd5e1' : '#334155'} strokeWidth={2.2} />
               <Text style={[styles.profileMenuItemText, isDark && styles.profileMenuItemTextDark]}>
                 My Profile
               </Text>
-              <ChevronRight size={15} color="#94a3b8" />
             </TouchableOpacity>
 
             {/* Theme Switcher in Profile Menu */}
@@ -375,11 +373,6 @@ export default function TenantTopbar({ onMenuToggle }) {
               onPress={toggleTheme}
               activeOpacity={0.7}
             >
-              {isDark ? (
-                <Sun size={16} color="#fbbf24" strokeWidth={2.2} />
-              ) : (
-                <Moon size={16} color="#0284c7" strokeWidth={2.2} />
-              )}
               <Text style={[styles.profileMenuItemText, isDark && styles.profileMenuItemTextDark, { flex: 1 }]}>
                 {isDark ? 'Light Mode' : 'Dark Mode'}
               </Text>
@@ -395,7 +388,6 @@ export default function TenantTopbar({ onMenuToggle }) {
               onPress={handleSignOut}
               activeOpacity={0.7}
             >
-              <LogOut size={16} color="#e11d48" strokeWidth={2.2} />
               <Text style={styles.profileMenuItemTextDanger}>Sign Out</Text>
             </TouchableOpacity>
           </View>
