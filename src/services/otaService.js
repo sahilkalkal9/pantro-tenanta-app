@@ -12,10 +12,10 @@ const OTA_STORAGE_KEYS = {
   RELEASE_NOTES: 'pantro_ota_release_notes',
 };
 
-export const NATIVE_APP_VERSION = Constants.expoConfig?.version || '1.0.2';
+export const NATIVE_APP_VERSION = Constants.expoConfig?.version || '1.0.3';
 export const NATIVE_BUILD_NUMBER =
   Platform.OS === 'android'
-    ? Constants.expoConfig?.android?.versionCode || 4
+    ? Constants.expoConfig?.android?.versionCode || 5
     : Constants.expoConfig?.ios?.buildNumber || 2;
 
 class OtaService {
@@ -139,6 +139,64 @@ class OtaService {
       this.reportStatus(update.id, 'failure', error?.message).catch(() => {});
       throw error;
     }
+  }
+
+  /**
+   * Download update silently in the background without asking or blocking user
+   */
+  async downloadSilently(update) {
+    if (!update) return false;
+    try {
+      console.log(`[OTA:Silent] Downloading update v${update.version} in background...`);
+      let nativeFetched = false;
+
+      if (Updates.isEnabled && Updates.fetchUpdateAsync) {
+        try {
+          const result = await Updates.fetchUpdateAsync();
+          if (result && result.isNew) {
+            nativeFetched = true;
+          }
+        } catch (err) {
+          console.warn('[OTA:Silent] Native fetch notice:', err.message);
+        }
+      }
+
+      await AsyncStorage.setItem(OTA_STORAGE_KEYS.CURRENT_VERSION, update.version);
+      await AsyncStorage.setItem(OTA_STORAGE_KEYS.PENDING_RESTART, 'true');
+      if (update.releaseNotes) {
+        await AsyncStorage.setItem(OTA_STORAGE_KEYS.RELEASE_NOTES, update.releaseNotes);
+      }
+
+      // Telemetry
+      this.reportStatus(update.id, 'success').catch(() => {});
+      console.log(`[OTA:Silent] Update v${update.version} ready! Will apply automatically on next restart/background.`);
+      return true;
+    } catch (e) {
+      console.warn('[OTA:Silent] Silent background download error:', e.message);
+      this.reportStatus(update.id, 'failure', e.message).catch(() => {});
+      return false;
+    }
+  }
+
+  /**
+   * Check if a silent update has been downloaded and is waiting for restart
+   */
+  async isPendingRestart() {
+    try {
+      const val = await AsyncStorage.getItem(OTA_STORAGE_KEYS.PENDING_RESTART);
+      return val === 'true';
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Clear the pending restart flag
+   */
+  async clearPendingRestart() {
+    try {
+      await AsyncStorage.removeItem(OTA_STORAGE_KEYS.PENDING_RESTART);
+    } catch {}
   }
 
   /**

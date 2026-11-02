@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { AppState } from 'react-native';
+import * as Updates from 'expo-updates';
 import otaService from '../services/otaService';
 
 export function useOtaUpdates({ autoCheck = true, checkDelayMs = 2500 } = {}) {
@@ -6,18 +8,23 @@ export function useOtaUpdates({ autoCheck = true, checkDelayMs = 2500 } = {}) {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [update, setUpdate] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
-  const [progressText, setProgressText] = useState('');
+  const [isPendingRestart, setIsPendingRestart] = useState(false);
   const [installedInfo, setInstalledInfo] = useState(null);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const downloadingRef = useRef(false);
 
   const loadInstalledInfo = useCallback(async () => {
     const info = await otaService.getInstalledVersionInfo();
+    const pending = await otaService.isPendingRestart();
     setInstalledInfo(info);
+    setIsPendingRestart(pending);
     return info;
   }, []);
 
+  /**
+   * Check for updates and download silently in the background
+   */
   const checkForUpdates = useCallback(async () => {
+    if (downloadingRef.current) return;
     setIsChecking(true);
     try {
       await loadInstalledInfo();
@@ -25,7 +32,27 @@ export function useOtaUpdates({ autoCheck = true, checkDelayMs = 2500 } = {}) {
       if (res.updateAvailable && res.update) {
         setUpdate(res.update);
         setUpdateAvailable(true);
-        setIsDismissed(false);
+
+        // SILENT BACKGROUND DOWNLOAD - Never interrupt user with modal
+        downloadingRef.current = true;
+        setIsDownloading(true);
+        console.log(`[useOtaUpdates] New update v${res.update.version} found. Starting silent background download...`);
+
+        otaService
+          .downloadSilently(res.update)
+          .then((success) => {
+            setIsDownloading(false);
+            downloadingRef.current = false;
+            if (success) {
+              setIsPendingRestart(true);
+              loadInstalledInfo();
+            }
+          })
+          .catch(() => {
+            setIsDownloading(false);
+            downloadingRef.current = false;
+          });
+
         return { updateAvailable: true, update: res.update };
       } else {
         setUpdateAvailable(false);
@@ -33,39 +60,27 @@ export function useOtaUpdates({ autoCheck = true, checkDelayMs = 2500 } = {}) {
         return { updateAvailable: false, message: res.message };
       }
     } catch (e) {
-      console.warn('[useOtaUpdates] Check failed:', e);
-      return { updateAvailable: false, error: e.message };
+      console.warn('[useOtaUpdates] Silent check notice:', e?.message || e);
+      return { updateAvailable: false, error: e?.message };
     } finally {
       setIsChecking(false);
     }
   }, [loadInstalledInfo]);
 
-  const downloadAndInstall = useCallback(async () => {
-    if (!update) return;
-    setIsDownloading(true);
-    setDownloadProgress(0.1);
-    setProgressText('Starting download...');
-
-    try {
-      await otaService.downloadAndApplyUpdate(update, (progress, text) => {
-        setDownloadProgress(progress);
-        if (text) setProgressText(text);
-      });
-
-      setProgressText('Restarting app...');
-      setTimeout(async () => {
-        await otaService.reloadApp();
-      }, 800);
-    } catch (err) {
-      console.error('[useOtaUpdates] Install error:', err);
-      setProgressText('Update failed. Please retry.');
-      setIsDownloading(false);
-      throw err;
-    }
-  }, [update]);
-
-  const dismissUpdate = useCallback(() => {
-    setIsDismissed(true);
+  // Listen to AppState: When user sends app to background and an update is ready,
+  // reload the app in background so next time they open, the new version is active!
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', async (nextState) => {
+      if (nextState === 'background' || nextState === 'inactive') {
+        const pending = await otaService.isPendingRestart();
+        if (pending && Updates.isEnabled && Updates.reloadAsync) {
+          console.log('[useOtaUpdates] App backgrounded. Reloading silently to apply downloaded update...');
+          await otaService.clearPendingRestart();
+          Updates.reloadAsync().catch(() => {});
+        }
+      }
+    });
+    return () => sub.remove();
   }, []);
 
   useEffect(() => {
@@ -81,16 +96,12 @@ export function useOtaUpdates({ autoCheck = true, checkDelayMs = 2500 } = {}) {
 
   return {
     isChecking,
-    updateAvailable: updateAvailable && !isDismissed,
+    updateAvailable,
     update,
-    isMandatory: update?.updateType === 'mandatory',
     isDownloading,
-    downloadProgress,
-    progressText,
+    isPendingRestart,
     installedInfo,
     checkForUpdates,
-    downloadAndInstall,
-    dismissUpdate,
     loadInstalledInfo,
   };
 }
