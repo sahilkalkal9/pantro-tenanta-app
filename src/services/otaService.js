@@ -105,14 +105,17 @@ class OtaService {
       let nativeFetched = false;
       if (Updates.isEnabled && Updates.fetchUpdateAsync) {
         try {
-          if (onProgress) onProgress(0.4, 'Fetching update bundle...');
+          if (onProgress) onProgress(0.4, 'Downloading update bundle...');
           const result = await Updates.fetchUpdateAsync();
           if (result && result.isNew) {
             nativeFetched = true;
           }
         } catch (nativeErr) {
-          console.warn('[OTA] Native expo-updates fetch failed, continuing with direct download:', nativeErr.message);
+          console.warn('[OTA] Native expo-updates fetch failed:', nativeErr.message);
+          throw new Error(`Failed to download update bundle: ${nativeErr.message}`);
         }
+      } else {
+        console.log('[OTA] Native Updates.isEnabled is false (running in dev/Expo Go)');
       }
 
       if (onProgress) onProgress(0.7, 'Verifying bundle integrity...');

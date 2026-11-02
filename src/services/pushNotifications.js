@@ -75,15 +75,32 @@ export async function registerDeviceToken() {
     const token = await registerForPushNotifications();
     if (!token) return;
 
+    let authToken = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+    if (!authToken) {
+      authToken = api.defaults.headers.common['Authorization']?.replace('Bearer ', '');
+    }
+    if (!authToken) {
+      console.log('[Push] User not authenticated yet, skipping device token registration');
+      return;
+    }
+
     const stored = await AsyncStorage.getItem(PUSH_TOKEN_KEY);
     if (stored === token) return; // already registered
 
-    await api.post('/notifications/device-token', {
-      token,
-      platform: Platform.OS,
-      deviceName: Device.deviceName || Platform.OS,
-      app: 'tenant',
-    });
+    await api.post(
+      '/notifications/device-token',
+      {
+        token,
+        platform: Platform.OS,
+        deviceName: Device.deviceName || Platform.OS,
+        app: 'tenant',
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
+    );
     await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
     console.log('[Push] Tenant device token registered successfully');
   } catch (err) {

@@ -48,6 +48,7 @@ const MENU = [
       { icon: Bell, color: COLORS.info, label: 'Notifications', subtitle: 'Your recent notifications', route: '/more/notifications' },
       { icon: Settings, color: COLORS.gray500, label: 'Settings', subtitle: 'Password & account', route: '/more/settings' },
       { icon: Shield, color: '#7c3aed', label: 'Privacy Policy', subtitle: 'How we protect your data', route: '/more/privacy-policy' },
+      { icon: FileText, color: '#2563eb', label: 'Terms & Conditions', subtitle: 'Rules and portal guidelines', route: '/more/terms' },
     ],
   },
 ];

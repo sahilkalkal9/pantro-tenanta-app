@@ -14,7 +14,7 @@
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://stayverse-backend-zyl7.onrender.com/api/ota/expo-manifest",
+      "url": "https://stayverse-backend-zyl7.onrender.com/api/ota/expo-manifest?app=tenant",
       "enabled": true,
       "checkAutomatically": "NEVER"
     },

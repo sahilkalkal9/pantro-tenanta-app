@@ -52,6 +52,8 @@ const MENU_ITEMS = [
   { key: 'documents', label: 'Documents', href: '/more/documents', icon: FileText },
   { key: 'support', label: 'Support & Help', href: '/more/support', icon: HeadphonesIcon },
   { key: 'profile', label: 'My Profile', href: '/profile', icon: User },
+  { key: 'privacy-policy', label: 'Privacy Policy', href: '/more/privacy-policy', icon: FileText },
+  { key: 'terms', label: 'Terms & Conditions', href: '/more/terms', icon: FileText },
 ];
 
 export default function TenantDrawer({ visible, onClose }) {

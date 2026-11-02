@@ -150,6 +150,7 @@ export const deepLinkLogin = createAsyncThunk(
       await setUserData(user);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       touchLastActive();
+      registerDeviceToken().catch(() => {});
       return { token, user };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');
@@ -174,6 +175,7 @@ export const initializeAuth = createAsyncThunk('auth/initialize', async (_, { re
       }
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       touchLastActive();
+      registerDeviceToken().catch(() => {});
       return { token, user };
     }
     return { token: null, user: null };
