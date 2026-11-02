@@ -85,7 +85,11 @@ function AppEffects() {
   }, [dispatch]);
 
   useEffect(() => {
-    hideAsync();
+    // Hide native splash screen smoothly once the initial screen mounts
+    const timer = setTimeout(() => {
+      hideAsync().catch(() => {});
+    }, 200);
+    return () => clearTimeout(timer);
   }, []);
 
   return null;

@@ -40,6 +40,11 @@
       "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
+      "splash": {
+        "image": "./assets/splash-android.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#070b14"
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#ffffff",
