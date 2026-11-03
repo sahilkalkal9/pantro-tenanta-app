@@ -24,6 +24,7 @@ import { ModalSheet } from '../layout';
 import { Button, Card } from '../primitives';
 import { TextField, SwitchRow } from '../forms';
 import ImageKitUploader from '../ImageKitUploader';
+import InHouseUpiGateway from './InHouseUpiGateway';
 import { useTheme } from '../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../../constants/colors';
 
@@ -155,6 +156,10 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
   const backToMethods = () => {
     setView('method');
     setMethod('');
+  };
+
+  const selectGateway = () => {
+    setView('gateway');
   };
 
   // ── UPI ────────────────────────────────────────────────────────────
@@ -458,47 +463,73 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
           ) : null}
         </View>
 
+        {/* ── 0. In-House UPI Gateway View ───────────────────── */}
+        {view === 'gateway' ? (
+          <InHouseUpiGateway
+            target={target}
+            items={items}
+            amount={amount}
+            onSuccess={() => {
+              onSuccess?.();
+            }}
+            onClose={close}
+            onBack={backToMethods}
+          />
+        ) : null}
+
         {/* ── 1. Method selection ──────────────────────────────── */}
         {view === 'method' ? (
           <>
             <Text style={[styles.prompt, { color: colors.textPrimary }]}>How would you like to pay?</Text>
 
-            <View style={styles.methodRow}>
-              <Card onPress={selectUpi} style={styles.methodCard}>
-                <View style={[styles.methodIcon, { backgroundColor: '#eff6ff' }]}>
-                  <Smartphone size={20} color="#2563eb" />
+            {/* In-House UPI Gateway — Primary High-Speed Option */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={selectGateway}
+              style={[
+                styles.methodCardWide,
+                {
+                  borderColor: '#2563eb',
+                  borderWidth: 1.5,
+                  backgroundColor: isDark ? 'rgba(37,99,235,0.12)' : '#EFF6FF',
+                },
+              ]}
+            >
+              <View style={[styles.methodIcon, { backgroundColor: '#2563eb' }]}>
+                <Zap size={22} color="#FFFFFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={styles.methodTitleRow}>
+                  <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>
+                    In-House UPI Gateway
+                  </Text>
+                  <View style={[styles.instantPill, { backgroundColor: '#10b981' }]}>
+                    <Text style={styles.instantPillText}>⚡ Auto-Verified</Text>
+                  </View>
                 </View>
-                <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>UPI</Text>
-                <Text style={[styles.methodSub, { color: colors.textSecondary }]}>GPay, PhonePe, Paytm &amp; screenshot</Text>
-              </Card>
+                <Text style={[styles.methodSub, { color: colors.textSecondary }]}>
+                  PhonePe, GPay, Paytm, BHIM & QR • 0% Fee • Instant Settlement
+                </Text>
+              </View>
+            </TouchableOpacity>
 
+            <View style={styles.methodRow}>
               <Card onPress={selectCash} style={styles.methodCard}>
                 <View style={[styles.methodIcon, { backgroundColor: '#ecfdf5' }]}>
                   <Banknote size={20} color="#059669" />
                 </View>
                 <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Cash</Text>
-                <Text style={[styles.methodSub, { color: colors.textSecondary }]}>Pay in person, confirmed by OTP</Text>
+                <Text style={[styles.methodSub, { color: colors.textSecondary }]}>Pay in person with OTP</Text>
+              </Card>
+
+              <Card onPress={selectUpi} style={styles.methodCard}>
+                <View style={[styles.methodIcon, { backgroundColor: isDark ? '#334155' : '#f1f5f9' }]}>
+                  <Smartphone size={20} color={colors.textSecondary} />
+                </View>
+                <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Manual UPI</Text>
+                <Text style={[styles.methodSub, { color: colors.textSecondary }]}>Upload screenshot proof</Text>
               </Card>
             </View>
-
-            {showOnline ? (
-              <Card onPress={selectOnline} style={styles.methodCardWide}>
-                <View style={[styles.methodIcon, { backgroundColor: '#f5f3ff' }]}>
-                  <Globe size={20} color="#7c3aed" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <View style={styles.methodTitleRow}>
-                    <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Pay Online Gateway</Text>
-                    <View style={styles.instantPill}>
-                      <Text style={styles.instantPillText}>Instant</Text>
-                    </View>
-                  </View>
-                  <Text style={[styles.methodSub, { color: colors.textSecondary }]}>
-                    UPI, Credit/Debit Cards, Netbanking — auto-verified instantly
-                  </Text>
-                </View>
-              </Card>
-            ) : null}
 
             <View style={[styles.otherMethods, { borderTopColor: colors.border }]}>
               <Text style={[styles.otherMethodsLabel, { color: colors.textSecondary }]}>OTHER METHODS</Text>
