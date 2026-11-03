@@ -152,35 +152,6 @@ export const tenantService = {
     });
     return unwrapItem(res, 'data') || res.data;
   },
-
-  // ── In-House UPI Payment Gateway (YouPI-PG style) ─────────────
-  async createUpiGatewaySession(items) {
-    const res = await api.post('/upi-gateway/create-session', { items });
-    return unwrapItem(res, 'data') || res.data;
-  },
-
-  async getGatewaySessionStatus(sessionId) {
-    const res = await api.get(`/upi-gateway/session-status/${sessionId}`);
-    return unwrapItem(res, 'data') || res.data;
-  },
-
-  async submitGatewayUtr(sessionId, utr) {
-    const res = await api.post('/upi-gateway/submit-utr', { sessionId, utr });
-    apiCache.invalidate('rents');
-    apiCache.invalidate('proofs');
-    apiCache.invalidate('dashboard');
-    apiCache.invalidate('dues');
-    return unwrapItem(res, 'data') || res.data;
-  },
-
-  async simulateGatewayPayment(sessionId) {
-    const res = await api.post(`/upi-gateway/simulate-success/${sessionId}`);
-    apiCache.invalidate('rents');
-    apiCache.invalidate('proofs');
-    apiCache.invalidate('dashboard');
-    apiCache.invalidate('dues');
-    return unwrapItem(res, 'data') || res.data;
-  },
   
   async getPaymentProofs(params = {}, options = {}) {
     const bypassCache = options?.bypassCache || false;
