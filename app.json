@@ -3,16 +3,18 @@
     "name": "Pantro Tenant",
     "slug": "pantro-tenant",
     "version": "1.0.3",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "jsEngine": "hermes",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "scheme": "pantro-tenant",
     "newArchEnabled": true,
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.3",
     "updates": {
       "url": "https://stayverse-backend-zyl7.onrender.com/api/ota/expo-manifest",
       "enabled": true,
@@ -75,13 +77,18 @@
             "buildToolsVersion": "36.0.0",
             "minSdkVersion": 24,
             "enableProguardInReleaseBuilds": false,
-            "enableShrinkResourcesInReleaseBuilds": false
+            "enableShrinkResourcesInReleaseBuilds": false,
+            "enableMinifyInReleaseBuilds": false
           }
         }
       ]
     ],
     "extra": {
-      "apiBaseUrl": "https://stayverse-backend-zyl7.onrender.com/api"
+      "apiBaseUrl": "https://stayverse-backend-zyl7.onrender.com/api",
+      "router": {},
+      "eas": {
+        "projectId": "5d2bd7c1-abe1-45ab-bf0b-ee548647d10a"
+      }
     },
     "androidStatusBar": {
       "barStyle": "dark-content",
@@ -89,9 +96,9 @@
       "translucent": false
     },
     "androidNavigationBar": {
-      "visible": "always",
       "barStyle": "dark-content",
       "backgroundColor": "#ffffff"
-    }
+    },
+    "owner": "sahilkalkal"
   }
 }
