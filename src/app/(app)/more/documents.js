@@ -107,10 +107,17 @@ export default function DocumentsScreen({ navigation }) {
     );
   }
 
+  const fullAadhaar = (() => {
+    const raw = String(profile?.aadhaarNumber || verification?.aadhaarNumber || '').replace(/\D/g, '');
+    if (raw.length === 12) return `${raw.slice(0, 4)} ${raw.slice(4, 8)} ${raw.slice(8, 12)}`;
+    return raw || null;
+  })();
+  const fullPan = (profile?.panNumber || profile?.pan || '').toUpperCase().trim() || null;
+
   const kycDocs = [
-    { key: 'aadhaarFront', label: 'Aadhaar Card (Front)', url: profile?.aadhaarFront },
-    { key: 'aadhaarBack', label: 'Aadhaar Card (Back)', url: profile?.aadhaarBack },
-    ...(profile?.panFront ? [{ key: 'panFront', label: 'PAN Card', url: profile.panFront }] : []),
+    { key: 'aadhaarFront', label: 'Aadhaar Card (Front)', url: profile?.aadhaarFront, idValue: fullAadhaar },
+    { key: 'aadhaarBack', label: 'Aadhaar Card (Back)', url: profile?.aadhaarBack, idValue: fullAadhaar },
+    ...(profile?.panFront ? [{ key: 'panFront', label: 'PAN Card', url: profile.panFront, idValue: fullPan }] : []),
     ...(Array.isArray(profile?.kycDocuments)
       ? profile.kycDocuments.map((docUrl, i) => ({
           key: `kycDoc_${i}`,
@@ -125,10 +132,6 @@ export default function DocumentsScreen({ navigation }) {
     verification?.aadhaarVerification?.verified ||
     profile?.aadhaarVerification?.status === 'verified' ||
     profile?.aadhaarVerification?.verified === true;
-
-  const maskedAadhaar =
-    verification?.aadhaarVerification?.maskedAadhaar ||
-    (profile?.aadhaarNumber ? `XXXX XXXX ${String(profile.aadhaarNumber).slice(-4)}` : null);
 
   const police = verification?.policeVerification || profile?.policeVerification || {};
   const isPoliceCompleted = police.status === 'completed';
@@ -385,11 +388,27 @@ export default function DocumentsScreen({ navigation }) {
             <IdCard size={16} color={COLORS.primary} />
           </View>
           <Text style={[styles.headTitle, { color: colors.textPrimary }]}>KYC Document Photos</Text>
-          {!!maskedAadhaar && <Badge label={maskedAadhaar} color={COLORS.primary} style={{ marginLeft: 'auto' }} />}
+        </View>
+
+        {/* Identity Numbers Summary Banner */}
+        <View style={[styles.idBanner, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.12)' : '#eff6ff', borderColor: isDark ? 'rgba(59, 130, 246, 0.25)' : '#bfdbfe' }]}>
+          <View style={styles.idBannerItem}>
+            <Text style={[styles.idBannerLabel, { color: colors.textSecondary }]}>Full Aadhaar</Text>
+            <Text style={[styles.idBannerValue, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
+              {fullAadhaar || 'Not Available'}
+            </Text>
+          </View>
+          <View style={[styles.idBannerDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#cbd5e1' }]} />
+          <View style={styles.idBannerItem}>
+            <Text style={[styles.idBannerLabel, { color: colors.textSecondary }]}>Full PAN</Text>
+            <Text style={[styles.idBannerValue, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
+              {fullPan || 'Not Available'}
+            </Text>
+          </View>
         </View>
 
         <Text style={[styles.note, { color: colors.textSecondary }]}>
-          Aadhaar document photos on file. Document photos are optional; verified identity details are validated via UIDAI DigiLocker.
+          Official identity documents on file. All cards are rendered edge-to-edge uncropped with full UIDAI & ITD identity records.
         </Text>
 
         {!hasKyc ? (
@@ -436,28 +455,38 @@ export default function DocumentsScreen({ navigation }) {
   );
 }
 
-function DocumentPhoto({ label, url, onOpen }) {
+function DocumentPhoto({ label, url, idValue, onOpen }) {
   const { colors, isDark } = useTheme();
   if (!url) {
     return (
       <View style={[styles.photoEmpty, { borderColor: colors.border, backgroundColor: isDark ? colors.cardSecondary : COLORS.gray50 }]}>
         <FileText size={24} color={colors.textTertiary} />
         <Text style={[styles.photoLabel, { color: colors.textSecondary }]}>{label}</Text>
+        {idValue ? (
+          <Text style={{ fontSize: 11, fontWeight: '700', fontFamily: 'monospace', color: COLORS.primary, marginTop: 3 }}>
+            {idValue}
+          </Text>
+        ) : null}
         <Text style={[styles.photoNotUploaded, { color: colors.textTertiary }]}>Not uploaded</Text>
       </View>
     );
   }
   return (
-    <View>
+    <View style={[styles.docCardContainer, { borderColor: colors.border, backgroundColor: isDark ? '#111827' : '#ffffff' }]}>
       <View style={styles.photoLabelRow}>
-        <IdCard size={12} color={COLORS.primary} />
-        <Text style={[styles.photoLabel, { color: colors.textSecondary }]}>{label}</Text>
+        <IdCard size={13} color={COLORS.primary} />
+        <Text style={[styles.photoLabel, { color: colors.textPrimary }]}>{label}</Text>
+        {idValue ? (
+          <View style={[styles.idBadge, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.18)' : '#eff6ff', borderColor: isDark ? 'rgba(59, 130, 246, 0.3)' : '#bfdbfe' }]}>
+            <Text style={[styles.idBadgeText, { color: isDark ? '#93c5fd' : '#1d4ed8' }]}>{idValue}</Text>
+          </View>
+        ) : null}
       </View>
-      <TouchableOpacity activeOpacity={0.85} onPress={onOpen}>
-        <Image source={{ uri: resolveMediaUrl(url) }} style={[styles.photo, { backgroundColor: colors.cardSecondary }]} resizeMode="cover" />
+      <TouchableOpacity activeOpacity={0.88} onPress={onOpen} style={[styles.photoWrapper, { borderColor: colors.border, backgroundColor: isDark ? '#030712' : '#f8fafc' }]}>
+        <Image source={{ uri: resolveMediaUrl(url) }} style={styles.photo} resizeMode="contain" />
         <View style={styles.viewOverlay}>
           <Eye size={13} color={COLORS.white} />
-          <Text style={styles.viewText}>View</Text>
+          <Text style={styles.viewText}>Full View</Text>
         </View>
       </TouchableOpacity>
       <TouchableOpacity
@@ -466,7 +495,7 @@ function DocumentPhoto({ label, url, onOpen }) {
         onPress={() => Linking.openURL(resolveMediaUrl(url)).catch(() => {})}
       >
         <ExternalLink size={10} color={colors.textTertiary} />
-        <Text style={[styles.openLinkText, { color: colors.textTertiary }]}>Open in new tab</Text>
+        <Text style={[styles.openLinkText, { color: colors.textTertiary }]}>Open in full resolution</Text>
       </TouchableOpacity>
     </View>
   );
@@ -477,6 +506,38 @@ const styles = StyleSheet.create({
   icon: { width: 30, height: 30, borderRadius: BORDER_RADIUS.sm, alignItems: 'center', justifyContent: 'center' },
   headTitle: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
   note: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: SPACING.sm, marginBottom: SPACING.sm, lineHeight: 18 },
+  idBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  idBannerItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  idBannerLabel: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+  },
+  idBannerValue: {
+    fontSize: 13,
+    fontWeight: '800',
+    fontFamily: 'monospace',
+    marginTop: 2,
+    letterSpacing: 0.5,
+  },
+  idBannerDivider: {
+    width: 1,
+    height: 24,
+  },
   stepBox: {
     padding: 12,
     borderRadius: 14,
@@ -551,10 +612,37 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary, marginTop: SPACING.sm },
   emptyText: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: 4, textAlign: 'center' },
   grid: { gap: SPACING.md },
-  photoLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  photoLabel: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textSecondary },
+  docCardContainer: {
+    padding: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  photoLabelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  photoLabel: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
+  idBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  idBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    fontFamily: 'monospace',
+    letterSpacing: 0.4,
+  },
   photoNotUploaded: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary, marginTop: 2 },
-  photo: { width: '100%', height: 180, borderRadius: BORDER_RADIUS.md, backgroundColor: COLORS.gray100 },
+  photoWrapper: {
+    width: '100%',
+    height: 200,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 4,
+  },
+  photo: { width: '100%', height: '100%' },
   photoEmpty: {
     alignItems: 'center',
     padding: SPACING.lg,
@@ -571,7 +659,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: 'rgba(0,0,0,0.65)',
     borderRadius: BORDER_RADIUS.full,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
