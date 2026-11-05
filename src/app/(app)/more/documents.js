@@ -68,7 +68,7 @@ export default function DocumentsScreen({ navigation }) {
       }
       toast.success(
         updated?.policeVerification?.status === 'completed'
-          ? 'Police verification report updated: Completed!'
+          ? 'Background verification report updated: Completed!'
           : 'Status checked. eCourts query is in progress.'
       );
     } catch (e) {
@@ -126,23 +126,24 @@ export default function DocumentsScreen({ navigation }) {
   const isPoliceCompleted = police.status === 'completed';
   const isPoliceInProgress = police.status === 'in_progress' || police.status === 'submitted';
   const reportUrl = police.reportUrl;
+  const docUrl = police.docUrl;
 
   return (
     <Screen refreshing={refreshing} onRefresh={() => fetchData({ refresh: true })}>
       <TenantPageHeader
         title="Documents & Verification"
-        subtitle="Your verified identity and police background clearance"
+        subtitle="Your verified identity and background clearance"
         icon={ShieldCheck}
         iconTone="blue"
       />
 
-      {/* Police & Judicial Background Verification Card */}
+      {/* Background Verification Card */}
       <Card style={{ marginBottom: SPACING.md }}>
         <View style={[styles.head, { borderBottomColor: colors.border }]}>
           <View style={[styles.icon, { backgroundColor: 'rgba(37, 99, 235, 0.10)' }]}>
             <ShieldCheck size={16} color={COLORS.primary} />
           </View>
-          <Text style={[styles.headTitle, { color: colors.textPrimary }]}>Police Verification</Text>
+          <Text style={[styles.headTitle, { color: colors.textPrimary }]}>Background Verification</Text>
           {isPoliceCompleted ? (
             <Badge
               label={police.verdict === 'clear' ? '✓ Record Clear' : '⚠️ Record Found'}
@@ -152,7 +153,7 @@ export default function DocumentsScreen({ navigation }) {
           ) : isPoliceInProgress ? (
             <Badge label="In Progress" color={COLORS.primary} style={{ marginLeft: 'auto' }} />
           ) : (
-            <Badge label={isAadhaarDone ? 'Police Pending' : 'Aadhaar Pending'} color={COLORS.warning} style={{ marginLeft: 'auto' }} />
+            <Badge label={isAadhaarDone ? 'Verification Pending' : 'Aadhaar Pending'} color={COLORS.warning} style={{ marginLeft: 'auto' }} />
           )}
         </View>
 
@@ -302,20 +303,32 @@ export default function DocumentsScreen({ navigation }) {
           <View style={[styles.actionBanner, { backgroundColor: isDark ? 'rgba(16, 185, 129, 0.12)' : '#ecfdf5', borderColor: 'rgba(16, 185, 129, 0.3)' }]}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.actionTitle, { color: colors.textPrimary }]}>
-                Police Verification Certificate Ready
+                Background Verification Certificate Ready
               </Text>
               <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>
                 Official certificate digitally signed and verified.
               </Text>
             </View>
-            <TouchableOpacity
-              style={styles.downloadBtn}
-              activeOpacity={0.8}
-              onPress={() => Linking.openURL(resolveMediaUrl(reportUrl)).catch(() => {})}
-            >
-              <Download size={13} color="#fff" />
-              <Text style={styles.downloadBtnText}>Certificate</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              <TouchableOpacity
+                style={styles.downloadBtn}
+                activeOpacity={0.8}
+                onPress={() => Linking.openURL(resolveMediaUrl(reportUrl)).catch(() => {})}
+              >
+                <Download size={13} color="#fff" />
+                <Text style={styles.downloadBtnText}>PDF</Text>
+              </TouchableOpacity>
+              {docUrl && (
+                <TouchableOpacity
+                  style={[styles.downloadBtn, { backgroundColor: '#475569' }]}
+                  activeOpacity={0.8}
+                  onPress={() => Linking.openURL(resolveMediaUrl(docUrl)).catch(() => {})}
+                >
+                  <Download size={13} color="#fff" />
+                  <Text style={styles.downloadBtnText}>DOC</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         ) : isPoliceInProgress ? (
           <View style={[styles.actionBanner, { backgroundColor: isDark ? 'rgba(59, 130, 246, 0.12)' : '#eff6ff', borderColor: 'rgba(59, 130, 246, 0.25)' }]}>
@@ -324,7 +337,7 @@ export default function DocumentsScreen({ navigation }) {
                 eCourts Background Check In Progress
               </Text>
               <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>
-                Surepass is searching court records (~2-5 mins).
+                Surepass is searching court records (~1-3 mins).
               </Text>
             </View>
             <TouchableOpacity
@@ -348,11 +361,11 @@ export default function DocumentsScreen({ navigation }) {
         {/* Mandatory Legal & Partner Attribution */}
         <View style={[styles.attributionBox, { borderTopColor: colors.border }]}>
           <Text style={[styles.attributionText, { color: colors.textTertiary }]}>
-            Police verification by <Text style={{ fontWeight: '700' }}>Pantro</Text> powered with{' '}
-            <Text style={{ fontWeight: '700' }}>Surepass</Text> (Surepass Technologies Private Limited).
+            Background Verification Done by <Text style={{ fontWeight: '700' }}>Pantro</Text> powered with{' '}
+            <Text style={{ fontWeight: '700' }}>Surepass Technologies Private Limited</Text>.
           </Text>
           <Text style={[styles.attributionText, { color: colors.textTertiary, marginTop: 2 }]}>
-            Pantro is a product of <Text style={{ fontWeight: '700' }}>Wabsyte Studio (OPC) Private Limited</Text>.
+            Pantro is a product of <Text style={{ fontWeight: '700' }}>Wabsyte Studio Private Limited</Text>.
           </Text>
         </View>
       </Card>

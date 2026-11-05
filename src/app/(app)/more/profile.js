@@ -1233,7 +1233,7 @@ export default function TenantProfileScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Aadhaar & KYC Verification</Text>
                   <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
-                    Government identity verification for police verification and rent agreement
+                    Government identity verification for background verification and rent agreement
                   </Text>
                 </View>
               </View>
