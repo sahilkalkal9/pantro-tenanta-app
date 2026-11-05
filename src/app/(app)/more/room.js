@@ -147,7 +147,11 @@ export default function RoomScreen() {
   const room = typeof profile.roomId === 'object' ? profile.roomId : null;
   const property = typeof profile.propertyId === 'object' ? profile.propertyId : null;
   const bed = typeof profile.bedId === 'object' ? profile.bedId : null;
-  const isRk = room?.type === 'RK' || room?.sharingType === 'RK' || ['RK', 'Flat'].includes(property?.type);
+  const isRk = profile?.effectiveCategory === 'RK' ||
+               room?.roomCategory === 'RK' ||
+               room?.type === 'RK' ||
+               room?.sharingType === 'RK' ||
+               (['RK', 'Flat'].includes(property?.type) && room?.roomCategory !== 'PG');
   const hasPending = requests.some((r) => r.status === 'pending');
   const canRequest = profile.status === 'active' && !hasPending;
 

@@ -296,7 +296,11 @@ export default function DashboardScreen() {
   const propertyName = property?.name || '—';
   const propertyAddress = [property?.address, property?.city].filter(Boolean).join(', ');
   const roomNumber = room?.roomNumber || '—';
-  const isRk = room?.type === 'RK' || room?.sharingType === 'RK' || ['RK', 'Flat'].includes(property?.type);
+  const isRk = profile?.effectiveCategory === 'RK' ||
+               room?.roomCategory === 'RK' ||
+               room?.type === 'RK' ||
+               room?.sharingType === 'RK' ||
+               (['RK', 'Flat'].includes(property?.type) && room?.roomCategory !== 'PG');
   const bedLabel = formatBedNumber(bed?.bedNumber, room?.roomNumber);
   const monthlyRent = profile?.monthlyRent || currentRent?.baseRent || currentRent?.rentAmount || 0;
   const tenantName = profile?.fullName || user?.name || user?.fullName || 'Tenant';

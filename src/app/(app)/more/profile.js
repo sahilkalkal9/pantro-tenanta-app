@@ -452,7 +452,11 @@ export default function TenantProfileScreen() {
   const property = typeof profile.propertyId === 'object' ? profile.propertyId : null;
   const room = typeof profile.roomId === 'object' ? profile.roomId : null;
   const bed = typeof profile.bedId === 'object' ? profile.bedId : null;
-  const isRk = room?.type === 'RK' || room?.sharingType === 'RK' || ['RK', 'Flat'].includes(property?.type);
+  const isRk = profile?.effectiveCategory === 'RK' ||
+               room?.roomCategory === 'RK' ||
+               room?.type === 'RK' ||
+               room?.sharingType === 'RK' ||
+               (['RK', 'Flat'].includes(property?.type) && room?.roomCategory !== 'PG');
   const fullName = profile.fullName || storedUser?.name || 'Tenant';
   const email = profile.email || storedUser?.email || '';
   const phone = profile.phone || storedUser?.phone || '';
