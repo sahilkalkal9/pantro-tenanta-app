@@ -110,6 +110,14 @@ export default function DocumentsScreen({ navigation }) {
   const kycDocs = [
     { key: 'aadhaarFront', label: 'Aadhaar Card (Front)', url: profile?.aadhaarFront },
     { key: 'aadhaarBack', label: 'Aadhaar Card (Back)', url: profile?.aadhaarBack },
+    ...(profile?.panFront ? [{ key: 'panFront', label: 'PAN Card', url: profile.panFront }] : []),
+    ...(Array.isArray(profile?.kycDocuments)
+      ? profile.kycDocuments.map((docUrl, i) => ({
+          key: `kycDoc_${i}`,
+          label: `KYC Document ${i + 1}`,
+          url: docUrl,
+        }))
+      : []),
   ];
   const hasKyc = kycDocs.some((d) => d.url);
 
