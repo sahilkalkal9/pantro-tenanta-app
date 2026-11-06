@@ -116,6 +116,7 @@ export const requestOtp = createAsyncThunk('auth/requestOtp', async (phone, { re
       await setUserData(data.user);
       api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       touchLastActive();
+      registerDeviceToken().catch(() => {});
     }
     return data;
   } catch (error) {
@@ -193,9 +194,9 @@ export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValu
   await removeAuthToken();
   await removeUserData();
   await AsyncStorage.removeItem(LAST_ACTIVE_KEY).catch(() => {});
+  await unregisterDeviceToken().catch(() => {});
   // NOTE: web unregisters the push token ('pantro_push-token') on logout; the
-  // mobile app never stores a push token (storage.setPushToken is unused), so
-  // there is nothing to clear here.
+  // mobile app now stores the push token in AsyncStorage and clears it here.
   delete api.defaults.headers.common['Authorization'];
   return true;
 });

@@ -15,7 +15,8 @@ import { Toaster, PantroLoader, OtaUpdateModal } from '../components';
 import { warmupBackend } from '../lib/api';
 import apiCache from '../services/apiCache';
 import { initLiveSocket } from '../services/liveSocket';
-import { setupPushNotifications } from '../services/pushNotifications';
+import { setupPushNotifications, registerDeviceToken } from '../services/pushNotifications';
+import { AppState } from 'react-native';
 
 preventAutoHideAsync();
 
@@ -65,6 +66,7 @@ function GlobalLoader() {
 
 function AppEffects() {
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   useEffect(() => {
     warmupBackend();
@@ -77,17 +79,42 @@ function AppEffects() {
       }
     }).catch(() => {});
 
-    
     dispatch(initializeAuth());
     dispatch(requestAllPermissions()).then(() => {
-      setupPushNotifications();
+      // Push permissions may now be granted — register the device token.
+      registerDeviceToken().catch(() => {});
     }).catch(() => {});
     dispatch(initializeNetworkListener());
     dispatch(loadOfflineQueue());
   }, [dispatch]);
 
+  // Register the device token whenever the tenant logs in (auth state change).
   useEffect(() => {
-    // Hide native splash screen smoothly once the initial screen mounts
+    if (isAuthenticated) {
+      registerDeviceToken().catch(() => {});
+      const retryTimer = setTimeout(() => {
+        registerDeviceToken().catch(() => {});
+      }, 2000);
+      return () => clearTimeout(retryTimer);
+    }
+  }, [isAuthenticated]);
+
+  // Re-register on foreground resume so a previously denied permission grant
+  // or a cleared device token is retried.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        registerDeviceToken().catch(() => {});
+      }
+    });
+    return () => {
+      try {
+        sub?.remove?.();
+      } catch {}
+    };
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       hideAsync().catch(() => {});
     }, 200);

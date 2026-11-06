@@ -14,7 +14,7 @@ export function resolveMediaUrl(url) {
   return `${API_ORIGIN}${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 60000,
   headers: {
@@ -116,4 +116,5 @@ api.interceptors.response.use(
   }
 );
 
+export { api };
 export default api;
