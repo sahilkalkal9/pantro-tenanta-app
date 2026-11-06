@@ -33,7 +33,7 @@ const platform = getArg('--platform', 'android');
 const version = getArg('--version', pkg.version || '1.0.3');
 const targetNative = getArg('--native', '*');
 const runtimeVersion = getArg('--runtime', '*');
-const urgency = getArg('--urgency', 'mandatory'); // 'flexible' or 'mandatory'
+const urgency = getArg('--urgency', 'flexible'); // 'flexible' for silent background updates
 const title = getArg('--title', `Pantro ${appName === 'tenant' ? 'Tenant' : 'Owner'} v${version}`);
 const notes = getArg('--notes', 'Over-The-Air bug fixes and improvements.');
 const apiBase = getArg('--api', 'https://stayverse-backend-zyl7.onrender.com/api');
