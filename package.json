@@ -1,6 +1,6 @@
 {
   "name": "pantro-tenant",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
@@ -19,6 +19,9 @@
     "ota:publish": "node scripts/publish-ota.js",
     "ota:publish:android": "node scripts/publish-ota.js --platform android",
     "ota:publish:ios": "node scripts/publish-ota.js --platform ios",
+    "publish:ota": "node scripts/publish-ota.js",
+    "publish:ota:android": "node scripts/publish-ota.js --platform android",
+    "publish:ota:ios": "node scripts/publish-ota.js --platform ios",
     "build:android:eas": "eas build --platform android --profile production",
     "submit:android:eas": "eas submit --platform android"
   },
