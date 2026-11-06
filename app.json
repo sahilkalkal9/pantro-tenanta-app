@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pantro Tenant",
     "slug": "pantro-tenant",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "platforms": [
       "ios",
       "android",
@@ -29,7 +29,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pantro.tenant",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "infoPlist": {
         "NSContactsUsageDescription": "Allow Pantro to access contacts for emergency contact selection",
         "NSCameraUsageDescription": "Allow Pantro to access camera for document uploads and profile photos",
@@ -39,7 +39,7 @@
     },
     "android": {
       "package": "com.pantro.tenant",
-      "versionCode": 7,
+      "versionCode": 8,
       "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,

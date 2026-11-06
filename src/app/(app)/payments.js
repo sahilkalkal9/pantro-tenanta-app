@@ -397,7 +397,7 @@ export default function PaymentsScreen() {
                     </View>
                   </View>
                   {group.items.map((tx) => (
-                    <TransactionRow key={tx.id} tx={tx} onPress={() => setSelected(tx)} />
+                    <TransactionRow key={tx.id} tx={tx} onPress={() => setSelected(tx)} onSelect={() => setSelected(tx)} onClick={() => setSelected(tx)} />
                   ))}
                 </View>
               );
@@ -449,7 +449,7 @@ export default function PaymentsScreen() {
   );
 }
 
-function TransactionRow({ tx, onPress }) {
+function TransactionRow({ tx, onPress, onSelect, onClick }) {
   const { colors, isDark } = useTheme();
   const isProof = tx.kind === 'proof';
   const isPending = tx.status === 'pending';
@@ -460,8 +460,14 @@ function TransactionRow({ tx, onPress }) {
   const StatusIcon = isProof ? (isPending ? Clock : isApproved ? CheckCircle : XCircle) : isApproved ? CheckCircle : Clock;
   const monthLabel = tx.rentMonth && tx.rentYear ? formatMonthYear(tx.rentMonth, tx.rentYear) : null;
 
+  const handlePress = () => {
+    if (onPress) onPress(tx);
+    else if (onSelect) onSelect(tx);
+    else if (onClick) onClick(tx);
+  };
+
   return (
-    <Card onPress={onPress} style={styles.txCard}>
+    <Card onPress={handlePress} style={styles.txCard}>
       <View style={styles.txTop}>
         <View style={[styles.txIcon, { backgroundColor: `${tone}15` }]}>
           {isProof ? <StatusIcon size={20} color={tone} /> : <IndianRupee size={20} color={tone} />}
@@ -507,7 +513,7 @@ function TransactionRow({ tx, onPress }) {
       {/* Separate line with big Chat / Clarify button */}
       {(isRejected || (tx.conversation && tx.conversation.length > 0)) && (
         <TouchableOpacity
-          onPress={onPress}
+          onPress={handlePress}
           activeOpacity={0.7}
           style={[
             styles.clarifyBigBtn,
