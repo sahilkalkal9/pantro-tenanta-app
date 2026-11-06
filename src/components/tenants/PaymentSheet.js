@@ -15,7 +15,9 @@ import {
   Smartphone,
   Wallet,
   Zap,
+  Sparkles,
 } from 'lucide-react-native';
+import { usePaymentObserver } from '../../hooks/usePaymentObserver';
 import { tenantService } from '../../services/tenantService';
 import { useToast } from '../../hooks/useToast';
 import { getErrorMessage } from '../../lib/normalize';
@@ -119,6 +121,15 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
   const showOnline = target?.showOnline !== false && (rentIds.length > 0 || depositAmount > 0);
   const depositToggle = target?.depositToggle || null;
 
+  const { detectedRrn, isDetecting, resetDetection } = usePaymentObserver({
+    expectedAmount: amount,
+    enabled: visible && (view === 'upi' || view === 'proof'),
+    onDetected: (utr) => {
+      setTransactionId(utr);
+      toast.success(`⚡ Auto-detected UPI Reference (RRN): ${utr}`);
+    },
+  });
+
   const reset = useCallback(() => {
     setView('method');
     setMethod('');
@@ -140,6 +151,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
     setCashfreeOrder(null);
     setCashfreeDone(false);
     setCashfreeError('');
+    resetDetection?.();
   }, []);
 
   // Fresh state every time the sheet opens.

@@ -17,11 +17,13 @@ export const SMS_PATTERNS = {
     /(?:a\/c|account|ac)\s*(?:\w+\s*)?(?:debited|sent)\s*(?:rs\.?|inr|₹)\s*([\d,]+\.?\d*)/i,
   ],
   
-  // UTR/Reference patterns
+  // UTR/Reference patterns (including 12-digit RRN & UPI Ref)
   utr: [
-    /(?:upi|imps|neft|rtgs)\/(\d{10,12})/i,
-    /(?:ref|reference|utr|txn)\.?\s*(?:no|number|id)?\s*[:\-]?\s*(\d{10,12})/i,
-    /(?:txn|transaction)\s*(?:id|ref)\s*[:\-]?\s*(\d{10,12})/i,
+    /(?:upi|imps|neft|rtgs)[/:\s#-]*(\d{12})/i,
+    /(?:rrn|upi\s*rrn)[:\s#-]*(\d{12})/i,
+    /(?:upi\s*ref|ref\s*no|reference\s*no|ref|reference|utr|txn\s*id|txn)[:\s#-]*(\d{12})/i,
+    /(?:debited|paid).*?(\d{12})/i,
+    /\b(\d{12})\b/,
   ],
   
   // Sender/Payee patterns
@@ -57,6 +59,44 @@ export function parseAmount(text) {
     return parseFloat(match[1].replace(/,/g, ''));
   }
   return null;
+}
+
+export function parseDebitAmount(text) {
+  if (!text) return null;
+  // Strip account balance so it never confuses the payment amount with available balance
+  const clean = text.replace(/(?:bal|balance|avl\s*bal|available\s*balance)\s*(?:is\s*)?(?:rs\.?|inr|₹)?\s*[\d,]+(?:\.\d+)?/gi, '');
+  const match = clean.match(/(?:rs\.?|inr|₹)\s*([\d,]+(?:\.\d{1,2})?)/i) ||
+                clean.match(/([\d,]+(?:\.\d{1,2})?)\s*(?:rs\.?|inr|₹)/i);
+  if (match) return parseFloat(match[1].replace(/,/g, ''));
+  return null;
+}
+
+export function matchDebitTransaction(text, expectedAmount) {
+  if (!text || typeof text !== 'string') return null;
+
+  const lower = text.toLowerCase();
+  const isDebit = lower.includes('debited') || lower.includes('sent') || lower.includes('paid') || lower.includes('transferred') || lower.includes('txn') || lower.includes('upi') || lower.includes('rrn');
+
+  const utr = parseUtr(text);
+  if (!utr) return null;
+
+  const amt = parseDebitAmount(text) || parseAmount(text);
+
+  if (expectedAmount && Number(expectedAmount) > 0) {
+    if (amt) {
+      const diff = Math.abs(amt - Number(expectedAmount));
+      if (diff > 5) {
+        return null; // Amount mismatch
+      }
+    }
+  }
+
+  return {
+    utr,
+    amount: amt || expectedAmount,
+    isDebit,
+    rawText: text,
+  };
 }
 
 export function parseUtr(text) {
