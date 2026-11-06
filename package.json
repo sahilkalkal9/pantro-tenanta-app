@@ -17,6 +17,8 @@
     "verify:16kb": "powershell -ExecutionPolicy Bypass -File scripts/verify-16kb.ps1",
     "ota:bundle": "npx expo export --platform android --output-dir dist",
     "ota:publish": "node scripts/publish-ota.js",
+    "ota:publish:android": "node scripts/publish-ota.js --platform android",
+    "ota:publish:ios": "node scripts/publish-ota.js --platform ios",
     "build:android:eas": "eas build --platform android --profile production",
     "submit:android:eas": "eas submit --platform android"
   },
