@@ -3,7 +3,7 @@
 <plist version="1.0">
   <dict>
     <key>EXUpdatesCheckOnLaunch</key>
-    <string>NEVER</string>
+    <string>ALWAYS</string>
     <key>EXUpdatesEnabled</key>
     <true/>
     <key>EXUpdatesLaunchWaitMs</key>
@@ -11,6 +11,6 @@
     <key>EXUpdatesRuntimeVersion</key>
     <string>1.0.3</string>
     <key>EXUpdatesURL</key>
-    <string>https://stayverse-backend-zyl7.onrender.com/api/ota/expo-manifest</string>
+    <string>https://stayverse-backend-zyl7.onrender.com/api/ota/expo-manifest?app=tenant</string>
   </dict>
 </plist>
