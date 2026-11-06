@@ -8,6 +8,11 @@ import { router } from 'expo-router';
 
 const PUSH_TOKEN_KEY = 'pantro_tenant_push_token';
 const AUTH_TOKEN_KEY = 'pantro_tenant_token';
+const EAS_PROJECT_ID =
+  Constants.expoConfig?.extra?.eas?.projectId ||
+  Constants.easConfig?.projectId ||
+  Constants.manifest2?.extra?.expoClient?.extra?.eas?.projectId ||
+  '5d2bd7c1-abe1-45ab-bf0b-ee548647d10a';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -39,31 +44,35 @@ export async function registerForPushNotifications() {
     status = request.status;
   }
   if (status !== 'granted') {
-    console.log('[Push] Push permission not granted');
+    console.log('[Push] Push permission not granted, status:', status);
     return null;
   }
 
   let token = null;
 
-  // 1. Try Expo push service
+  // 1. Try Expo push service (Primary for cross-platform Android & iOS)
   try {
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
-    const tokenResponse = await Notifications.getExpoPushTokenAsync(
-      projectId ? { projectId } : undefined
-    );
+    const tokenResponse = await Notifications.getExpoPushTokenAsync({
+      projectId: EAS_PROJECT_ID,
+    });
     token = tokenResponse?.data;
+    if (token) {
+      console.log('[Push] Acquired Expo push token:', token.substring(0, 25) + '...');
+    }
   } catch (err) {
-    console.warn('[Push] Expo push token failed, falling back to native device token:', err?.message || err);
+    console.warn('[Push] Expo push token fetch failed:', err?.message || err);
   }
 
-  // 2. Fallback to native FCM/APNs token
+  // 2. Fallback to native FCM/APNs token if Expo service is unreachable
   if (!token) {
     try {
       const deviceToken = await Notifications.getDevicePushTokenAsync();
       token = deviceToken?.data;
-      console.log('[Push] Acquired native tenant device token');
+      if (token) {
+        console.log('[Push] Acquired native device token:', String(token).substring(0, 25) + '...');
+      }
     } catch (deviceErr) {
-      console.warn('[Push] Native device token also failed:', deviceErr?.message || deviceErr);
+      console.warn('[Push] Native device token fallback also failed:', deviceErr?.message || deviceErr);
     }
   }
 
@@ -79,13 +88,11 @@ export async function registerDeviceToken() {
     if (!authToken) {
       authToken = api.defaults.headers.common['Authorization']?.replace('Bearer ', '');
     }
-    if (!authToken) {
-      console.log('[Push] User not authenticated yet, skipping device token registration');
-      return;
-    }
 
-    const stored = await AsyncStorage.getItem(PUSH_TOKEN_KEY);
-    if (stored === token) return; // already registered
+    const headers = {};
+    if (authToken) {
+      headers.Authorization = `Bearer ${authToken}`;
+    }
 
     await api.post(
       '/notifications/device-token',
@@ -95,14 +102,10 @@ export async function registerDeviceToken() {
         deviceName: Device.deviceName || Platform.OS,
         app: 'tenant',
       },
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      }
+      { headers }
     );
     await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
-    console.log('[Push] Tenant device token registered successfully');
+    console.log('[Push] Tenant device token registered with backend for ' + Platform.OS);
   } catch (err) {
     console.warn('[Push] Failed to register tenant device token:', err?.message || err);
   }
@@ -121,12 +124,8 @@ export async function unregisterDeviceToken() {
 }
 
 export function setupPushNotifications() {
-  // Register once at app start if logged in
-  AsyncStorage.getItem(AUTH_TOKEN_KEY).then((authToken) => {
-    if (authToken) {
-      registerDeviceToken();
-    }
-  }).catch(() => {});
+  // Always register on app launch
+  registerDeviceToken().catch(() => {});
 
   // Handle tapped notification interaction
   try {

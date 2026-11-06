@@ -30,7 +30,13 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.pantro.tenant",
       "buildNumber": "5",
+      "entitlements": {
+        "aps-environment": "production"
+      },
       "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
         "NSContactsUsageDescription": "Allow Pantro to access contacts for emergency contact selection",
         "NSCameraUsageDescription": "Allow Pantro to access camera for document uploads and profile photos",
         "NSPhotoLibraryUsageDescription": "Allow Pantro to access photo library for document uploads",

@@ -20,18 +20,46 @@ export const NATIVE_BUILD_NUMBER =
 
 class OtaService {
   /**
+   * Ask the native expo-updates client whether a new update is available and
+   * fetch it. This is the only source of truth for whether an update can
+   * actually be applied — the custom /check-update endpoint is only UI info.
+   */
+  async fetchNativeUpdate() {
+    if (!Updates.isEnabled || !Updates.checkForUpdateAsync || !Updates.fetchUpdateAsync) {
+      return { enabled: false, available: false, fetched: false };
+    }
+
+    const check = await Updates.checkForUpdateAsync();
+    if (!check?.isAvailable) {
+      return { enabled: true, available: false, fetched: false };
+    }
+
+    await Updates.fetchUpdateAsync();
+    return { enabled: true, available: true, fetched: true };
+  }
+
+  /**
    * Get currently active OTA version or 'Base Binary'
    */
   async getInstalledVersionInfo() {
     try {
-      const otaVersion = await AsyncStorage.getItem(OTA_STORAGE_KEYS.CURRENT_VERSION);
+      const storedVersion = await AsyncStorage.getItem(OTA_STORAGE_KEYS.CURRENT_VERSION);
       const lastChecked = await AsyncStorage.getItem(OTA_STORAGE_KEYS.LAST_CHECKED);
-      const isEmbedded = Updates.isEmbeddedLaunch ?? true;
+      const updateId = Updates.updateId ?? null;
+      const isEmbedded = Updates.isEmbeddedLaunch ?? !updateId;
+
+      // If an OTA bundle is already running, any "pending restart" marker is
+      // stale (the update was applied by expo-updates on launch).
+      if (!isEmbedded) {
+        await AsyncStorage.removeItem(OTA_STORAGE_KEYS.PENDING_RESTART);
+      }
+
+      const otaVersion = isEmbedded ? null : storedVersion;
 
       return {
         nativeVersion: NATIVE_APP_VERSION,
         buildNumber: NATIVE_BUILD_NUMBER,
-        otaVersion: otaVersion || null,
+        otaVersion,
         displayVersion: otaVersion ? `v${otaVersion} (OTA)` : `v${NATIVE_APP_VERSION}`,
         isEmbedded,
         lastChecked: lastChecked ? new Date(lastChecked) : null,
@@ -101,27 +129,22 @@ class OtaService {
     try {
       if (onProgress) onProgress(0.2, 'Connecting to update server...');
 
-      // First attempt native expo-updates fetch if enabled
-      let nativeFetched = false;
-      if (Updates.isEnabled && Updates.fetchUpdateAsync) {
-        try {
-          if (onProgress) onProgress(0.4, 'Downloading update bundle...');
-          const result = await Updates.fetchUpdateAsync();
-          if (result && result.isNew) {
-            nativeFetched = true;
-          }
-        } catch (nativeErr) {
-          console.warn('[OTA] Native expo-updates fetch failed:', nativeErr.message);
-          throw new Error(`Failed to download update bundle: ${nativeErr.message}`);
-        }
-      } else {
+      if (onProgress) onProgress(0.4, 'Downloading update bundle...');
+      const native = await this.fetchNativeUpdate();
+
+      if (!native.enabled) {
         console.log('[OTA] Native Updates.isEnabled is false (running in dev/Expo Go)');
+        return { success: false, nativeFetched: false, message: 'Updates are disabled in this environment' };
+      }
+      if (!native.available) {
+        return { success: false, nativeFetched: false, message: 'No update is available from the native updater' };
       }
 
       if (onProgress) onProgress(0.7, 'Verifying bundle integrity...');
 
       // Mark version as downloaded in AsyncStorage
       await AsyncStorage.setItem(OTA_STORAGE_KEYS.CURRENT_VERSION, update.version);
+      await AsyncStorage.setItem(OTA_STORAGE_KEYS.PENDING_RESTART, 'true');
       if (update.releaseNotes) {
         await AsyncStorage.setItem(OTA_STORAGE_KEYS.RELEASE_NOTES, update.releaseNotes);
       }
@@ -133,7 +156,7 @@ class OtaService {
 
       if (onProgress) onProgress(1.0, 'Update ready!');
 
-      return { success: true, nativeFetched };
+      return { success: true, nativeFetched: true };
     } catch (error) {
       console.error('[OTA] Download & Apply failed:', error);
       this.reportStatus(update.id, 'failure', error?.message).catch(() => {});
@@ -148,17 +171,15 @@ class OtaService {
     if (!update) return false;
     try {
       console.log(`[OTA:Silent] Downloading update v${update.version} in background...`);
-      let nativeFetched = false;
+      const native = await this.fetchNativeUpdate();
 
-      if (Updates.isEnabled && Updates.fetchUpdateAsync) {
-        try {
-          const result = await Updates.fetchUpdateAsync();
-          if (result && result.isNew) {
-            nativeFetched = true;
-          }
-        } catch (err) {
-          console.warn('[OTA:Silent] Native fetch notice:', err.message);
-        }
+      if (!native.enabled) {
+        console.log('[OTA:Silent] Native updates disabled; nothing to apply.');
+        return false;
+      }
+      if (!native.available) {
+        console.log('[OTA:Silent] Native updater reports no update available; keeping current version.');
+        return false;
       }
 
       await AsyncStorage.setItem(OTA_STORAGE_KEYS.CURRENT_VERSION, update.version);

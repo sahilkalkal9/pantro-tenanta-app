@@ -139,6 +139,42 @@ function findBundleFile(dir, targetPlatform) {
   return null;
 }
 
+// Read dist/metadata.json and return the static assets referenced by the
+// exported bundle. Asset filenames on disk are metro hashes without an
+// extension, so the real extension comes from metadata.json.
+function collectAssetFiles(dir, targetPlatform) {
+  const metadataPath = path.join(dir, 'metadata.json');
+  if (!fs.existsSync(metadataPath)) return [];
+
+  let metadata;
+  try {
+    metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+  } catch (err) {
+    console.warn(`Could not parse metadata.json: ${err.message}`);
+    return [];
+  }
+
+  const platformMeta = metadata?.fileMetadata?.[targetPlatform];
+  const assetList = platformMeta?.assets;
+  if (!Array.isArray(assetList)) return [];
+
+  const seen = new Set();
+  const assets = [];
+  for (const item of assetList) {
+    if (!item?.path) continue;
+    const relPath = item.path.replace(/\\/g, '/');
+    if (seen.has(relPath)) continue;
+    seen.add(relPath);
+
+    const absPath = path.join(dir, relPath);
+    if (!fs.existsSync(absPath)) continue;
+
+    const ext = (item.ext || path.extname(relPath).replace(/^\./, '')).replace(/^\./, '');
+    assets.push({ absPath, ext });
+  }
+  return assets;
+}
+
 async function publishForPlatform(platform, token) {
   console.log(`\n====================================================`);
   console.log(`>> Processing OTA Release for Platform: [${platform.toUpperCase()}]`);
@@ -176,13 +212,16 @@ async function publishForPlatform(platform, token) {
   const bundleStats = fs.statSync(bundlePath);
   console.log(`Found bundle: ${bundlePath} (${(bundleStats.size / (1024 * 1024)).toFixed(2)} MB)`);
 
+  const assetFiles = collectAssetFiles(distDir, platform);
+  console.log(`Found ${assetFiles.length} static asset(s) referenced by the bundle`);
+
   if (noUpload) {
     console.log(`[3/3] (--no-upload set) Bundle ready for manual upload: ${bundlePath}`);
     return true;
   }
 
   // Step 3: Upload
-  console.log(`\n[3/3] Uploading ${platform} bundle directly to Pantro Backend...`);
+  console.log(`\n[3/3] Uploading ${platform} bundle + ${assetFiles.length} asset(s) to Pantro Backend...`);
   const fileBytes = fs.readFileSync(bundlePath);
   const form = new FormData();
   form.append('app', appName);
@@ -200,6 +239,13 @@ async function publishForPlatform(platform, token) {
     `${appName}-${version}-${platform}.hbc`
   );
 
+  for (const asset of assetFiles) {
+    const bytes = fs.readFileSync(asset.absPath);
+    const ext = asset.ext ? `.${asset.ext}` : '';
+    const filename = `${path.basename(asset.absPath)}${ext}`;
+    form.append('assets', new Blob([bytes]), filename);
+  }
+
   const uploadRes = await fetch(`${apiBase}/ota/admin/releases`, {
     method: 'POST',
     headers: {
@@ -216,6 +262,7 @@ async function publishForPlatform(platform, token) {
   console.log(`  Release ID:  ${uploadData.data?._id}`);
   console.log(`  Bundle URL:  ${uploadData.data?.bundleUrl}`);
   console.log(`  Bundle Hash: ${uploadData.data?.bundleHash}`);
+  console.log(`  Assets:      ${uploadData.data?.assetsCount ?? assetFiles.length}`);
   return true;
 }
 

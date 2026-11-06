@@ -79,7 +79,9 @@ function AppEffects() {
 
     
     dispatch(initializeAuth());
-    dispatch(requestAllPermissions());
+    dispatch(requestAllPermissions()).then(() => {
+      setupPushNotifications();
+    }).catch(() => {});
     dispatch(initializeNetworkListener());
     dispatch(loadOfflineQueue());
   }, [dispatch]);
