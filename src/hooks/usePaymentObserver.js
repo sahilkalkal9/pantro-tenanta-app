@@ -168,7 +168,7 @@ export function usePaymentObserver({ expectedAmount, onDetected, enabled = true 
     };
   }, [enabled, expectedAmount, onDetected]);
 
-  // Listen for App State change (when tenant returns from GPay/PhonePe back to Pantro)
+  // Listen for App State change (when tenant returns from GPay/PhonePe or Settings back to Pantro)
   useEffect(() => {
     if (!enabled) return;
 
@@ -177,6 +177,9 @@ export function usePaymentObserver({ expectedAmount, onDetected, enabled = true 
         appStateRef.current.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
+        if (isNativeListenerSupported) {
+          checkNotificationAccess().then(setHasNotificationAccess).catch(() => {});
+        }
         // Just returned to foreground — scan for payment message & RRN
         setTimeout(() => {
           checkSource();

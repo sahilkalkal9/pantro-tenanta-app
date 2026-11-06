@@ -24,7 +24,7 @@ export default function AppLayout() {
   const bgColor = isDark ? '#070b14' : '#ffffff';
 
   return (
-    <SafeAreaView edges={Platform.OS === 'ios' ? ['top'] : []} style={{ flex: 1, backgroundColor: bgColor }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: bgColor }}>
       <StatusBar
         style={isDark ? 'light' : 'dark'}
         backgroundColor={bgColor}

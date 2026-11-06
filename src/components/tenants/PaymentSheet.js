@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   AlertCircle,
   Banknote,
@@ -97,6 +98,13 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
   const [transactionId, setTransactionId] = useState('');
   const [screenshotUrl, setScreenshotUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [rrnDismissed, setRrnDismissed] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem('pantro_auto_rrn_enabled').then((val) => {
+      if (val === 'true') setRrnDismissed(true);
+    }).catch(() => {});
+  }, []);
 
   // Cash state
   const [payees, setPayees] = useState([]);
@@ -572,9 +580,13 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
               </View>
             )}
 
-            {isNativeListenerSupported && !hasNotificationAccess ? (
+            {isNativeListenerSupported && !hasNotificationAccess && !rrnDismissed ? (
               <TouchableOpacity
-                onPress={openNotificationSettings}
+                onPress={() => {
+                  setRrnDismissed(true);
+                  AsyncStorage.setItem('pantro_auto_rrn_enabled', 'true').catch(() => {});
+                  openNotificationSettings();
+                }}
                 activeOpacity={0.7}
                 style={{
                   flexDirection: 'row',
