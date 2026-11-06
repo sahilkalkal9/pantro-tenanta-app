@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
 import {
-  FileText, Eye, IdCard, ExternalLink, ShieldCheck, CheckCircle2,
+  FileText, Eye, IdCard, ExternalLink, ShieldCheck, CheckCircle2, Sparkles,
   Clock, RefreshCw, Download, ArrowRight,
 } from 'lucide-react-native';
 import { tenantService } from '../../../services/tenantService';
@@ -113,6 +113,9 @@ export default function DocumentsScreen({ navigation }) {
     return raw || null;
   })();
   const fullPan = (profile?.panNumber || profile?.pan || '').toUpperCase().trim() || null;
+  const maskedAadhaar =
+    verification?.aadhaarVerification?.maskedAadhaar ||
+    (fullAadhaar ? `XXXX XXXX ${fullAadhaar.slice(-4)}` : '');
 
   const kycDocs = [
     { key: 'aadhaarFront', label: 'Aadhaar Card (Front)', url: profile?.aadhaarFront, idValue: fullAadhaar },
@@ -302,9 +305,17 @@ export default function DocumentsScreen({ navigation }) {
                 </Text>
               ) : (
                 <Text style={{ fontSize: 11.5, color: colors.textTertiary, fontWeight: '500' }}>
-                  Will be initiated by your property manager after DigiLocker KYC.
+                  {isAadhaarDone
+                    ? 'Auto-verifying via national eCourts...'
+                    : 'Will be initiated after DigiLocker KYC.'}
                 </Text>
               )}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 5 }}>
+                <Sparkles size={11} color={isDark ? '#60a5fa' : '#2563eb'} />
+                <Text style={{ fontSize: 10.5, fontWeight: '600', color: isDark ? '#93c5fd' : '#1d4ed8' }}>
+                  90% Data Accuracy: eCourts & National Judicial Data Grid
+                </Text>
+              </View>
             </View>
           </View>
         </View>

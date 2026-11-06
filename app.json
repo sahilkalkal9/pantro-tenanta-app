@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pantro Tenant",
     "slug": "pantro-tenant",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "platforms": [
       "ios",
       "android",
@@ -14,7 +14,7 @@
     "userInterfaceStyle": "light",
     "scheme": "pantro-tenant",
     "newArchEnabled": true,
-    "runtimeVersion": "1.0.4",
+    "runtimeVersion": "1.0.5",
     "updates": {
       "url": "https://stayverse-backend-zyl7.onrender.com/api/ota/expo-manifest?app=tenant",
       "enabled": true,
@@ -29,7 +29,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pantro.tenant",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "infoPlist": {
         "NSContactsUsageDescription": "Allow Pantro to access contacts for emergency contact selection",
         "NSCameraUsageDescription": "Allow Pantro to access camera for document uploads and profile photos",
@@ -39,7 +39,7 @@
     },
     "android": {
       "package": "com.pantro.tenant",
-      "versionCode": 6,
+      "versionCode": 7,
       "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
