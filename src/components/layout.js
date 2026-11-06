@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,9 @@ import {
   Modal,
   Animated,
   Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -48,6 +51,8 @@ export function Screen({
       contentContainerStyle={[styles.scrollContent, contentStyle]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+      automaticallyAdjustKeyboardInsets={true}
+      keyboardDismissMode="interactive"
       refreshControl={
         onRefresh ? (
           <RefreshControl
@@ -115,9 +120,35 @@ export function ModalSheet({
   scroll = true,
 }) {
   const { colors } = useTheme();
-  const maxHeight = height || Dimensions.get('window').height * 0.85;
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height || 0);
+      }
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        setKeyboardHeight(0);
+      }
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const windowHeight = Dimensions.get('window').height;
+  const baseMaxHeight = height || windowHeight * 0.85;
+  const effectiveMaxHeight = keyboardHeight > 0
+    ? Math.max(260, windowHeight - keyboardHeight - 50)
+    : baseMaxHeight;
+
   const content = (
-    <View style={{ maxHeight }}>
+    <View style={{ maxHeight: effectiveMaxHeight }}>
       <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
       <View style={[styles.sheetHeader, { borderBottomColor: colors.border }]}>
         <Text style={[styles.sheetTitle, { color: colors.textPrimary }]}>{title}</Text>
@@ -127,15 +158,17 @@ export function ModalSheet({
       </View>
       {scroll ? (
         <ScrollView
-          style={{ maxHeight: maxHeight - 180 }}
-          contentContainerStyle={styles.sheetBody}
+          style={{ maxHeight: Math.max(180, effectiveMaxHeight - 120) }}
+          contentContainerStyle={[styles.sheetBody, { paddingBottom: keyboardHeight > 0 ? 120 : 60 }]}
           keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+          keyboardDismissMode="interactive"
+          automaticallyAdjustKeyboardInsets={true}
+          showsVerticalScrollIndicator={true}
         >
           {children}
         </ScrollView>
       ) : (
-        <View style={styles.sheetBody}>{children}</View>
+        <View style={[styles.sheetBody, { paddingBottom: keyboardHeight > 0 ? 80 : 30 }]}>{children}</View>
       )}
       {actions ? (
         <View style={[styles.sheetActions, { borderTopColor: colors.border }]}>
@@ -166,10 +199,15 @@ export function ModalSheet({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.sheetBackdrop}>
-        <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
-        <View style={[styles.sheetContainer, { backgroundColor: colors.card }]}>{content}</View>
-      </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.sheetBackdrop}>
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
+          <View style={[styles.sheetContainer, { backgroundColor: colors.card }]}>{content}</View>
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

@@ -603,30 +603,20 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                 <ActivityIndicator size="small" color={COLORS.primary} />
                 <Text style={[styles.muted, { color: colors.textSecondary }]}>Generating UPI link…</Text>
               </View>
-            ) : upiLink ? (
-              <>
-                <Button
-                  title="Open UPI App"
-                  icon={ExternalLink}
-                  onPress={openUpiApp}
-                  fullWidth
-                />
-                {upiId ? (
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={copyUpiId}
-                    style={[styles.upiIdRow, { backgroundColor: blueBg, borderColor: blueBorder }]}
-                  >
-                    <Text style={[styles.upiIdText, { color: colors.textPrimary }]} numberOfLines={1} selectable>
-                      UPI ID: <Text style={{ fontFamily: 'monospace', fontWeight: '700' }}>{upiId}</Text>
-                    </Text>
-                    <View style={styles.copyRow}>
-                      <Copy size={13} color="#2563eb" />
-                      <Text style={styles.copyText}>Copy</Text>
-                    </View>
-                  </TouchableOpacity>
-                ) : null}
-              </>
+            ) : upiId ? (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={copyUpiId}
+                style={[styles.upiIdRow, { backgroundColor: blueBg, borderColor: blueBorder }]}
+              >
+                <Text style={[styles.upiIdText, { color: colors.textPrimary }]} numberOfLines={1} selectable>
+                  UPI ID: <Text style={{ fontFamily: 'monospace', fontWeight: '700' }}>{upiId}</Text>
+                </Text>
+                <View style={styles.copyRow}>
+                  <Copy size={13} color="#2563eb" />
+                  <Text style={styles.copyText}>Copy</Text>
+                </View>
+              </TouchableOpacity>
             ) : (
               <View style={[styles.banner, { backgroundColor: roseBg, borderColor: roseBorder }]}>
                 <AlertCircle size={16} color="#ef4444" style={{ marginTop: 1 }} />

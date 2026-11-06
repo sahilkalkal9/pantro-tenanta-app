@@ -56,6 +56,12 @@ const TYPE_META = {
 function parseDuesData(d, pRes) {
   const pList = Array.isArray(pRes) ? pRes : pRes?.data || pRes?.proofs || [];
   const rejectedProofs = pList.filter((p) => p.status === 'rejected');
+  const activeRejectedProofIds = new Set(
+    rejectedProofs.map((p) => String(p._id || p.id))
+  );
+  const approvedProofIds = new Set(
+    pList.filter((p) => p.status === 'approved').map((p) => String(p._id || p.id))
+  );
   const list = [];
 
   const rents = Array.isArray(d?.unpaidRents) ? d.unpaidRents : [];
@@ -67,6 +73,9 @@ function parseDuesData(d, pRes) {
     const monthKey = `${r.year}-${r.month}`;
     if (seenRentMonths.has(monthKey)) return;
     seenRentMonths.add(monthKey);
+    const isRejActive = r.rejectedProofId
+      ? activeRejectedProofIds.has(String(r.rejectedProofId))
+      : (!!r.hasRejectedProof && (!r.rejectedProofId || !approvedProofIds.has(String(r.rejectedProofId))));
     list.push({
       id: r._id || `rent-${r.year}-${r.month}`,
       type: 'rent',
@@ -78,10 +87,10 @@ function parseDuesData(d, pRes) {
       lateFee: Number(r.lateFeeAccrued) || 0,
       month: r.month,
       year: r.year,
-      hasRejectedProof: !!r.hasRejectedProof,
+      hasRejectedProof: isRejActive,
       rejectedProofId: r.rejectedProofId || null,
-      rejectionReason: r.rejectionReason || null,
-      clarificationStatus: r.clarificationStatus || null,
+      rejectionReason: isRejActive ? (r.rejectionReason || null) : null,
+      clarificationStatus: isRejActive ? (r.clarificationStatus || null) : null,
       conversation: r.conversation || [],
     });
   });
@@ -89,6 +98,9 @@ function parseDuesData(d, pRes) {
   const depositPending = Math.max(0, Number(d?.unpaidSecurityDeposit) || 0);
   if (depositPending > 0) {
     const depRej = d?.depositRejectedInfo;
+    const isDepRejActive = depRej?.rejectedProofId
+      ? activeRejectedProofIds.has(String(depRej.rejectedProofId))
+      : (!!depRej?.hasRejectedProof && (!depRej?.rejectedProofId || !approvedProofIds.has(String(depRej.rejectedProofId))));
     list.push({
       id: 'security-deposit',
       type: 'deposit',
@@ -99,10 +111,10 @@ function parseDuesData(d, pRes) {
       amount: depositPending,
       rentAmount: 0,
       lateFee: 0,
-      hasRejectedProof: !!depRej?.hasRejectedProof,
+      hasRejectedProof: isDepRejActive,
       rejectedProofId: depRej?.rejectedProofId || null,
-      rejectionReason: depRej?.rejectionReason || null,
-      clarificationStatus: depRej?.clarificationStatus || null,
+      rejectionReason: isDepRejActive ? (depRej?.rejectionReason || null) : null,
+      clarificationStatus: isDepRejActive ? (depRej?.clarificationStatus || null) : null,
       conversation: depRej?.conversation || [],
     });
   }
@@ -110,6 +122,7 @@ function parseDuesData(d, pRes) {
   const penalties = Array.isArray(d?.payments) ? d.payments : [];
   penalties.forEach((p) => {
     if (p.status !== 'pending' && p.status !== 'rejected') return;
+    const isPenRejActive = p.status === 'rejected' && (!p.rejectedProofId || !approvedProofIds.has(String(p.rejectedProofId)));
     list.push({
       id: p._id || p.id,
       type: p.type || 'custom',
@@ -119,10 +132,10 @@ function parseDuesData(d, pRes) {
       amount: Number(p.amount) || 0,
       rentAmount: 0,
       lateFee: 0,
-      hasRejectedProof: p.status === 'rejected' || !!p.hasRejectedProof,
+      hasRejectedProof: isPenRejActive,
       rejectedProofId: p.rejectedProofId || p._id || p.id,
-      rejectionReason: p.rejectionReason || null,
-      clarificationStatus: p.clarificationStatus || null,
+      rejectionReason: isPenRejActive ? (p.rejectionReason || null) : null,
+      clarificationStatus: isPenRejActive ? (p.clarificationStatus || null) : null,
       conversation: p.conversation || [],
     });
   });

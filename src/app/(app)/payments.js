@@ -481,7 +481,7 @@ function TransactionRow({ tx, onPress }) {
               Note: {tx.notes}
             </Text>
           ) : null}
-          {!!tx.rejectionReason ? (
+          {!isApproved && !!tx.rejectionReason ? (
             <Text style={styles.txRejected} numberOfLines={1}>
               Rejected: {tx.rejectionReason}
             </Text>
@@ -507,19 +507,27 @@ function TransactionRow({ tx, onPress }) {
       {/* Separate line with big Chat / Clarify button */}
       {(isRejected || (tx.conversation && tx.conversation.length > 0)) && (
         <TouchableOpacity
-          onPress={() => onSelect(tx)}
+          onPress={onPress}
           activeOpacity={0.7}
           style={[
             styles.clarifyBigBtn,
-            {
-              backgroundColor: isDark ? 'rgba(37, 99, 235, 0.16)' : '#eff6ff',
-              borderColor: isDark ? 'rgba(59, 130, 246, 0.3)' : '#bfdbfe',
-            },
+            isApproved
+              ? {
+                  backgroundColor: isDark ? 'rgba(16, 185, 129, 0.12)' : '#ecfdf5',
+                  borderColor: isDark ? 'rgba(16, 185, 129, 0.25)' : '#a7f3d0',
+                }
+              : {
+                  backgroundColor: isDark ? 'rgba(37, 99, 235, 0.16)' : '#eff6ff',
+                  borderColor: isDark ? 'rgba(59, 130, 246, 0.3)' : '#bfdbfe',
+                },
           ]}
         >
-          <MessageSquare size={14} color={isDark ? '#93c5fd' : '#2563eb'} />
-          <Text style={[styles.clarifyBigBtnText, { color: isDark ? '#93c5fd' : '#1d4ed8' }]}>
-            Chat &amp; Clarify with Owner {tx.conversation?.length ? `(${tx.conversation.length} msgs)` : ''}
+          <MessageSquare size={14} color={isApproved ? (isDark ? '#6ee7b7' : '#059669') : (isDark ? '#93c5fd' : '#2563eb')} />
+          <Text style={[styles.clarifyBigBtnText, { color: isApproved ? (isDark ? '#6ee7b7' : '#065f46') : (isDark ? '#93c5fd' : '#1d4ed8') }]}>
+            {isApproved
+              ? `View Discussion with Owner ${tx.conversation?.length ? `(${tx.conversation.length} msgs)` : ''}`
+              : `Chat & Clarify with Owner ${tx.conversation?.length ? `(${tx.conversation.length} msgs)` : ''}`
+            }
           </Text>
         </TouchableOpacity>
       )}
@@ -547,6 +555,7 @@ function TransactionDetail({ tx, onClose, onReplySuccess }) {
     return <ModalSheet visible={false} onClose={onClose} title="Transaction" children={null} />;
   }
   const isProof = tx.kind === 'proof';
+  const isApproved = ['approved', 'paid'].includes(tx.status);
   const verifiedByName =
     tx.verifiedBy?.name || tx.verifiedBy?.firstName || (typeof tx.verifiedBy === 'string' ? tx.verifiedBy : null);
   const monthLabel = tx.rentMonth && tx.rentYear ? formatMonthYear(tx.rentMonth, tx.rentYear) : null;
@@ -679,7 +688,7 @@ function TransactionDetail({ tx, onClose, onReplySuccess }) {
         </View>
       ) : null}
 
-      {!!tx.rejectionReason ? (
+      {!isApproved && tx.status === 'rejected' && !!tx.rejectionReason ? (
         <View style={styles.rejectBox}>
           <View style={styles.rejectHead}>
             <MessageSquareWarning size={15} color={COLORS.danger} />
@@ -709,8 +718,10 @@ function TransactionDetail({ tx, onClose, onReplySuccess }) {
       {showThread && (
         <View style={{ marginTop: SPACING.lg }}>
           <View style={styles.threadHeader}>
-            <Text style={[styles.subHeading, { color: colors.textTertiary }]}>Clarifications & Discussion with Owner</Text>
-            {tx.status === 'rejected' && (
+            <Text style={[styles.subHeading, { color: colors.textTertiary }]}>
+              {isApproved ? 'Discussion History with Owner' : 'Clarifications & Discussion with Owner'}
+            </Text>
+            {!isApproved && tx.status === 'rejected' && (
               <View style={styles.awaitingPill}>
                 <Text style={styles.awaitingPillText}>Awaiting Clarification</Text>
               </View>
@@ -760,7 +771,7 @@ function TransactionDetail({ tx, onClose, onReplySuccess }) {
       )}
 
       {/* Clarification / Reply Box */}
-      {isProof && (tx.status === 'rejected' || tx.status === 'pending') && (
+      {isProof && !isApproved && (tx.status === 'rejected' || tx.status === 'pending') && (
         <View style={[styles.replyBox, { borderColor: colors.border, backgroundColor: isDark ? colors.cardSecondary : COLORS.gray50 }]}>
           <Text style={[styles.replyBoxTitle, { color: colors.textPrimary }]}>Chat / Clarify with Owner</Text>
           <Text style={[styles.replyBoxSub, { color: colors.textSecondary }]}>
