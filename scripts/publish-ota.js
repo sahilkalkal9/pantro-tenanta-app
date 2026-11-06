@@ -6,11 +6,18 @@
  * Exports and uploads an Over-The-Air JavaScript bundle directly to the
  * Pantro backend and SuperAdmin control center.
  *
+ * Features:
+ *   - Auto-increments patch version on every push (e.g. 1.0.4 -> 1.0.5 -> 1.0.6)
+ *   - Syncs bumped version across package.json, app.json, and Expo.plist
+ *   - Exports and publishes for both Android and iOS
+ *   - Safe flexible background updates with zero user popups
+ *
  * Usage:
- *   npm run ota:publish                                      # Publishes for both Android & iOS
+ *   npm run ota:publish                                      # Auto-bumps version & publishes for Android + iOS
  *   npm run ota:publish -- --platform android                # Publishes for Android only
- *   npm run ota:publish -- --platform ios                    # Publishes for iOS (iPhone) only
- *   npm run ota:publish -- --version 1.0.4 --notes "Fixes"
+ *   npm run ota:publish -- --platform ios                    # Publishes for iOS only
+ *   npm run ota:publish -- --version 1.0.8                   # Uses explicit version without bumping
+ *   npm run ota:publish -- --no-bump                         # Keeps current version without bumping
  */
 
 const { execSync } = require('child_process');
@@ -19,19 +26,74 @@ const path = require('path');
 
 const projectRoot = path.resolve(__dirname, '..');
 const distDir = path.join(projectRoot, 'dist');
-const pkg = require(path.join(projectRoot, 'package.json'));
+const pkgPath = path.join(projectRoot, 'package.json');
+const pkg = require(pkgPath);
 
 // Parse command line arguments
 const args = process.argv.slice(2);
-function getArg(flag, fallback = '') {
+function getArg(flag, fallback = null) {
   const idx = args.indexOf(flag);
   if (idx !== -1 && args[idx + 1]) return args[idx + 1];
   return fallback;
 }
 
+function bumpSemver(ver) {
+  const parts = ver.replace(/[^0-9.]/g, '').split('.').map(Number);
+  while (parts.length < 3) parts.push(0);
+  parts[2] += 1;
+  return parts.join('.');
+}
+
+// Auto-bump version handling
+const explicitVersion = getArg('--version');
+const noBump = args.includes('--no-bump');
+
+let version;
+const currentVer = pkg.version || '1.0.4';
+
+if (explicitVersion) {
+  version = explicitVersion;
+} else if (noBump) {
+  version = currentVer;
+} else {
+  // Auto-increment version on every push
+  version = bumpSemver(currentVer);
+
+  // 1. Sync package.json
+  pkg.version = version;
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
+
+  // 2. Sync app.json
+  const appJsonPath = path.join(projectRoot, 'app.json');
+  if (fs.existsSync(appJsonPath)) {
+    try {
+      const appJson = JSON.parse(fs.readFileSync(appJsonPath, 'utf8'));
+      if (appJson.expo) {
+        appJson.expo.version = version;
+        appJson.expo.runtimeVersion = version;
+        fs.writeFileSync(appJsonPath, JSON.stringify(appJson, null, 2) + '\n', 'utf8');
+      }
+    } catch (_) {}
+  }
+
+  // 3. Sync ios Expo.plist if exists
+  const expoPlistPath = path.join(projectRoot, 'ios', 'PantroTenant', 'Supporting', 'Expo.plist');
+  if (fs.existsSync(expoPlistPath)) {
+    try {
+      let plistContent = fs.readFileSync(expoPlistPath, 'utf8');
+      plistContent = plistContent.replace(
+        /<key>EXUpdatesRuntimeVersion<\/key>\s*<string>[^<]+<\/string>/,
+        `<key>EXUpdatesRuntimeVersion</key>\r\n    <string>${version}</string>`
+      );
+      fs.writeFileSync(expoPlistPath, plistContent, 'utf8');
+    } catch (_) {}
+  }
+
+  console.log(`\n✨ Auto-bumped OTA Release version: v${currentVer} -> v${version}\n`);
+}
+
 const appName = getArg('--app', 'tenant');
 const requestedPlatform = getArg('--platform', 'all'); // 'all', 'android', or 'ios'
-const version = getArg('--version', pkg.version || '1.0.4');
 const targetNative = getArg('--native', '*');
 const runtimeVersion = getArg('--runtime', '*');
 const urgency = getArg('--urgency', 'flexible'); // Safe flexible background updates
@@ -199,7 +261,8 @@ async function main() {
 
   console.log('\n====================================================');
   console.log(`🎉 ALL OTA RELEASES PUBLISHED SUCCESSFULLY!`);
-  console.log(`Platforms: ${platformsToPublish.map((p) => p.toUpperCase()).join(', ')}`);
+  console.log(`New Version: v${version}`);
+  console.log(`Platforms:   ${platformsToPublish.map((p) => p.toUpperCase()).join(', ')}`);
   console.log(`All devices (Android & iPhone) will receive updates automatically in background!`);
   console.log('====================================================\n');
 }
