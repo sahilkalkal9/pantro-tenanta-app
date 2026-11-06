@@ -121,12 +121,21 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
   const showOnline = target?.showOnline !== false && (rentIds.length > 0 || depositAmount > 0);
   const depositToggle = target?.depositToggle || null;
 
-  const { detectedRrn, isDetecting, resetDetection } = usePaymentObserver({
+  const {
+    detectedRrn,
+    detectedMeta,
+    isDetecting,
+    resetDetection,
+    hasNotificationAccess,
+    isNativeListenerSupported,
+    openNotificationSettings,
+  } = usePaymentObserver({
     expectedAmount: amount,
     enabled: visible && (view === 'upi' || view === 'proof'),
-    onDetected: (utr) => {
+    onDetected: (utr, meta) => {
       setTransactionId(utr);
-      toast.success(`⚡ Auto-detected UPI Reference (RRN): ${utr}`);
+      const app = meta?.appName ? ` via ${meta.appName}` : '';
+      toast.success(`⚡ Auto-detected UPI Reference (RRN): ${utr}${app}`);
     },
   });
 
@@ -533,22 +542,60 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
         {/* ── 2. UPI ────────────────────────────────────────────── */}
         {view === 'upi' ? (
           <View style={{ gap: SPACING.md }}>
-            <View style={[styles.banner, { backgroundColor: blueBg, borderColor: blueBorder }]}>
-              <Zap size={18} color="#2563eb" style={{ marginTop: 1 }} />
-              <Text style={[styles.bannerText, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
-                Pay <Text style={{ fontWeight: 'bold' }}>{formatCurrency(amount)}</Text> via UPI. Enter your{' '}
-                <Text style={{ fontWeight: 'bold' }}>12-digit UPI Reference (UTR)</Text> for{' '}
-                <Text style={{ fontWeight: 'bold' }}>verification & approval</Text>!
-              </Text>
-            </View>
-
-            {isFullUtr ? (
+            {detectedRrn ? (
+              <View style={[styles.banner, { backgroundColor: greenBg, borderColor: greenBorder }]}>
+                <Zap size={18} color="#059669" style={{ marginTop: 1 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.bannerText, { color: isDark ? '#6ee7b7' : '#065f46', fontWeight: '800' }]}>
+                    ⚡ Auto-Detected RRN: {detectedRrn}
+                  </Text>
+                  <Text style={[styles.bannerText, { color: isDark ? '#a7f3d0' : '#047857', fontSize: 11, marginTop: 2 }]}>
+                    {detectedMeta?.appName ? `Matched ₹${formatCurrency(amount)} debit from ${detectedMeta.appName}` : 'Captured from payment receipt'}
+                  </Text>
+                </View>
+              </View>
+            ) : isFullUtr ? (
               <View style={[styles.banner, { backgroundColor: greenBg, borderColor: greenBorder }]}>
                 <CheckCircle size={16} color="#059669" style={{ marginTop: 1 }} />
                 <Text style={[styles.bannerText, { color: isDark ? '#6ee7b7' : '#065f46' }]}>
-                  ✨ 12-digit UTR detected! Screenshot is optional. Tap submit to send for owner approval.
+                  ✨ 12-digit UTR entered! Screenshot is optional. Tap submit to send for owner approval.
                 </Text>
               </View>
+            ) : (
+              <View style={[styles.banner, { backgroundColor: blueBg, borderColor: blueBorder }]}>
+                <Zap size={18} color="#2563eb" style={{ marginTop: 1 }} />
+                <Text style={[styles.bannerText, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
+                  Pay <Text style={{ fontWeight: 'bold' }}>{formatCurrency(amount)}</Text> via UPI. Enter your{' '}
+                  <Text style={{ fontWeight: 'bold' }}>12-digit UPI Reference (UTR)</Text> for{' '}
+                  <Text style={{ fontWeight: 'bold' }}>verification & approval</Text>!
+                </Text>
+              </View>
+            )}
+
+            {isNativeListenerSupported && !hasNotificationAccess ? (
+              <TouchableOpacity
+                onPress={openNotificationSettings}
+                activeOpacity={0.7}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingHorizontal: 12,
+                  paddingVertical: 9,
+                  borderRadius: 10,
+                  backgroundColor: isDark ? 'rgba(59, 130, 246, 0.12)' : '#eff6ff',
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(59, 130, 246, 0.3)' : '#bfdbfe',
+                }}
+              >
+                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Sparkles size={15} color="#2563eb" />
+                  <Text style={{ fontSize: 12, color: isDark ? '#93c5fd' : '#1e40af', flex: 1 }}>
+                    Enable Auto-RRN detection from UPI notifications
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 12, fontWeight: '700', color: '#2563eb' }}>Enable</Text>
+              </TouchableOpacity>
             ) : null}
 
             {upiLoading ? (
@@ -608,8 +655,9 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
             />
 
             <Button
-              title="Submit for Approval"
-              icon={CreditCard}
+              title={detectedRrn ? "⚡ Submit Auto-Detected RRN" : "Submit for Approval"}
+              icon={detectedRrn ? Zap : CreditCard}
+              variant={detectedRrn ? "success" : "primary"}
               onPress={submitProof}
               loading={submitting}
               fullWidth

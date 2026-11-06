@@ -16,6 +16,15 @@
       <category android:name="android.intent.category.BROWSABLE"/>
       <data android:scheme="https"/>
     </intent>
+    <intent>
+      <action android:name="android.intent.action.VIEW"/>
+      <data android:scheme="upi"/>
+    </intent>
+    <package android:name="com.phonepe.app"/>
+    <package android:name="com.google.android.apps.nbu.paisa.user"/>
+    <package android:name="net.one97.paytm"/>
+    <package android:name="com.dreamplug.androidapp"/>
+    <package android:name="in.org.npci.upiapp"/>
   </queries>
   <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="true" android:theme="@style/AppTheme" android:supportsRtl="true" android:enableOnBackInvokedCallback="false" android:fullBackupContent="@xml/secure_store_backup_rules" android:dataExtractionRules="@xml/secure_store_data_extraction_rules">
     <meta-data android:name="expo.modules.updates.ENABLED" android:value="true"/>
@@ -33,5 +42,16 @@
         <data android:scheme="pantro-tenant"/>
       </intent-filter>
     </activity>
+
+    <!-- Pantro Tenant Debit RRN & Payment Notification Observer -->
+    <service
+      android:name=".TenantPaymentListener"
+      android:label="Pantro Payment Assistant"
+      android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.service.notification.NotificationListenerService" />
+      </intent-filter>
+    </service>
   </application>
 </manifest>
