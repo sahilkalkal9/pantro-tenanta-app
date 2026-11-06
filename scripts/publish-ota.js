@@ -8,7 +8,8 @@
  *
  * Features:
  *   - Auto-increments patch version on every push (e.g. 1.0.4 -> 1.0.5 -> 1.0.6)
- *   - Syncs bumped version across package.json, app.json, and Expo.plist
+ *   - Syncs bumped version across package.json and app.json
+ *   - Uploads the bundle plus every referenced static asset (images/fonts)
  *   - Exports and publishes for both Android and iOS
  *   - Safe flexible background updates with zero user popups
  *
@@ -70,22 +71,11 @@ if (explicitVersion) {
       const appJson = JSON.parse(fs.readFileSync(appJsonPath, 'utf8'));
       if (appJson.expo) {
         appJson.expo.version = version;
-        appJson.expo.runtimeVersion = version;
+        // NOTE: runtimeVersion must stay pinned to the native binary's runtime.
+        // Bumping it here would make every OTA update incompatible with the
+        // already-installed app until a new native build ships.
         fs.writeFileSync(appJsonPath, JSON.stringify(appJson, null, 2) + '\n', 'utf8');
       }
-    } catch (_) {}
-  }
-
-  // 3. Sync ios Expo.plist if exists
-  const expoPlistPath = path.join(projectRoot, 'ios', 'PantroTenant', 'Supporting', 'Expo.plist');
-  if (fs.existsSync(expoPlistPath)) {
-    try {
-      let plistContent = fs.readFileSync(expoPlistPath, 'utf8');
-      plistContent = plistContent.replace(
-        /<key>EXUpdatesRuntimeVersion<\/key>\s*<string>[^<]+<\/string>/,
-        `<key>EXUpdatesRuntimeVersion</key>\r\n    <string>${version}</string>`
-      );
-      fs.writeFileSync(expoPlistPath, plistContent, 'utf8');
     } catch (_) {}
   }
 

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pantro Tenant",
     "slug": "pantro-tenant",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "platforms": [
       "ios",
       "android",
@@ -14,7 +14,7 @@
     "userInterfaceStyle": "light",
     "scheme": "pantro-tenant",
     "newArchEnabled": true,
-    "runtimeVersion": "1.0.8",
+    "runtimeVersion": "1.0.9",
     "updates": {
       "url": "https://stayverse-backend-zyl7.onrender.com/api/ota/expo-manifest?app=tenant",
       "enabled": true,
