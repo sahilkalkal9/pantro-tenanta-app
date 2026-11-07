@@ -13,6 +13,7 @@ import {
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 const CATEGORY_EMOJI = {
   Electricity: '⚡', Water: '💧', Food: '🍽️', Cleaning: '🧹', WiFi: '📶',
@@ -345,10 +346,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  categoryEmoji: { fontSize: 24, lineHeight: 28 },
+  categoryEmoji: { fontSize: responsiveFontSize(24), lineHeight: 28 },
   titleTop: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm },
-  title: { flex: 1, fontSize: FONT_SIZES.lg, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary, letterSpacing: -0.3, lineHeight: 22 },
-  category: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: 4 },
+  title: { flex: 1, fontSize: responsiveFontSize(FONT_SIZES.lg), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary, letterSpacing: -0.3, lineHeight: 22 },
+  category: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginTop: 4 },
   priorityPill: {
     alignSelf: 'flex-start',
     borderRadius: BORDER_RADIUS.full,
@@ -357,19 +358,19 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     marginTop: 14,
   },
-  priorityText: { fontSize: 11, fontWeight: FONT_WEIGHTS.semibold, letterSpacing: 0.88 },
-  description: { fontSize: 13, marginTop: SPACING.md, lineHeight: 20, whiteSpace: 'pre-wrap' },
+  priorityText: { fontSize: responsiveFontSize(11), fontWeight: FONT_WEIGHTS.semibold, letterSpacing: 0.88 },
+  description: { fontSize: responsiveFontSize(13), marginTop: SPACING.md, lineHeight: 20, whiteSpace: 'pre-wrap' },
   imageThumbWrap: { width: 84, height: 84, borderRadius: BORDER_RADIUS.md, borderWidth: 1, overflow: 'hidden' },
   imageThumb: { width: '100%', height: '100%' },
   modalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center', alignItems: 'center' },
   closeBtn: { position: 'absolute', top: 50, right: 20, zIndex: 10, padding: 8, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
   fullImage: { width: '92%', height: '80%' },
-  raisedOn: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary, marginTop: SPACING.md },
-  sectionTitle: { fontSize: 15, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary, letterSpacing: -0.15 },
+  raisedOn: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary, marginTop: SPACING.md },
+  sectionTitle: { fontSize: responsiveFontSize(15), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary, letterSpacing: -0.15 },
   timeline: { flexDirection: 'row', gap: 6, marginTop: 14 },
   timelineItem: { flex: 1 },
   timelineBar: { height: 6, borderRadius: 3 },
-  timelineLabel: { fontSize: 10, marginTop: 6, textAlign: 'center' },
+  timelineLabel: { fontSize: responsiveFontSize(10), marginTop: 6, textAlign: 'center' },
   resolutionBox: {
     flexDirection: 'row',
     gap: SPACING.sm,
@@ -379,7 +380,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     alignItems: 'center',
   },
-  resolutionText: { flex: 1, fontSize: FONT_SIZES.sm, color: COLORS.success },
+  resolutionText: { flex: 1, fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.success },
   repliesHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: SPACING.sm },
   reply: {
     backgroundColor: COLORS.gray50,
@@ -389,9 +390,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   replyHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  replyBy: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textSecondary },
-  replyDate: { fontSize: 10, color: COLORS.textTertiary },
-  replyMessage: { fontSize: 13, color: COLORS.textPrimary, lineHeight: 19 },
+  replyBy: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textSecondary },
+  replyDate: { fontSize: responsiveFontSize(10), color: COLORS.textTertiary },
+  replyMessage: { fontSize: responsiveFontSize(13), color: COLORS.textPrimary, lineHeight: 19 },
   closeRow: {
     borderTopWidth: 1,
     marginTop: SPACING.md,

@@ -11,10 +11,11 @@ import { resolveMediaUrl } from '../../../lib/api';
 import { formatDate } from '../../../lib/format';
 import {
   Screen, TenantPageHeader, Card, Badge, ModalSheet, EmptyState, CardSkeleton,
-  Button,
+  Button, PantroLoader,
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 export default function DocumentsScreen({ navigation }) {
   const toast = useToast();
@@ -84,18 +85,7 @@ export default function DocumentsScreen({ navigation }) {
   }, []);
 
   if (loading && !profile) {
-    return (
-      <Screen>
-        <TenantPageHeader title="Documents" subtitle="Your verified identity & documents" icon={ShieldCheck} iconTone="blue" />
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 }}>
-          <ActivityIndicator size="small" color={isDark ? '#60a5fa' : '#2563eb'} />
-          <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textSecondary }}>
-            Loading your documents…
-          </Text>
-        </View>
-        <CardSkeleton count={2} />
-      </Screen>
-    );
+    return <PantroLoader fullScreen message="Loading your documents…" />;
   }
 
   if (error && !profile) {
@@ -214,12 +204,12 @@ export default function DocumentsScreen({ navigation }) {
             </View>
             <View style={{ marginTop: 8 }}>
               {isAadhaarDone ? (
-                <Text style={{ fontSize: 11.5, color: isDark ? '#34d399' : '#059669', fontWeight: '600' }}>
+                <Text style={{ fontSize: responsiveFontSize(11.5), color: isDark ? '#34d399' : '#059669', fontWeight: '600' }}>
                   Identity verified via UIDAI DigiLocker {maskedAadhaar ? `(${maskedAadhaar})` : ''}
                 </Text>
               ) : (
                 <View>
-                  <Text style={{ fontSize: 11.5, color: isDark ? '#fbbf24' : '#b45309', fontWeight: '500' }}>
+                  <Text style={{ fontSize: responsiveFontSize(11.5), color: isDark ? '#fbbf24' : '#b45309', fontWeight: '500' }}>
                     Aadhaar verification is pending.
                   </Text>
                   {navigation && (
@@ -227,7 +217,7 @@ export default function DocumentsScreen({ navigation }) {
                       style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}
                       onPress={() => navigation.navigate('Profile', { tab: 'kyc' })}
                     >
-                      <Text style={{ fontSize: 12, fontWeight: '700', color: COLORS.primary }}>
+                      <Text style={{ fontSize: responsiveFontSize(12), fontWeight: '700', color: COLORS.primary }}>
                         Verify with DigiLocker
                       </Text>
                       <ArrowRight size={12} color={COLORS.primary} />
@@ -293,18 +283,18 @@ export default function DocumentsScreen({ navigation }) {
             </View>
             <View style={{ marginTop: 8 }}>
               {isPoliceCompleted ? (
-                <Text style={{ fontSize: 11.5, color: isDark ? '#34d399' : '#059669', fontWeight: '600' }}>
+                <Text style={{ fontSize: responsiveFontSize(11.5), color: isDark ? '#34d399' : '#059669', fontWeight: '600' }}>
                   {police.verdict === 'clear'
                     ? 'Clear / No Adverse Judicial Record Found'
                     : 'Adverse Court Record Detected'}
                   {police.completedAt ? ` · ${formatDate(police.completedAt)}` : ''}
                 </Text>
               ) : isPoliceInProgress ? (
-                <Text style={{ fontSize: 11.5, color: isDark ? '#93c5fd' : '#1d4ed8', fontWeight: '500' }}>
+                <Text style={{ fontSize: responsiveFontSize(11.5), color: isDark ? '#93c5fd' : '#1d4ed8', fontWeight: '500' }}>
                   Querying national court repository (~2-5 mins).
                 </Text>
               ) : (
-                <Text style={{ fontSize: 11.5, color: colors.textTertiary, fontWeight: '500' }}>
+                <Text style={{ fontSize: responsiveFontSize(11.5), color: colors.textTertiary, fontWeight: '500' }}>
                   {isAadhaarDone
                     ? 'Auto-verifying via national eCourts...'
                     : 'Will be initiated after DigiLocker KYC.'}
@@ -312,7 +302,7 @@ export default function DocumentsScreen({ navigation }) {
               )}
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 5 }}>
                 <Sparkles size={11} color={isDark ? '#60a5fa' : '#2563eb'} />
-                <Text style={{ fontSize: 10.5, fontWeight: '600', color: isDark ? '#93c5fd' : '#1d4ed8' }}>
+                <Text style={{ fontSize: responsiveFontSize(10.5), fontWeight: '600', color: isDark ? '#93c5fd' : '#1d4ed8' }}>
                   90% Data Accuracy: eCourts & National Judicial Data Grid
                 </Text>
               </View>
@@ -474,7 +464,7 @@ function DocumentPhoto({ label, url, idValue, onOpen }) {
         <FileText size={24} color={colors.textTertiary} />
         <Text style={[styles.photoLabel, { color: colors.textSecondary }]}>{label}</Text>
         {idValue ? (
-          <Text style={{ fontSize: 11, fontWeight: '700', fontFamily: 'monospace', color: COLORS.primary, marginTop: 3 }}>
+          <Text style={{ fontSize: responsiveFontSize(11), fontWeight: '700', fontFamily: 'monospace', color: COLORS.primary, marginTop: 3 }}>
             {idValue}
           </Text>
         ) : null}
@@ -515,8 +505,8 @@ function DocumentPhoto({ label, url, idValue, onOpen }) {
 const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, paddingBottom: SPACING.sm, borderBottomWidth: 1, borderBottomColor: COLORS.borderLight },
   icon: { width: 30, height: 30, borderRadius: BORDER_RADIUS.sm, alignItems: 'center', justifyContent: 'center' },
-  headTitle: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
-  note: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: SPACING.sm, marginBottom: SPACING.sm, lineHeight: 18 },
+  headTitle: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
+  note: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginTop: SPACING.sm, marginBottom: SPACING.sm, lineHeight: 18 },
   idBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -533,13 +523,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   idBannerLabel: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     fontWeight: '600',
     letterSpacing: 0.4,
     textTransform: 'uppercase',
   },
   idBannerValue: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '800',
     fontFamily: 'monospace',
     marginTop: 2,
@@ -562,12 +552,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepNumber: {
-    fontSize: 9.5,
+    fontSize: responsiveFontSize(9.5),
     fontWeight: '800',
     letterSpacing: 0.5,
   },
   stepTitle: {
-    fontSize: 12.5,
+    fontSize: responsiveFontSize(12.5),
     fontWeight: '700',
   },
   actionBanner: {
@@ -582,11 +572,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   actionTitle: {
-    fontSize: 12.5,
+    fontSize: responsiveFontSize(12.5),
     fontWeight: '700',
   },
   actionDesc: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     marginTop: 2,
   },
   downloadBtn: {
@@ -600,7 +590,7 @@ const styles = StyleSheet.create({
   },
   downloadBtnText: {
     color: '#fff',
-    fontSize: 11.5,
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '700',
   },
   attributionBox: {
@@ -609,7 +599,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   attributionText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     lineHeight: 14,
   },
   emptyBox: {
@@ -620,8 +610,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     borderRadius: BORDER_RADIUS.md,
   },
-  emptyTitle: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary, marginTop: SPACING.sm },
-  emptyText: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: 4, textAlign: 'center' },
+  emptyTitle: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary, marginTop: SPACING.sm },
+  emptyText: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginTop: 4, textAlign: 'center' },
   grid: { gap: SPACING.md },
   docCardContainer: {
     padding: 10,
@@ -629,7 +619,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   photoLabelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  photoLabel: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
+  photoLabel: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
   idBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -637,12 +627,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   idBadgeText: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '700',
     fontFamily: 'monospace',
     letterSpacing: 0.4,
   },
-  photoNotUploaded: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary, marginTop: 2 },
+  photoNotUploaded: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary, marginTop: 2 },
   photoWrapper: {
     width: '100%',
     height: 200,
@@ -675,7 +665,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
   },
-  viewText: { color: COLORS.white, fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.semibold },
+  viewText: { color: COLORS.white, fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: FONT_WEIGHTS.semibold },
   infoNote: {
     flexDirection: 'row',
     gap: SPACING.sm,
@@ -684,10 +674,10 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     borderWidth: 1,
   },
-  infoTitle: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
-  infoText: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: 2, lineHeight: 17 },
+  infoTitle: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
+  infoText: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginTop: 2, lineHeight: 17 },
   lightboxImage: { width: '100%', height: 400, borderRadius: BORDER_RADIUS.md, backgroundColor: COLORS.gray100 },
-  lightboxHint: { fontSize: 11, textAlign: 'center', marginTop: 8 },
+  lightboxHint: { fontSize: responsiveFontSize(11), textAlign: 'center', marginTop: 8 },
   openLink: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -695,5 +685,5 @@ const styles = StyleSheet.create({
     gap: 4,
     marginTop: 6,
   },
-  openLinkText: { fontSize: 11 },
+  openLinkText: { fontSize: responsiveFontSize(11) },
 });

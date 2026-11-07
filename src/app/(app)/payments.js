@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Linking, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, Alert } from 'react-native';
 import {
   Receipt, CheckCircle, XCircle, Clock, TrendingUp, ShieldCheck, ShieldX,
   Wallet, Hash, IndianRupee, AlertTriangle, Calendar, MessageSquare, ImageIcon,
@@ -20,6 +20,7 @@ import {
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../constants/colors';
 import { useTheme } from '../../hooks/useTheme';
 import { useLocalSearchParams, router } from 'expo-router';
+import { responsiveFontSize } from "../../theme";
 
 const METHOD_LABELS = {
   upi: 'UPI', UPI: 'UPI',
@@ -278,12 +279,7 @@ export default function PaymentsScreen() {
           iconTone="blue"
           right={<Button variant="secondary" size="sm" onPress={() => fetchData({ refresh: true })}><RefreshCw size={14} /> Refresh</Button>}
         />
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 }}>
-          <ActivityIndicator size="small" color={isDark ? '#60a5fa' : '#2563eb'} />
-          <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textSecondary }}>
-            Loading your transactions…
-          </Text>
-        </View>
+        <PantroLoader fullScreen message="Loading your transactions…" />
         <CardSkeleton count={2} />
       </Screen>
     );
@@ -424,11 +420,11 @@ export default function PaymentsScreen() {
               style={{ width: 260, height: 260, borderRadius: BORDER_RADIUS.md, backgroundColor: '#ffffff' }}
               resizeMode="contain"
             />
-            <Text style={{ marginTop: SPACING.md, fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, color: colors.textPrimary }}>
+            <Text style={{ marginTop: SPACING.md, fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: colors.textPrimary }}>
               {previewQr.name || 'Scan to Pay'}
             </Text>
             {previewQr.upiId ? (
-              <Text style={{ marginTop: 4, fontSize: FONT_SIZES.sm, color: colors.textSecondary }}>
+              <Text style={{ marginTop: 4, fontSize: responsiveFontSize(FONT_SIZES.sm), color: colors.textSecondary }}>
                 UPI ID: {previewQr.upiId}
               </Text>
             ) : null}
@@ -821,14 +817,7 @@ function PaymentMethodsCard({ info, loading, onPreviewQr }) {
   };
 
   if (loading) {
-    return (
-      <Card style={{ marginBottom: SPACING.md, padding: SPACING.md }}>
-        <ActivityIndicator size="small" color={COLORS.primary} />
-        <Text style={{ textAlign: 'center', fontSize: FONT_SIZES.xs, color: colors.textTertiary, marginTop: SPACING.xs }}>
-          Loading payment options...
-        </Text>
-      </Card>
-    );
+    return <PantroLoader message="Loading payment options..." />;
   }
 
   const upiAccounts = info?.upiAccounts || [];
@@ -974,28 +963,28 @@ const styles = StyleSheet.create({
   group: { marginBottom: SPACING.lg },
   groupHead: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.sm },
   groupIcon: { width: 28, height: 28, borderRadius: BORDER_RADIUS.sm, alignItems: 'center', justifyContent: 'center' },
-  groupTitle: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
-  groupCount: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary },
-  groupApproved: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.success },
-  groupPending: { fontSize: FONT_SIZES.xs, color: COLORS.warning, marginTop: 1 },
+  groupTitle: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
+  groupCount: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary },
+  groupApproved: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.success },
+  groupPending: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.warning, marginTop: 1 },
   txCard: { marginBottom: SPACING.sm },
   txTop: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   txIcon: { width: 44, height: 44, borderRadius: BORDER_RADIUS.md, alignItems: 'center', justifyContent: 'center' },
   txTitleRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, flexWrap: 'wrap' },
-  txTitle: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
-  txMeta: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: 2 },
-  txRef: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary, marginTop: 2 },
-  txRejected: { fontSize: FONT_SIZES.xs, color: COLORS.danger, marginTop: 2 },
-  txAmount: { fontSize: FONT_SIZES.lg, fontWeight: FONT_WEIGHTS.bold },
-  txOf: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary, marginTop: 2 },
+  txTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
+  txMeta: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginTop: 2 },
+  txRef: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary, marginTop: 2 },
+  txRejected: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.danger, marginTop: 2 },
+  txAmount: { fontSize: responsiveFontSize(FONT_SIZES.lg), fontWeight: FONT_WEIGHTS.bold },
+  txOf: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary, marginTop: 2 },
   detailBanner: { borderRadius: BORDER_RADIUS.md, padding: SPACING.md },
   detailBannerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  detailLabel: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textSecondary, textTransform: 'uppercase' },
-  detailStatus: { fontSize: FONT_SIZES.lg, fontWeight: FONT_WEIGHTS.bold, marginTop: 2 },
-  detailHint: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: 2 },
-  detailAmount: { fontSize: FONT_SIZES.xxl, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary, marginTop: 2 },
+  detailLabel: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textSecondary, textTransform: 'uppercase' },
+  detailStatus: { fontSize: responsiveFontSize(FONT_SIZES.lg), fontWeight: FONT_WEIGHTS.bold, marginTop: 2 },
+  detailHint: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginTop: 2 },
+  detailAmount: { fontSize: responsiveFontSize(FONT_SIZES.xxl), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary, marginTop: 2 },
   subHeading: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: FONT_WEIGHTS.semibold,
     color: COLORS.textTertiary,
     textTransform: 'uppercase',
@@ -1008,11 +997,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.borderLight,
   },
-  breakdownTitle: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
-  breakdownRef: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary, marginTop: 2 },
-  breakdownAmount: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
+  breakdownTitle: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
+  breakdownRef: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary, marginTop: 2 },
+  breakdownAmount: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
   noteBox: { backgroundColor: COLORS.gray50, borderRadius: BORDER_RADIUS.md, padding: SPACING.sm, marginTop: SPACING.md },
-  noteText: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary },
+  noteText: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary },
   rejectBox: {
     backgroundColor: `${COLORS.danger}0F`,
     borderWidth: 1,
@@ -1022,9 +1011,9 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   rejectHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  rejectTitle: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.bold, color: COLORS.danger, textTransform: 'uppercase' },
-  rejectText: { fontSize: FONT_SIZES.sm, color: COLORS.dangerDark },
-  rejectDate: { fontSize: FONT_SIZES.xs, color: COLORS.danger, marginTop: 4 },
+  rejectTitle: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: FONT_WEIGHTS.bold, color: COLORS.danger, textTransform: 'uppercase' },
+  rejectText: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.dangerDark },
+  rejectDate: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.danger, marginTop: 4 },
   screenshot: {
     width: '100%',
     height: 220,
@@ -1040,12 +1029,12 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.md,
     marginTop: SPACING.md,
   },
-  noShotText: { fontSize: FONT_SIZES.sm, color: COLORS.textTertiary, marginTop: SPACING.sm, textAlign: 'center' },
+  noShotText: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textTertiary, marginTop: SPACING.sm, textAlign: 'center' },
   rejectBanner: { marginBottom: SPACING.md, borderWidth: 1, borderRadius: BORDER_RADIUS.lg, padding: SPACING.md },
-  rejectBannerTitle: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold, marginBottom: 2 },
-  rejectBannerText: { fontSize: FONT_SIZES.xs, lineHeight: 18 },
+  rejectBannerTitle: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.bold, marginBottom: 2 },
+  rejectBannerText: { fontSize: responsiveFontSize(FONT_SIZES.xs), lineHeight: 18 },
   chatPill: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  chatPillText: { fontSize: 10, fontWeight: FONT_WEIGHTS.bold },
+  chatPillText: { fontSize: responsiveFontSize(10), fontWeight: FONT_WEIGHTS.bold },
   clarifyBigBtn: {
     marginTop: 10,
     paddingVertical: 9,
@@ -1058,25 +1047,25 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   clarifyBigBtnText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: '700',
   },
   chatBubble: { padding: SPACING.sm, borderRadius: BORDER_RADIUS.md, marginBottom: SPACING.xs },
   chatMe: { alignSelf: 'flex-end', maxWidth: '85%' },
   chatThem: { alignSelf: 'flex-start', maxWidth: '85%' },
   chatHeader: { flexDirection: 'row', justifyContent: 'space-between', gap: SPACING.sm, marginBottom: 2 },
-  chatAuthor: { fontSize: 10, fontWeight: FONT_WEIGHTS.bold },
-  chatTime: { fontSize: 9 },
-  chatText: { fontSize: FONT_SIZES.xs, lineHeight: 17 },
+  chatAuthor: { fontSize: responsiveFontSize(10), fontWeight: FONT_WEIGHTS.bold },
+  chatTime: { fontSize: responsiveFontSize(9) },
+  chatText: { fontSize: responsiveFontSize(FONT_SIZES.xs), lineHeight: 17 },
   chatImage: { width: 140, height: 140, borderRadius: BORDER_RADIUS.sm, marginTop: 4 },
   replyBox: { marginTop: SPACING.md, padding: SPACING.md, borderRadius: BORDER_RADIUS.md, borderWidth: 1 },
-  replyBoxTitle: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold, marginBottom: 2 },
-  replyBoxSub: { fontSize: FONT_SIZES.xs, marginBottom: SPACING.sm },
+  replyBoxTitle: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.bold, marginBottom: 2 },
+  replyBoxSub: { fontSize: responsiveFontSize(FONT_SIZES.xs), marginBottom: SPACING.sm },
   payOptionsCard: { marginBottom: SPACING.md },
   payOptionsHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.xs },
-  payOptionsTitle: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold },
-  payOptionsSubtitle: { fontSize: FONT_SIZES.xs, marginTop: 2 },
-  noPayMethodsText: { fontSize: FONT_SIZES.xs, lineHeight: 18, marginTop: SPACING.xs },
+  payOptionsTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold },
+  payOptionsSubtitle: { fontSize: responsiveFontSize(FONT_SIZES.xs), marginTop: 2 },
+  noPayMethodsText: { fontSize: responsiveFontSize(FONT_SIZES.xs), lineHeight: 18, marginTop: SPACING.xs },
   payMethodRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1094,8 +1083,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  methodName: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold },
-  methodSub: { fontSize: FONT_SIZES.xs, marginTop: 2 },
+  methodName: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.bold },
+  methodSub: { fontSize: responsiveFontSize(FONT_SIZES.xs), marginTop: 2 },
   copyPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1105,7 +1094,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  copyPillText: { fontSize: 11, fontWeight: FONT_WEIGHTS.bold },
+  copyPillText: { fontSize: responsiveFontSize(11), fontWeight: FONT_WEIGHTS.bold },
   bankCard: {
     borderWidth: 1,
     borderRadius: BORDER_RADIUS.md,
@@ -1120,8 +1109,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.sm,
     paddingVertical: 6,
   },
-  bankFieldLabel: { fontSize: 9, fontWeight: FONT_WEIGHTS.bold, letterSpacing: 0.5 },
-  bankFieldValue: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.bold, marginTop: 2 },
+  bankFieldLabel: { fontSize: responsiveFontSize(9), fontWeight: FONT_WEIGHTS.bold, letterSpacing: 0.5 },
+  bankFieldValue: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: FONT_WEIGHTS.bold, marginTop: 2 },
   instructionsBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -1130,27 +1119,27 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.sm,
   },
-  instructionsText: { flex: 1, fontSize: 11, lineHeight: 16 },
+  instructionsText: { flex: 1, fontSize: responsiveFontSize(11), lineHeight: 16 },
   // New styles for web parity
   sectionHeader: { marginTop: SPACING.lg, marginBottom: SPACING.md, paddingHorizontal: SPACING.md },
-  sectionTitle: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
-  sectionSub: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: 2 },
-  txNotes: { fontSize: FONT_SIZES.xs, marginTop: 2 },
+  sectionTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
+  sectionSub: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginTop: 2 },
+  txNotes: { fontSize: responsiveFontSize(FONT_SIZES.xs), marginTop: 2 },
   rentPeriodRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.md },
   viewProofBtn: { paddingHorizontal: 8, paddingVertical: 2, backgroundColor: '#eff6ff', borderRadius: 4 },
-  viewProofBtnText: { fontSize: 10, fontWeight: '600', color: '#2563eb' },
+  viewProofBtnText: { fontSize: responsiveFontSize(10), fontWeight: '600', color: '#2563eb' },
   breakdownTotal: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: SPACING.sm, borderTopWidth: 1, borderTopColor: COLORS.border },
-  breakdownTotalLabel: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
-  breakdownTotalAmount: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
+  breakdownTotalLabel: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
+  breakdownTotalAmount: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
   threadHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.sm },
   awaitingPill: { backgroundColor: '#fffbeb', borderRadius: BORDER_RADIUS.full, paddingHorizontal: 10, paddingVertical: 4 },
-  awaitingPillText: { fontSize: FONT_SIZES.xs, fontWeight: '700', color: '#b45309' },
-  threadExplanation: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginBottom: SPACING.md, lineHeight: 18 },
+  awaitingPillText: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: '700', color: '#b45309' },
+  threadExplanation: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginBottom: SPACING.md, lineHeight: 18 },
   emptyThread: { textAlign: 'center', color: COLORS.textTertiary, paddingVertical: SPACING.md },
   chatBubbleWrapper: { marginBottom: SPACING.xs },
   chatAuthorRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   roleBadge: { paddingHorizontal: 6, paddingVertical: 1, borderRadius: BORDER_RADIUS.full, borderWidth: 1 },
-  roleBadgeText: { fontSize: 8, fontWeight: '700' },
+  roleBadgeText: { fontSize: responsiveFontSize(8), fontWeight: '700' },
   chatImageWrapper: { marginTop: 4 },
-  screenshotCaption: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary, textAlign: 'center', marginTop: SPACING.xs },
+  screenshotCaption: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary, textAlign: 'center', marginTop: SPACING.xs },
 });

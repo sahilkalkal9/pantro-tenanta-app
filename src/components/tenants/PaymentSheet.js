@@ -29,6 +29,7 @@ import { TextField, SwitchRow } from '../forms';
 import ImageKitUploader from '../ImageKitUploader';
 import { useTheme } from '../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES } from '../../constants/colors';
+import { responsiveFontSize } from "../../theme";
 
 /* ------------------------------------------------------------------ */
 /* PaymentSheet — the single payment sheet used everywhere in the      */
@@ -557,7 +558,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                   <Text style={[styles.bannerText, { color: isDark ? '#6ee7b7' : '#065f46', fontWeight: '800' }]}>
                     ⚡ Auto-Detected RRN: {detectedRrn}
                   </Text>
-                  <Text style={[styles.bannerText, { color: isDark ? '#a7f3d0' : '#047857', fontSize: 11, marginTop: 2 }]}>
+                  <Text style={[styles.bannerText, { color: isDark ? '#a7f3d0' : '#047857', fontSize: responsiveFontSize(11), marginTop: 2 }]}>
                     {detectedMeta?.appName ? `Matched ₹${formatCurrency(amount)} debit from ${detectedMeta.appName}` : 'Captured from payment receipt'}
                   </Text>
                 </View>
@@ -602,11 +603,11 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
               >
                 <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   <Sparkles size={15} color="#2563eb" />
-                  <Text style={{ fontSize: 12, color: isDark ? '#93c5fd' : '#1e40af', flex: 1 }}>
+                  <Text style={{ fontSize: responsiveFontSize(12), color: isDark ? '#93c5fd' : '#1e40af', flex: 1 }}>
                     Enable Auto-RRN detection from UPI notifications
                   </Text>
                 </View>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: '#2563eb' }}>Enable</Text>
+                <Text style={{ fontSize: responsiveFontSize(12), fontWeight: '700', color: '#2563eb' }}>Enable</Text>
               </TouchableOpacity>
             ) : null}
 
@@ -937,12 +938,12 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
             </View>
 
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 20, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' }}>
+              <Text style={{ fontSize: responsiveFontSize(20), fontWeight: '800', color: colors.textPrimary, textAlign: 'center' }}>
                 Payment Auto-Verified! 🎉
               </Text>
               <Text
                 style={{
-                  fontSize: 13,
+                  fontSize: responsiveFontSize(13),
                   color: colors.textSecondary,
                   textAlign: 'center',
                   marginTop: 6,
@@ -953,7 +954,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                 <Text style={{ fontWeight: '800', color: '#10b981' }}>{formatCurrency(amount)}</Text> was verified
                 automatically via the owner&apos;s bank feed.
               </Text>
-              <Text style={{ fontSize: 11.5, color: colors.textTertiary, marginTop: 8 }}>
+              <Text style={{ fontSize: responsiveFontSize(11.5), color: colors.textTertiary, marginTop: 8 }}>
                 UTR:{' '}
                 <Text style={{ fontFamily: 'monospace', fontWeight: '700', color: colors.textPrimary }}>
                   {cleanUtr || transactionId}
@@ -982,29 +983,29 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
 
 const styles = StyleSheet.create({
   totalBox: { borderWidth: 1, borderRadius: BORDER_RADIUS.lg, padding: SPACING.md, alignItems: 'center' },
-  totalLabel: { fontSize: 10, fontWeight: '800', letterSpacing: 1.2 },
-  totalAmount: { fontSize: 28, fontWeight: '800', marginVertical: 2 },
-  totalSub: { fontSize: 12, textAlign: 'center' },
-  prompt: { fontSize: FONT_SIZES.sm, fontWeight: '600' },
+  totalLabel: { fontSize: responsiveFontSize(10), fontWeight: '800', letterSpacing: 1.2 },
+  totalAmount: { fontSize: responsiveFontSize(28), fontWeight: '800', marginVertical: 2 },
+  totalSub: { fontSize: responsiveFontSize(12), textAlign: 'center' },
+  prompt: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: '600' },
   methodRow: { flexDirection: 'row', gap: SPACING.sm },
   methodCard: { flex: 1 },
   methodCardWide: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   methodIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
   methodTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
-  methodTitle: { fontSize: FONT_SIZES.md, fontWeight: '700' },
-  methodSub: { fontSize: 10.5, marginTop: 2 },
+  methodTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: '700' },
+  methodSub: { fontSize: responsiveFontSize(10.5), marginTop: 2 },
   instantPill: {
     paddingHorizontal: 6,
     paddingVertical: 1.5,
     borderRadius: 999,
     backgroundColor: 'rgba(124, 58, 237, 0.15)',
   },
-  instantPillText: { fontSize: 9.5, fontWeight: '800', color: '#7c3aed', letterSpacing: 0.5 },
+  instantPillText: { fontSize: responsiveFontSize(9.5), fontWeight: '800', color: '#7c3aed', letterSpacing: 0.5 },
   otherMethods: { borderTopWidth: 1, paddingTop: SPACING.md },
-  otherMethodsLabel: { fontSize: 10, fontWeight: '800', letterSpacing: 1.2, marginBottom: SPACING.sm },
+  otherMethodsLabel: { fontSize: responsiveFontSize(10), fontWeight: '800', letterSpacing: 1.2, marginBottom: SPACING.sm },
   otherMethodsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm },
   otherChip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
-  otherChipText: { fontSize: 12, fontWeight: '600' },
+  otherChipText: { fontSize: responsiveFontSize(12), fontWeight: '600' },
   banner: {
     flexDirection: 'row',
     gap: 8,
@@ -1012,10 +1013,10 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.sm,
   },
-  bannerTitle: { fontSize: FONT_SIZES.xs, fontWeight: '700' },
-  bannerText: { flex: 1, fontSize: 12, lineHeight: 17 },
+  bannerTitle: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: '700' },
+  bannerText: { flex: 1, fontSize: responsiveFontSize(12), lineHeight: 17 },
   centerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center', paddingVertical: SPACING.md },
-  muted: { fontSize: 12 },
+  muted: { fontSize: responsiveFontSize(12) },
   upiIdRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1025,13 +1026,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: 8,
   },
-  upiIdText: { fontSize: 12, flex: 1 },
+  upiIdText: { fontSize: responsiveFontSize(12), flex: 1 },
   copyRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginLeft: SPACING.sm },
-  copyText: { color: '#2563eb', fontSize: 12, fontWeight: '700' },
+  copyText: { color: '#2563eb', fontSize: responsiveFontSize(12), fontWeight: '700' },
   backBtn: { paddingVertical: SPACING.sm, alignItems: 'center' },
-  backText: { fontSize: 12, fontWeight: '600' },
-  fieldLabel: { fontSize: FONT_SIZES.xs, fontWeight: '700', textTransform: 'uppercase' },
-  warnText: { fontSize: 12, paddingVertical: SPACING.sm },
+  backText: { fontSize: responsiveFontSize(12), fontWeight: '600' },
+  fieldLabel: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: '700', textTransform: 'uppercase' },
+  warnText: { fontSize: responsiveFontSize(12), paddingVertical: SPACING.sm },
   payeeCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1039,8 +1040,8 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md,
   },
-  payeeName: { fontSize: FONT_SIZES.sm, fontWeight: '700' },
-  payeeRole: { fontSize: 11, marginTop: 2 },
+  payeeName: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: '700' },
+  payeeRole: { fontSize: responsiveFontSize(11), marginTop: 2 },
   radio: {
     width: 20,
     height: 20,
@@ -1051,9 +1052,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   otpActions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  resendText: { fontSize: 12, fontWeight: '700', color: '#059669' },
-  orderInfo: { fontSize: 12, lineHeight: 17, textAlign: 'center' },
-  hint: { fontSize: 11, textAlign: 'center' },
+  resendText: { fontSize: responsiveFontSize(12), fontWeight: '700', color: '#059669' },
+  orderInfo: { fontSize: responsiveFontSize(12), lineHeight: 17, textAlign: 'center' },
+  hint: { fontSize: responsiveFontSize(11), textAlign: 'center' },
   successBox: { alignItems: 'center', paddingVertical: SPACING.md, gap: SPACING.md },
   successIconWrap: {
     width: 60,
@@ -1063,6 +1064,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  successTitle: { fontSize: 16, fontWeight: '800', textAlign: 'center' },
-  successDesc: { fontSize: 12.5, textAlign: 'center', lineHeight: 18, paddingHorizontal: SPACING.sm },
+  successTitle: { fontSize: responsiveFontSize(16), fontWeight: '800', textAlign: 'center' },
+  successDesc: { fontSize: responsiveFontSize(12.5), textAlign: 'center', lineHeight: 18, paddingHorizontal: SPACING.sm },
 });

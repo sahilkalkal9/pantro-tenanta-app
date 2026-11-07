@@ -11,6 +11,7 @@ import {
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 export default function NotificationsScreen() {
   const toast = useToast();
@@ -180,10 +181,10 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: SPACING.md },
   icon: { width: 38, height: 38, borderRadius: BORDER_RADIUS.md, alignItems: 'center', justifyContent: 'center' },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
-  title: { flexShrink: 1, fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textSecondary },
+  title: { flexShrink: 1, fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textSecondary },
   titleUnread: { color: COLORS.textPrimary, fontWeight: FONT_WEIGHTS.bold },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.primary },
-  message: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, marginTop: 4, lineHeight: 19 },
+  message: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, marginTop: 4, lineHeight: 19 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: SPACING.sm },
-  meta: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary },
+  meta: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary },
 });

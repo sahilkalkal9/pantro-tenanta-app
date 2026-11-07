@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  ActivityIndicator,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { router } from 'expo-router';
@@ -43,10 +42,12 @@ import {
   RentStatusCard,
   ComplaintCard,
   NoticeCard,
+  PantroLoader,
 } from '../../components';
 import PaymentSheet from '../../components/tenants/PaymentSheet';
 import { COLORS, SPACING, SHADOWS } from '../../constants/colors';
 import { useTheme } from '../../hooks/useTheme';
+import { responsiveFontSize } from "../../theme";
 
 const STAT_TONES = {
   violet: { light: { bg: '#f3e8ff', fg: '#7c3aed' }, dark: { bg: 'rgba(124, 58, 237, 0.18)', fg: '#a78bfa' } },
@@ -239,20 +240,8 @@ export default function DashboardScreen() {
     };
   }, [payTarget, includeDeposit, depositPending]);
 
-  if (loading && !dashboard) {
-    return (
-      <Screen refreshing={refreshing} onRefresh={onRefresh} contentStyle={styles.scrollContent}>
-        <TenantPageHeader title="Dashboard" subtitle="Welcome back!" icon={LayoutDashboard} iconTone="blue" />
-        <View style={styles.inlineLoadingBox}>
-          <ActivityIndicator size="small" color={isDark ? '#60a5fa' : '#2563eb'} />
-          <Text style={[styles.inlineLoadingText, { color: colors.textSecondary }]}>
-            Loading your dashboard…
-          </Text>
-        </View>
-        <CardSkeleton count={3} />
-        <ListSkeleton count={2} style={{ marginTop: SPACING.md }} />
-      </Screen>
-    );
+  if (loading) {
+    return <PantroLoader fullScreen message="Loading your dashboard…" />;
   }
 
   if (error && !dashboard) {
@@ -790,13 +779,13 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   greetingTitle: {
-    fontSize: 22,
+    fontSize: responsiveFontSize(22),
     fontWeight: '800',
     color: '#0f172a',
     letterSpacing: -0.4,
   },
   greetingSubtitle: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     color: '#64748b',
     lineHeight: 18,
   },
@@ -847,13 +836,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   homePillText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '800',
     letterSpacing: 1.2,
     color: '#ffffff',
   },
   propertyName: {
-    fontSize: 22,
+    fontSize: responsiveFontSize(22),
     fontWeight: '800',
     color: '#ffffff',
     letterSpacing: -0.4,
@@ -866,7 +855,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   addressText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     color: 'rgba(255, 255, 255, 0.88)',
     flex: 1,
   },
@@ -887,7 +876,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.22)',
   },
   specBadgeText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: '700',
     color: '#ffffff',
   },
@@ -900,7 +889,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   statusBadgeText: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '800',
     color: '#ffffff',
     letterSpacing: 0.5,
@@ -927,19 +916,19 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   metricLabelText: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     fontWeight: '700',
     letterSpacing: 0.8,
     color: '#64748b',
   },
   metricValueText: {
-    fontSize: 18,
+    fontSize: responsiveFontSize(18),
     fontWeight: '800',
     color: '#0f172a',
     letterSpacing: -0.3,
   },
   metricSubText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '600',
     marginTop: 2,
   },
@@ -951,7 +940,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   inlineLoadingText: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '600',
   },
   statsGrid: {
@@ -987,14 +976,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   statValue: {
-    fontSize: 22,
+    fontSize: responsiveFontSize(22),
     fontWeight: '800',
     color: '#0f172a',
     letterSpacing: -0.4,
   },
   statTitle: {
     flex: 1,
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '700',
     color: '#64748b',
     letterSpacing: 0.3,
@@ -1021,13 +1010,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardHeaderTitle: {
-    fontSize: 15,
+    fontSize: responsiveFontSize(15),
     fontWeight: '800',
     color: '#0f172a',
     letterSpacing: -0.2,
   },
   cardHeaderSub: {
-    fontSize: 11.5,
+    fontSize: responsiveFontSize(11.5),
     color: '#64748b',
     marginTop: 1,
   },
@@ -1038,13 +1027,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionHeading: {
-    fontSize: 15,
+    fontSize: responsiveFontSize(15),
     fontWeight: '800',
     color: '#0f172a',
     letterSpacing: -0.2,
   },
   sectionSubheading: {
-    fontSize: 11.5,
+    fontSize: responsiveFontSize(11.5),
     color: '#64748b',
     marginTop: 1,
   },
@@ -1054,7 +1043,7 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   viewAllText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: '700',
     color: '#2563eb',
   },
@@ -1090,12 +1079,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   quickTitle: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '700',
     color: '#0f172a',
   },
   quickSub: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     color: '#64748b',
     marginTop: 1,
   },
@@ -1115,7 +1104,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f43f5e',
   },
   quickBadgeText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '800',
     color: '#ffffff',
   },
@@ -1140,12 +1129,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   depositTitle: {
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
     fontWeight: '700',
     color: '#0f172a',
   },
   depositSub: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
   },
   depositPaidPill: {
@@ -1155,7 +1144,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(5, 150, 105, 0.12)',
   },
   depositPaidPillText: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     fontWeight: '700',
     color: '#059669',
   },
@@ -1174,13 +1163,13 @@ const styles = StyleSheet.create({
     borderLeftColor: '#f1f5f9',
   },
   depositColLabel: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '700',
     letterSpacing: 0.8,
     color: '#64748b',
   },
   depositColValue: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '800',
     color: '#0f172a',
     marginTop: 3,
@@ -1207,12 +1196,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   feeName: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '600',
     color: '#475569',
   },
   feeAmount: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '800',
     color: '#0f172a',
   },
@@ -1231,12 +1220,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   rentMonth: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: '600',
     color: '#64748b',
   },
   rentAmount: {
-    fontSize: 20,
+    fontSize: responsiveFontSize(20),
     fontWeight: '800',
     color: '#0f172a',
     letterSpacing: -0.4,
@@ -1257,7 +1246,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffe4e6',
   },
   rentStatusText: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     fontWeight: '800',
     letterSpacing: 0.6,
   },
@@ -1284,7 +1273,7 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   dueDateText: {
-    fontSize: 11.5,
+    fontSize: responsiveFontSize(11.5),
     color: '#64748b',
   },
   payNowBtn: {
@@ -1294,7 +1283,7 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
   payNowBtnText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: '700',
     color: '#ffffff',
   },
@@ -1308,12 +1297,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emptyCardTitle: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '700',
     color: '#0f172a',
   },
   emptyCardSub: {
-    fontSize: 11.5,
+    fontSize: responsiveFontSize(11.5),
     color: '#64748b',
     marginTop: 2,
     textAlign: 'center',
@@ -1326,7 +1315,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   emptyCardBtnText: {
-    fontSize: 11.5,
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '700',
     color: '#2563eb',
   },
@@ -1354,7 +1343,7 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   complaintTitle: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '700',
     color: '#0f172a',
     flex: 1,
@@ -1371,7 +1360,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fef3c7',
   },
   complaintBadgeText: {
-    fontSize: 9.5,
+    fontSize: responsiveFontSize(9.5),
     fontWeight: '800',
     letterSpacing: 0.5,
   },
@@ -1382,7 +1371,7 @@ const styles = StyleSheet.create({
     color: '#d97706',
   },
   complaintMeta: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
   },
   noticeItem: {
@@ -1405,12 +1394,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   noticeTitle: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '700',
     color: '#0f172a',
   },
   noticeMeta: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
     marginTop: 2,
   },
@@ -1435,7 +1424,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   errorTitle: {
-    fontSize: 18,
+    fontSize: responsiveFontSize(18),
     fontWeight: '800',
     color: '#0f172a',
     letterSpacing: -0.3,
@@ -1443,7 +1432,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   errorDescription: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     color: '#64748b',
     textAlign: 'center',
     lineHeight: 18,
@@ -1458,7 +1447,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.small,
   },
   retryBtnText: {
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
     fontWeight: '700',
     color: '#ffffff',
   },

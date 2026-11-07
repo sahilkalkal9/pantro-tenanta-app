@@ -18,6 +18,7 @@ import {
   FONT_WEIGHTS,
 } from '../constants/colors';
 import { useTheme } from '../hooks/useTheme';
+import { responsiveFontSize } from "../theme";
 
 /* ------------------------------------------------------------------ */
 /* TextField                                                           */
@@ -158,11 +159,11 @@ export function SelectField({
           numberOfLines={1}
         >
           {selectedLabel ? (
-            <Text style={{ color: colors.textPrimary, fontSize: FONT_SIZES.md }}>
+            <Text style={{ color: colors.textPrimary, fontSize: responsiveFontSize(FONT_SIZES.md) }}>
               {selectedLabel}
             </Text>
           ) : (
-            <Text style={{ color: colors.textTertiary, fontSize: FONT_SIZES.md }}>
+            <Text style={{ color: colors.textTertiary, fontSize: responsiveFontSize(FONT_SIZES.md) }}>
               {placeholder}
             </Text>
           )}
@@ -270,7 +271,7 @@ export function DateField({ label, value, onChange, placeholder = 'YYYY-MM-DD', 
 const styles = StyleSheet.create({
   field: { marginBottom: SPACING.md },
   label: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.textSecondary,
     marginBottom: 6,
@@ -290,17 +291,17 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     minHeight: 48,
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     color: COLORS.textPrimary,
     paddingVertical: 0,
   },
   prefix: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     color: COLORS.textSecondary,
     marginRight: 4,
   },
-  errorText: { fontSize: FONT_SIZES.xs, color: COLORS.danger, marginTop: 4 },
-  helperText: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary, marginTop: 4 },
+  errorText: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.danger, marginTop: 4 },
+  helperText: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary, marginTop: 4 },
   switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -308,7 +309,7 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   switchLabel: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.textPrimary,
   },
@@ -324,7 +325,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   selectTitle: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.textPrimary,
     marginBottom: SPACING.sm,
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.borderLight,
   },
-  selectOptionText: { fontSize: FONT_SIZES.md, color: COLORS.textPrimary },
+  selectOptionText: { fontSize: responsiveFontSize(FONT_SIZES.md), color: COLORS.textPrimary },
   selectEmpty: {
     textAlign: 'center',
     color: COLORS.textTertiary,

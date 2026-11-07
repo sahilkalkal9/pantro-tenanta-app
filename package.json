@@ -26,6 +26,7 @@
     "submit:android:eas": "eas submit --platform android"
   },
   "dependencies": {
+    "@expo-google-fonts/nunito": "^0.4.2",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "11.4.1",
@@ -66,7 +67,7 @@
     "@babel/core": "^7.24.0",
     "@types/react": "~19.1.0",
     "babel-preset-expo": "~54.0.12",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
     "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"
   },

@@ -12,6 +12,7 @@ import {
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 export default function SettingsScreen() {
   const dispatch = useDispatch();
@@ -183,9 +184,9 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   card: { marginBottom: SPACING.md },
   head: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.md },
-  cardTitle: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
-  note: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, marginTop: 2 },
+  cardTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
+  note: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, marginTop: 2 },
   logoutRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   themeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: SPACING.xs },
-  themeLabel: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.medium },
+  themeLabel: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.medium },
 });

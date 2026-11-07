@@ -6,7 +6,6 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
-  ActivityIndicator,
   Image,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -38,10 +37,12 @@ import {
   EmptyState,
   CardSkeleton,
   ImageKitUploader,
+  PantroLoader,
 } from '../../../components';
 import PaymentSheet from '../../../components/tenants/PaymentSheet';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 const MONTHS = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -284,12 +285,7 @@ export default function DuesScreen() {
         <View style={styles.flex}>
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
             <TenantPageHeader title="Dues" subtitle="Everything you need to pay" icon={Wallet} iconTone="rose" />
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 }}>
-              <ActivityIndicator size="small" color={isDark ? '#60a5fa' : '#2563eb'} />
-              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textSecondary }}>
-                Loading your dues…
-              </Text>
-            </View>
+            <PantroLoader fullScreen message="Loading your dues…" />
             <CardSkeleton count={3} />
           </ScrollView>
         </View>
@@ -606,8 +602,8 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { padding: SPACING.md, paddingBottom: 100 },
   rejectBanner: { marginBottom: SPACING.md, borderWidth: 1, borderRadius: BORDER_RADIUS.lg, padding: SPACING.md },
-  rejectBannerTitle: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold, marginBottom: 2 },
-  rejectBannerText: { fontSize: FONT_SIZES.xs, lineHeight: 18 },
+  rejectBannerTitle: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.bold, marginBottom: 2 },
+  rejectBannerText: { fontSize: responsiveFontSize(FONT_SIZES.xs), lineHeight: 18 },
   outstandingCard: {
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.lg,
@@ -623,33 +619,33 @@ const styles = StyleSheet.create({
   },
   outstandingBadgeText: {
     color: '#ffffff',
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '800',
     letterSpacing: 1.2,
   },
   outstandingAmount: {
     color: '#ffffff',
-    fontSize: 32,
+    fontSize: responsiveFontSize(32),
     fontWeight: '800',
   },
   outstandingSub: {
     color: 'rgba(255,255,255,0.85)',
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     marginTop: 4,
   },
   sectionWrap: { marginBottom: SPACING.md },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: SPACING.sm },
   sectionDot: { width: 8, height: 8, borderRadius: 4 },
-  sectionTitle: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold },
-  sectionCount: { fontSize: FONT_SIZES.sm },
+  sectionTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold },
+  sectionCount: { fontSize: responsiveFontSize(FONT_SIZES.sm) },
   dueCard: { marginBottom: SPACING.sm, padding: 0, overflow: 'hidden' },
   dueCardSelected: { borderWidth: 2 },
   dueMainRow: { flexDirection: 'row', alignItems: 'center', padding: SPACING.md },
   dueIcon: { width: 40, height: 40, borderRadius: BORDER_RADIUS.md, alignItems: 'center', justifyContent: 'center', marginRight: SPACING.sm },
-  dueTitle: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold },
-  dueSub: { fontSize: FONT_SIZES.xs, marginTop: 2 },
-  dueAmount: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold },
-  dueOf: { fontSize: 10, marginTop: 2 },
+  dueTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold },
+  dueSub: { fontSize: responsiveFontSize(FONT_SIZES.xs), marginTop: 2 },
+  dueAmount: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold },
+  dueOf: { fontSize: responsiveFontSize(10), marginTop: 2 },
   checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   checkboxOn: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
   dueRejectFooter: {
@@ -659,15 +655,15 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderTopWidth: 1,
   },
-  dueRejectTitle: { fontSize: 11, fontWeight: '700' },
-  dueRejectReason: { fontSize: 11, marginTop: 1 },
+  dueRejectTitle: { fontSize: responsiveFontSize(11), fontWeight: '700' },
+  dueRejectReason: { fontSize: responsiveFontSize(11), marginTop: 1 },
   clarifyBtn: {
     backgroundColor: '#ef4444',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 6,
   },
-  clarifyBtnText: { color: '#ffffff', fontSize: 11, fontWeight: '700' },
+  clarifyBtnText: { color: '#ffffff', fontSize: responsiveFontSize(11), fontWeight: '700' },
   bottomBar: {
     position: 'absolute',
     bottom: 0,
@@ -680,18 +676,18 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     elevation: 10,
   },
-  bottomLabel: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
-  bottomAmount: { fontSize: FONT_SIZES.lg, fontWeight: '800' },
+  bottomLabel: { fontSize: responsiveFontSize(11), fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  bottomAmount: { fontSize: responsiveFontSize(FONT_SIZES.lg), fontWeight: '800' },
   payHeaderBox: {
     borderWidth: 1,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
     alignItems: 'center',
   },
-  payHeaderLabel: { fontSize: 10, fontWeight: '800', letterSpacing: 1.2 },
-  payHeaderAmount: { fontSize: 28, fontWeight: '800', marginVertical: 2 },
-  payHeaderSub: { fontSize: 12 },
-  promptText: { fontSize: FONT_SIZES.sm, fontWeight: '600', marginBottom: SPACING.sm },
+  payHeaderLabel: { fontSize: responsiveFontSize(10), fontWeight: '800', letterSpacing: 1.2 },
+  payHeaderAmount: { fontSize: responsiveFontSize(28), fontWeight: '800', marginVertical: 2 },
+  payHeaderSub: { fontSize: responsiveFontSize(12) },
+  promptText: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: '600', marginBottom: SPACING.sm },
   methodCardsRow: { flexDirection: 'row', gap: SPACING.sm },
   methodCard: {
     flex: 1,
@@ -701,8 +697,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   methodIconCircle: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
-  methodCardTitle: { fontSize: FONT_SIZES.md, fontWeight: '700' },
-  methodCardSub: { fontSize: 10.5, textAlign: 'center', marginTop: 2 },
+  methodCardTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: '700' },
+  methodCardSub: { fontSize: responsiveFontSize(10.5), textAlign: 'center', marginTop: 2 },
   infoBanner: {
     flexDirection: 'row',
     gap: 8,
@@ -711,10 +707,10 @@ const styles = StyleSheet.create({
     padding: SPACING.sm,
     marginBottom: SPACING.md,
   },
-  infoBannerTitle: { fontSize: FONT_SIZES.xs, fontWeight: '700' },
-  infoBannerText: { flex: 1, fontSize: 12, lineHeight: 17 },
+  infoBannerTitle: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: '700' },
+  infoBannerText: { flex: 1, fontSize: responsiveFontSize(12), lineHeight: 17 },
   upiLoadingWrap: { flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center', paddingVertical: SPACING.md },
-  upiLoadingText: { fontSize: 12 },
+  upiLoadingText: { fontSize: responsiveFontSize(12) },
   upiActionWrap: { marginBottom: SPACING.md },
   upiIdRow: {
     flexDirection: 'row',
@@ -725,13 +721,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: 8,
   },
-  upiIdText: { fontSize: 12 },
+  upiIdText: { fontSize: responsiveFontSize(12) },
   copyBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  copyBtnText: { color: '#2563eb', fontSize: 12, fontWeight: '700' },
+  copyBtnText: { color: '#2563eb', fontSize: responsiveFontSize(12), fontWeight: '700' },
   backMethodBtn: { paddingVertical: SPACING.sm, alignItems: 'center' },
-  backMethodText: { fontSize: 12, fontWeight: '600' },
-  payeeSelectLabel: { fontSize: FONT_SIZES.xs, fontWeight: '700', textTransform: 'uppercase', marginBottom: 6 },
-  noPayeeText: { fontSize: 12, paddingVertical: SPACING.sm },
+  backMethodText: { fontSize: responsiveFontSize(12), fontWeight: '600' },
+  payeeSelectLabel: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: '700', textTransform: 'uppercase', marginBottom: 6 },
+  noPayeeText: { fontSize: responsiveFontSize(12), paddingVertical: SPACING.sm },
   payeeCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -740,8 +736,8 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     marginBottom: SPACING.xs,
   },
-  payeeName: { fontSize: FONT_SIZES.sm, fontWeight: '700' },
-  payeeRole: { fontSize: 11, marginTop: 2 },
+  payeeName: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: '700' },
+  payeeRole: { fontSize: responsiveFontSize(11), marginTop: 2 },
   payeeRadio: {
     width: 20,
     height: 20,
@@ -757,12 +753,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: SPACING.md,
   },
-  resendOtpText: { fontSize: 12, fontWeight: '700' },
-  changePayeeText: { fontSize: 12 },
+  resendOtpText: { fontSize: responsiveFontSize(12), fontWeight: '700' },
+  changePayeeText: { fontSize: responsiveFontSize(12) },
   rejectReasonBox: { borderWidth: 1, borderRadius: BORDER_RADIUS.md, padding: SPACING.sm },
-  rejectReasonTitle: { fontSize: 11, fontWeight: '700', marginBottom: 2 },
-  rejectReasonText: { fontSize: 12, lineHeight: 17 },
-  clarifyHint: { fontSize: 12, lineHeight: 18 },
+  rejectReasonTitle: { fontSize: responsiveFontSize(11), fontWeight: '700', marginBottom: 2 },
+  rejectReasonText: { fontSize: responsiveFontSize(12), lineHeight: 17 },
+  clarifyHint: { fontSize: responsiveFontSize(12), lineHeight: 18 },
   clarifyStatusBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -771,14 +767,14 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.sm,
   },
-  clarifyStatusText: { fontSize: 12, fontWeight: '600' },
-  subGroupHeading: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', marginBottom: 4 },
+  clarifyStatusText: { fontSize: responsiveFontSize(12), fontWeight: '600' },
+  subGroupHeading: { fontSize: responsiveFontSize(11), fontWeight: '700', textTransform: 'uppercase', marginBottom: 4 },
   chatBubble: { padding: SPACING.sm, borderRadius: BORDER_RADIUS.md, marginBottom: SPACING.xs },
   chatMe: { alignSelf: 'flex-end', maxWidth: '85%' },
   chatThem: { alignSelf: 'flex-start', maxWidth: '85%' },
   chatHeader: { flexDirection: 'row', justifyContent: 'space-between', gap: SPACING.sm, marginBottom: 2 },
-  chatSender: { fontSize: 10, fontWeight: '700' },
-  chatTime: { fontSize: 9 },
-  chatMsg: { fontSize: 12, lineHeight: 17 },
+  chatSender: { fontSize: responsiveFontSize(10), fontWeight: '700' },
+  chatTime: { fontSize: responsiveFontSize(9) },
+  chatMsg: { fontSize: responsiveFontSize(12), lineHeight: 17 },
   chatScreenshot: { width: 140, height: 140, borderRadius: BORDER_RADIUS.sm, marginTop: 4 },
 });

@@ -4,6 +4,7 @@ import { Calendar, ArrowRight, Clock, AlertCircle } from 'lucide-react-native';
 import { formatCurrency, formatMonthYear } from '../../lib/format';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../constants/colors';
 import { useTheme } from '../../hooks/useTheme';
+import { responsiveFontSize } from "../../theme";
 
 const STATUS_THEMES = {
   paid: { bg: '#dcfce7', text: '#16a34a', border: '#bbf7d0' },
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xl,
   },
   emptyText: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '600',
     color: '#64748b',
   },
@@ -216,12 +217,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   noticeText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: '500',
     flex: 1,
   },
   noticeTextBold: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: '700',
     marginBottom: 2,
   },
@@ -235,7 +236,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   pendingApprovalText: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '700',
   },
   headerRow: {
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   monthTitle: {
-    fontSize: 15,
+    fontSize: responsiveFontSize(15),
     fontWeight: '700',
     color: '#0f172a',
     letterSpacing: -0.15,
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   dueDateText: {
-    fontSize: 11.5,
+    fontSize: responsiveFontSize(11.5),
     color: '#64748b',
   },
   statusPill: {
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statusText: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '600',
     letterSpacing: 0.1,
   },
@@ -293,14 +294,14 @@ const styles = StyleSheet.create({
     borderLeftColor: '#e2e8f0',
   },
   metricLabel: {
-    fontSize: 9.5,
+    fontSize: responsiveFontSize(9.5),
     fontWeight: '700',
     letterSpacing: 0.8,
     color: '#64748b',
     marginBottom: 2,
   },
   metricVal: {
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
     fontWeight: '800',
     color: '#0f172a',
     letterSpacing: -0.2,
@@ -318,17 +319,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   lateFeeTitle: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '600',
     color: '#b45309',
   },
   lateFeeSub: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     color: 'rgba(217, 119, 6, 0.8)',
     marginTop: 1,
   },
   lateFeeAmount: {
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
     fontWeight: '700',
     color: '#b45309',
   },
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.small,
   },
   payButtonText: {
-    fontSize: 13.5,
+    fontSize: responsiveFontSize(13.5),
     fontWeight: '700',
     color: '#ffffff',
   },

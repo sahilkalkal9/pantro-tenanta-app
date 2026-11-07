@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Modal,
   Linking,
-  ActivityIndicator,
   Platform,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -21,8 +20,6 @@ import {
   Check, ArrowRight, ShieldCheck, BadgeCheck, ShieldAlert,
   HelpCircle, Sparkles, RotateCcw, LogOut, Loader2, Upload,
 } from 'lucide-react-native';
-import Signature from 'react-native-signature-canvas';
-import { WebView } from 'react-native-webview';
 import { tenantService } from '../../../services/tenantService';
 import { logout } from '../../../slices/authSlice';
 import { useToast } from '../../../hooks/useToast';
@@ -35,6 +32,7 @@ import {
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 const EDUCATION_LEVELS = [
   { value: 'high_school',   label: 'High school' },
@@ -119,15 +117,6 @@ function maskAadhaar(num) {
   return `XXXX XXXX ${clean.slice(-4)}`;
 }
 
-const SIGNATURE_WEB_STYLE = `
-  .m-signature-pad--footer {display: flex; justify-content: space-between; margin: 12px 20px;}
-  .m-signature-pad {box-shadow: none; border: none; background-color: #ffffff;}
-  .m-signature-pad--body {border: 1px dashed #cbd5e1; border-radius: 8px;}
-  body,html {width: 100%; height: 100%; margin: 0; padding: 0;}
-  .button {background-color: #2563eb; color: #ffffff; font-weight: bold; border-radius: 8px; padding: 10px 24px; font-size: 15px;}
-  .button.clear {background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;}
-`;
-
 export default function TenantProfileScreen() {
   const toast = useToast();
   const dispatch = useDispatch();
@@ -147,13 +136,11 @@ export default function TenantProfileScreen() {
   const [saveError, setSaveError] = useState({});
   const [saveSuccess, setSaveSuccess] = useState({});
 
-  // Signature state
+  // Signature state (upload only)
   const [signatureInput, setSignatureInput] = useState('');
-  const [signatureData, setSignatureData] = useState(''); // drawn signature (data URL)
   const [signatureSaving, setSignatureSaving] = useState(false);
   const [signatureSaved, setSignatureSaved] = useState(false);
   const [signatureError, setSignatureError] = useState('');
-  const [drawModalOpen, setDrawModalOpen] = useState(false);
 
   // Lightbox modal state
   const [lightbox, setLightbox] = useState(null); // { url, label }
@@ -350,17 +337,16 @@ export default function TenantProfileScreen() {
   };
 
   const handleSaveSignature = async () => {
-    const val = (signatureData || signatureInput || '').trim();
+    const val = signatureInput.trim();
     if (!val) {
-      setSignatureError('Please draw or upload your signature before saving.');
+      setSignatureError('Please upload your signature before saving.');
       return;
     }
     setSignatureSaving(true);
     setSignatureError('');
     try {
-      const payload = val.startsWith('data:') ? { signatureData: val } : { signatureUrl: val };
+      const payload = { signatureUrl: val };
       await tenantService.saveMySignature(payload);
-      setSignatureData('');
       setSignatureInput('');
       setSignatureSaved(true);
       setTimeout(() => setSignatureSaved(false), 3000);
@@ -390,36 +376,10 @@ export default function TenantProfileScreen() {
   };
 
   if (loading && !form) {
-    return (
-      <Screen scroll={false}>
-        <View style={styles.container}>
-          <TenantPageHeader title="My Profile" icon={User} iconTone="blue" />
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 }}>
-            <ActivityIndicator size="small" color={isDark ? '#60a5fa' : '#2563eb'} />
-            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textSecondary }}>
-              Loading your profile…
-            </Text>
-          </View>
-          {/* Hero card skeleton */}
-          <Card padded={false}>
-            <Skeleton variant="card" style={{ height: 128, borderRadius: 0 }} />
-            <View style={{ flexDirection: 'row' }}>
-              {[0, 1, 2, 3].map((i) => (
-                <View key={i} style={{ flex: 1, padding: SPACING.sm + 2, gap: 8 }}>
-                  <Skeleton variant="text" style={{ width: 64, height: 10 }} />
-                  <Skeleton variant="text" style={{ width: '80%', height: 14 }} />
-                </View>
-              ))}
-            </View>
-          </Card>
-          {/* Section card skeletons */}
-          <CardSkeleton count={3} />
-        </View>
-      </Screen>
-    );
+    return <PantroLoader fullScreen message="Loading your profile…" />;
   }
 
-  if (error && !profile) {
+  if (error) {
     return (
       <Screen>
         <TenantPageHeader title="My Profile" icon={User} iconTone="blue" />
@@ -1405,48 +1365,12 @@ export default function TenantProfileScreen() {
               <View style={[styles.sigStatusBanner, styles.sigStatusBannerWarning]}>
                 <AlertTriangle size={15} color={COLORS.warning} style={{ marginTop: 1 }} />
                 <Text style={styles.sigStatusWarningText}>
-                  You haven't added a signature yet. Please sign in the box below to complete your profile.
+                  You haven&apos;t added a signature yet. Please upload your signature to complete your profile.
                 </Text>
               </View>
             )}
 
-            {/* Draw or upload your signature */}
-            <View style={styles.sigPadContainer}>
-              <View style={styles.sigPadLabelRow}>
-                <Text style={[styles.sigPadLabel, { color: colors.textSecondary }]}>
-                  Draw or upload your signature
-                </Text>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => setDrawModalOpen(true)}
-                  style={styles.sigPadDrawBtn}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <PenLine size={13} color="#2563eb" />
-                  <Text style={styles.sigPadDrawBtnText}>{signatureData ? 'Draw new' : 'Draw'}</Text>
-                </TouchableOpacity>
-              </View>
-
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => setDrawModalOpen(true)}
-                style={[styles.sigPadBox, { borderColor: colors.border, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff' }]}
-              >
-                {signatureData ? (
-                  <Image source={{ uri: signatureData }} style={styles.sigPadPreviewImg} resizeMode="contain" />
-                ) : (
-                  <View style={styles.sigPadPlaceholder}>
-                    <PenLine size={16} color={colors.textTertiary} />
-                    <Text style={[styles.sigPadPlaceholderText, { color: colors.textTertiary }]}>Sign here</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-
-              <Text style={[styles.sigPadHint, { color: colors.textTertiary }]}>
-                Sign neatly inside the canvas or upload an image file of your signature. Click 'Save Signature' when done.
-              </Text>
-            </View>
-
+            {/* Upload your signature */}
             <View style={styles.sigUploadContainer}>
               <ImageKitUploader
                 folder="/tenants/signatures"
@@ -1475,7 +1399,7 @@ export default function TenantProfileScreen() {
               icon={Save}
               onPress={handleSaveSignature}
               loading={signatureSaving}
-              disabled={(!signatureData && !signatureInput.trim()) || signatureSaving}
+              disabled={(!signatureInput.trim()) || signatureSaving}
               fullWidth
               style={{ marginTop: SPACING.md }}
             />
@@ -1552,38 +1476,6 @@ export default function TenantProfileScreen() {
         </Modal>
       )}
 
-      {/* Draw Signature Modal (react-native-signature-canvas renders inside a WebView) */}
-      <Modal
-        visible={drawModalOpen}
-        animationType="slide"
-        onRequestClose={() => setDrawModalOpen(false)}
-      >
-        <View style={styles.sigDrawModalContainer}>
-          <View style={styles.sigDrawModalHeader}>
-            <Text style={styles.sigDrawModalTitle}>Draw your signature</Text>
-            <TouchableOpacity
-              onPress={() => setDrawModalOpen(false)}
-              style={styles.sigDrawModalCloseBtn}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            >
-              <X size={20} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.sigDrawCanvasWrap}>
-            <Signature
-              onOK={(data) => {
-                if (data) setSignatureData(`data:image/png;base64,${data}`);
-                setSignatureError('');
-                setDrawModalOpen(false);
-              }}
-              onEmpty={() => {}}
-              clearText="Clear"
-              confirmText="Save"
-              webStyle={SIGNATURE_WEB_STYLE}
-            />
-          </View>
-        </View>
-      </Modal>
     </Screen>
   );
 }
@@ -1846,7 +1738,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(225, 29, 72, 0.08)',
   },
   actionBtnText: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: '600',
   },
   banner: {
@@ -1863,7 +1755,7 @@ const styles = StyleSheet.create({
   },
   bannerSuccessText: {
     flex: 1,
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     color: '#059669',
     fontWeight: '600',
   },
@@ -1873,7 +1765,7 @@ const styles = StyleSheet.create({
   },
   bannerDangerText: {
     flex: 1,
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     color: '#e11d48',
     fontWeight: '600',
   },
@@ -1902,7 +1794,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   avatarInitial: {
-    fontSize: 26,
+    fontSize: responsiveFontSize(26),
     fontWeight: '800',
     color: '#ffffff',
   },
@@ -1928,7 +1820,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   heroName: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: responsiveFontSize(FONT_SIZES.lg),
     fontWeight: '800',
     letterSpacing: -0.3,
   },
@@ -1953,7 +1845,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(5, 150, 105, 0.25)',
   },
   microChipSuccessText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '700',
     color: COLORS.success,
   },
@@ -1963,12 +1855,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(217, 119, 6, 0.25)',
   },
   microChipWarningText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '700',
     color: COLORS.warning,
   },
   microChipText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '600',
   },
   contactItemsWrap: {
@@ -1981,7 +1873,7 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   contactText: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: '500',
   },
   loginPill: {
@@ -1991,7 +1883,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   loginPillText: {
-    fontSize: 9,
+    fontSize: responsiveFontSize(9),
     fontWeight: '700',
     color: '#2563eb',
   },
@@ -2002,7 +1894,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   aadhaarPillText: {
-    fontSize: 9,
+    fontSize: responsiveFontSize(9),
     fontWeight: '700',
     color: COLORS.success,
   },
@@ -2018,18 +1910,18 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.06)',
   },
   statBoxLabel: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   statBoxValue: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: '700',
     marginTop: 2,
   },
   statBoxSub: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     marginTop: 1,
   },
   progressSection: {
@@ -2043,15 +1935,15 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   progressLabel: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: '600',
   },
   progressValue: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: '700',
   },
   progressHint: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     marginTop: 6,
     lineHeight: 16,
   },
@@ -2069,7 +1961,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   navChipText: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
   },
   sectionHead: {
     flexDirection: 'row',
@@ -2092,11 +1984,11 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   sectionTitle: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     fontWeight: '700',
   },
   sectionSub: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     marginTop: 2,
     lineHeight: 16,
   },
@@ -2123,7 +2015,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(225, 29, 72, 0.25)',
   },
   smallBtnText: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '600',
   },
   statusBadge: {
@@ -2140,7 +2032,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(5, 150, 105, 0.25)',
   },
   badgeVerifiedText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '700',
     color: COLORS.success,
   },
@@ -2149,7 +2041,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   badgeReadOnlyText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '600',
   },
   infoBanner: {
@@ -2165,12 +2057,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(5, 150, 105, 0.25)',
   },
   infoBannerTitleVerified: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: '700',
     color: '#059669',
   },
   infoBannerSubVerified: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#047857',
     marginTop: 2,
     lineHeight: 16,
@@ -2180,12 +2072,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(217, 119, 6, 0.25)',
   },
   infoBannerTitleWarning: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: '700',
     color: '#d97706',
   },
   infoBannerSubWarning: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#b45309',
     marginTop: 2,
     lineHeight: 16,
@@ -2210,7 +2102,7 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   detailRowLabel: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -2222,16 +2114,16 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   detailRowBadgeText: {
-    fontSize: 9,
+    fontSize: responsiveFontSize(9),
     fontWeight: '700',
     color: '#2563eb',
   },
   detailRowValue: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: '600',
   },
   detailRowSubtext: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     marginTop: 1,
   },
   italic: {
@@ -2242,7 +2134,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   subGroupHeading: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.7,
@@ -2288,7 +2180,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   kycStatusTitle: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: '700',
   },
   kycDetailRow: {
@@ -2298,10 +2190,10 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   kycDetailLabel: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
   },
   kycDetailValue: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: '600',
   },
   dlWrapper: {
@@ -2320,11 +2212,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   dlTitle: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: '700',
   },
   dlSub: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     lineHeight: 18,
   },
   docsRow: {
@@ -2349,13 +2241,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   docPhotoLabel: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '700',
     marginBottom: 4,
     textAlign: 'center',
   },
   docPhotoSub: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
   },
   docPhotoThumbWrap: {
     borderRadius: BORDER_RADIUS.sm,
@@ -2376,7 +2268,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(37,99,235,0.1)',
   },
   docPhotoBarText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '600',
     color: '#2563eb',
   },
@@ -2391,7 +2283,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   viewDocsBtnText: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: '700',
     color: '#2563eb',
   },
@@ -2420,18 +2312,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sigStatusTitle: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: '700',
     color: '#059669',
   },
   sigStatusSub: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     color: '#047857',
     marginTop: 1,
   },
   sigStatusWarningText: {
     flex: 1,
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     color: '#d97706',
   },
   sigThumbBox: {
@@ -2457,11 +2349,11 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   sessionName: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: '600',
   },
   sessionSub: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     marginTop: 2,
   },
   lightboxOverlay: {
@@ -2478,7 +2370,7 @@ const styles = StyleSheet.create({
   },
   lightboxTitle: {
     color: '#ffffff',
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     fontWeight: '700',
     flex: 1,
   },

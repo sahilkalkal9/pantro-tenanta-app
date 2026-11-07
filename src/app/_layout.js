@@ -8,6 +8,16 @@ import { initializeNetworkListener, loadOfflineQueue } from '../slices/offlineSl
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { preventAutoHideAsync, hideAsync } from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
+import {
+  Nunito_300Light,
+  Nunito_400Regular,
+  Nunito_500Medium,
+  Nunito_600SemiBold,
+  Nunito_700Bold,
+  Nunito_800ExtraBold,
+} from '@expo-google-fonts/nunito';
+import { PixelRatio, useWindowDimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setTheme } from '../slices/uiSlice';
 import { useTheme } from '../hooks/useTheme';
@@ -17,14 +27,37 @@ import apiCache from '../services/apiCache';
 import { initLiveSocket } from '../services/liveSocket';
 import { setupPushNotifications, registerDeviceToken } from '../services/pushNotifications';
 import { AppState } from 'react-native';
+import { setFontMetrics } from '../theme/tokens';
 
 preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    Nunito_300Light,
+    Nunito_400Regular,
+    Nunito_500Medium,
+    Nunito_600SemiBold,
+    Nunito_700Bold,
+    Nunito_800ExtraBold,
+  });
+  const { width: screenWidth } = useWindowDimensions();
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      try {
+        setFontMetrics({ fontScale: PixelRatio.getFontScale(), screenWidth });
+      } catch (e) {
+        console.warn('[Theme] setFontMetrics error:', e);
+      }
+    }
+  }, [fontsLoaded, screenWidth]);
+
+  const isLoading = !fontsLoaded && !fontError;
+
   return (
     <Provider store={store}>
       <PersistGate
-        loading={<PantroLoader fullScreen message="Loading Pantro Tenant Portal…" />}
+        loading={isLoading ? <PantroLoader fullScreen message="Loading Pantro Tenant Portal…" /> : null}
         persistor={persistor}
       >
         <SafeAreaProvider>

@@ -18,6 +18,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ArrowRight, Check, RotateCcw, AlertTriangle } from 'lucide-react-native';
 import { requestOtp, clearError } from '../../slices/authSlice';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../constants/colors';
+import { responsiveFontSize } from "../../theme";
 
 const LOGO_URI = 'https://ik.imagekit.io/fkhvlkpi1/FULL%20LOGO%20P.png';
 const LOCAL_ICON = require('../../../assets/icon.png');
@@ -292,13 +293,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#2dd4bf',
   },
   portalBadgeText: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     fontWeight: '700',
     letterSpacing: 1.4,
     color: '#2dd4bf',
   },
   title: {
-    fontSize: 24,
+    fontSize: responsiveFontSize(24),
     fontWeight: '800',
     color: '#ffffff',
     letterSpacing: -0.4,
@@ -306,7 +307,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     color: '#94a3b8',
     textAlign: 'center',
     maxWidth: 290,
@@ -330,7 +331,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(20, 184, 166, 0.4)',
   },
   inputLabel: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '700',
     letterSpacing: 0.8,
     color: '#cbd5e1',
@@ -364,10 +365,10 @@ const styles = StyleSheet.create({
     borderRightColor: '#1e293b',
   },
   flagEmoji: {
-    fontSize: 15,
+    fontSize: responsiveFontSize(15),
   },
   countryCodeText: {
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
     fontWeight: '700',
     color: '#cbd5e1',
   },
@@ -375,7 +376,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 17,
+    fontSize: responsiveFontSize(17),
     fontWeight: '700',
     letterSpacing: 1.2,
     color: '#ffffff',
@@ -407,7 +408,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     flex: 1,
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     color: '#fca5a5',
     lineHeight: 16,
   },
@@ -430,13 +431,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   buttonText: {
-    fontSize: 15,
+    fontSize: responsiveFontSize(15),
     fontWeight: '700',
     color: '#ffffff',
     letterSpacing: 0.2,
   },
   helperText: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
     textAlign: 'center',
     marginTop: 12,
@@ -447,11 +448,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   footerCopy: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
   },
   footerBrand: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
   },
   footerBrandBold: {

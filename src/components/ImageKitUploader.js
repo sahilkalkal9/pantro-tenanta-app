@@ -16,6 +16,7 @@ import { Upload, X, Check, Camera, Image as ImageIcon, AlertCircle, Link } from 
 import api from '../lib/api';
 import { useTheme } from '../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
+import { responsiveFontSize } from "../theme";
 
 /**
  * Safe native image picker loader:
@@ -400,7 +401,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   labelText: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: FONT_WEIGHTS.semibold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -431,11 +432,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   triggerTitle: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.semibold,
   },
   triggerSub: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     marginTop: 2,
   },
   uploadingWrap: {
@@ -444,7 +445,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   uploadingText: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.medium,
   },
   uploadedCard: {
@@ -471,11 +472,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   uploadedSuccessText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: FONT_WEIGHTS.bold,
   },
   uploadedUrlText: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     marginTop: 2,
   },
   changeBtn: {
@@ -483,7 +484,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   changeBtnText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: FONT_WEIGHTS.semibold,
   },
   removeBtn: {
@@ -498,7 +499,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: '#ef4444',
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: FONT_WEIGHTS.medium,
   },
   modalOverlay: {
@@ -522,14 +523,14 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   modalTitle: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     fontWeight: FONT_WEIGHTS.bold,
   },
   modalCloseBtn: {
     padding: 4,
   },
   modalHint: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     lineHeight: 18,
     marginBottom: SPACING.md,
   },
@@ -537,7 +538,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.sm,
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     minHeight: 60,
     textAlignVertical: 'top',
     marginBottom: SPACING.md,
@@ -554,7 +555,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   modalCancelText: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.medium,
   },
   modalSubmitBtn: {
@@ -564,7 +565,7 @@ const styles = StyleSheet.create({
   },
   modalSubmitText: {
     color: COLORS.white,
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.semibold,
   },
 });

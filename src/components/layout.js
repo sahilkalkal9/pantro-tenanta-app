@@ -28,6 +28,7 @@ import {
 import { removeToast } from '../slices/uiSlice';
 import { Button } from './primitives';
 import { useTheme } from '../hooks/useTheme';
+import { responsiveFontSize } from "../theme";
 
 /* ------------------------------------------------------------------ */
 /* Screen                                                              */
@@ -325,11 +326,11 @@ const styles = StyleSheet.create({
   },
   headerCenter: { flex: 1, alignItems: 'center' },
   headerTitle: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: responsiveFontSize(FONT_SIZES.lg),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.textPrimary,
   },
-  headerSubtitle: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: 1 },
+  headerSubtitle: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginTop: 1 },
   headerRight: { minWidth: 40, alignItems: 'flex-end', flexDirection: 'row', justifyContent: 'flex-end', gap: 4 },
   sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
   sheetContainer: {
@@ -354,7 +355,7 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.borderLight,
   },
   sheetTitle: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: responsiveFontSize(FONT_SIZES.lg),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.textPrimary,
     flex: 1,
@@ -381,12 +382,12 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
   confirmTitle: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: responsiveFontSize(FONT_SIZES.lg),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.textPrimary,
   },
   confirmMessage: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     color: COLORS.textSecondary,
     marginTop: SPACING.sm,
   },
@@ -408,9 +409,9 @@ const styles = StyleSheet.create({
     ...SHADOWS.large,
   },
   toastTitle: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.textPrimary,
   },
-  toastMessage: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, marginTop: 1 },
+  toastMessage: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, marginTop: 1 },
 });

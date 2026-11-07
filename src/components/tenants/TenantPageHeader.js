@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../constants/colors';
 import { useTheme } from '../../hooks/useTheme';
+import { responsiveFontSize } from "../../theme";
 
 const LIGHT_ICON_TONES = {
   blue: { bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe' },
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   eyebrow: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '800',
     color: '#2563eb',
     letterSpacing: 1,
@@ -97,13 +98,13 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   title: {
-    fontSize: 20,
+    fontSize: responsiveFontSize(20),
     fontWeight: '800',
     color: '#0f172a',
     letterSpacing: -0.3,
   },
   subtitle: {
-    fontSize: 12.5,
+    fontSize: responsiveFontSize(12.5),
     color: '#64748b',
     marginTop: 2,
   },

@@ -1,13 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Shield, ExternalLink, ArrowLeft } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useTheme } from '../../../hooks/useTheme';
 import {
-  Screen, TenantPageHeader, Card, Button,
+  Screen, TenantPageHeader, Card, Button, PantroLoader,
 } from '../../../components';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 const PRIVACY_POLICY_URL = 'https://pantro.in/privacy';
 
@@ -39,12 +40,9 @@ export default function PrivacyPolicyScreen() {
       />
 
       <Card style={styles.card}>
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading privacy policy…</Text>
-          </View>
-        ) : error ? (
+      {loading ? (
+        <PantroLoader message="Loading privacy policy…" />
+      ) : error ? (
           <View style={styles.errorContainer}>
             <ExternalLink size={48} color={colors.danger} />
             <Text style={[styles.errorTitle, { color: colors.textPrimary }]}>Unable to Load</Text>
@@ -84,16 +82,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: SPACING.xl,
   },
-  loadingText: { marginTop: SPACING.md, fontSize: FONT_SIZES.md },
+  loadingText: { marginTop: SPACING.md, fontSize: responsiveFontSize(FONT_SIZES.md) },
   errorContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: SPACING.xl,
   },
-  errorTitle: { fontSize: FONT_SIZES.lg, fontWeight: FONT_WEIGHTS.bold, marginTop: SPACING.md },
+  errorTitle: { fontSize: responsiveFontSize(FONT_SIZES.lg), fontWeight: FONT_WEIGHTS.bold, marginTop: SPACING.md },
   errorText: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     textAlign: 'center',
     marginTop: SPACING.sm,
     marginHorizontal: SPACING.md,

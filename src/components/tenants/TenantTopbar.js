@@ -28,6 +28,7 @@ import { logout } from '../../slices/authSlice';
 import { useTheme } from '../../hooks/useTheme';
 import { formatDate } from '../../lib/format';
 import { COLORS, SPACING, SHADOWS } from '../../constants/colors';
+import { responsiveFontSize } from "../../theme";
 
 const PANTRO_ICON = require('../../../assets/pantro-icon.png');
 
@@ -457,7 +458,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   brandText: {
-    fontSize: 13.5,
+    fontSize: responsiveFontSize(13.5),
     fontWeight: '900',
     color: '#2563eb',
     letterSpacing: -0.3,
@@ -466,7 +467,7 @@ const styles = StyleSheet.create({
     color: '#3b82f6',
   },
   propertyNameSub: {
-    fontSize: 11.5,
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '600',
     color: '#64748b',
   },
@@ -492,7 +493,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   themePillText: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     fontWeight: '700',
     color: '#475569',
   },
@@ -530,7 +531,7 @@ const styles = StyleSheet.create({
     borderColor: '#ffffff',
   },
   badgeText: {
-    fontSize: 9,
+    fontSize: responsiveFontSize(9),
     fontWeight: '900',
     color: '#ffffff',
   },
@@ -544,7 +545,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.small,
   },
   avatarInitial: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '800',
     color: '#ffffff',
   },
@@ -589,7 +590,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255, 255, 255, 0.08)',
   },
   notifTitle: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '800',
     letterSpacing: 0.8,
     color: '#0f172a',
@@ -615,7 +616,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(37, 99, 235, 0.15)',
   },
   markReadText: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '700',
     color: '#2563eb',
   },
@@ -648,7 +649,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   notifItemTitle: {
-    fontSize: 12.5,
+    fontSize: responsiveFontSize(12.5),
     fontWeight: '600',
     color: '#334155',
     flex: 1,
@@ -667,7 +668,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563eb',
   },
   notifItemMessage: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
     lineHeight: 15,
   },
@@ -675,7 +676,7 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
   },
   notifItemDate: {
-    fontSize: 9.5,
+    fontSize: responsiveFontSize(9.5),
     fontWeight: '600',
     color: '#94a3b8',
     marginTop: 4,
@@ -686,7 +687,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emptyNotifText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     color: '#94a3b8',
     fontWeight: '600',
   },
@@ -705,7 +706,7 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255, 255, 255, 0.08)',
   },
   viewAllNotifsText: {
-    fontSize: 11.5,
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '700',
     color: '#2563eb',
   },
@@ -746,7 +747,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   profileMenuAvatarInitial: {
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
     fontWeight: '800',
     color: '#ffffff',
   },
@@ -755,7 +756,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   profileMenuName: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '800',
     color: '#0f172a',
   },
@@ -763,7 +764,7 @@ const styles = StyleSheet.create({
     color: '#f1f5f9',
   },
   profileMenuContact: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
     marginTop: 1,
   },
@@ -790,7 +791,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(225, 29, 72, 0.12)',
   },
   profileMenuItemText: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '600',
     color: '#334155',
     flex: 1,
@@ -799,7 +800,7 @@ const styles = StyleSheet.create({
     color: '#cbd5e1',
   },
   profileMenuItemTextDanger: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '700',
     color: '#e11d48',
     flex: 1,

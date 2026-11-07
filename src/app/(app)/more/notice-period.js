@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import {
   LogOut, Clock, CheckCircle2, XCircle, Send, MessageSquareWarning, HandCoins, ImageUp,
 } from 'lucide-react-native';
@@ -14,6 +14,7 @@ import {
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 const STATUS_META = {
   pending: { label: 'Pending', color: COLORS.warning },
@@ -94,18 +95,7 @@ export default function NoticePeriodScreen() {
   };
 
   if (loading && requests.length === 0) {
-    return (
-      <Screen>
-        <TenantPageHeader title="Notice Period" subtitle="Submit a request to vacate" icon={LogOut} iconTone="rose" />
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 }}>
-          <ActivityIndicator size="small" color={isDark ? '#60a5fa' : '#2563eb'} />
-          <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textSecondary }}>
-            Loading notice requests…
-          </Text>
-        </View>
-        <CardSkeleton count={2} />
-      </Screen>
-    );
+    return <PantroLoader fullScreen message="Loading notice requests…" />;
   }
 
   const latest = requests[0] || null;
@@ -247,14 +237,14 @@ export default function NoticePeriodScreen() {
 const styles = StyleSheet.create({
   card: { marginBottom: SPACING.md },
   cardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.sm },
-  cardTitle: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
-  cardSub: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, marginTop: SPACING.xs },
+  cardTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
+  cardSub: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, marginTop: SPACING.xs },
   refundCard: { borderLeftWidth: 4, marginBottom: SPACING.md },
   refundRow: { flexDirection: 'row', gap: SPACING.md },
-  smallMuted: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary, marginTop: SPACING.xs },
-  reason: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, marginTop: SPACING.sm },
-  rejected: { fontSize: FONT_SIZES.sm, color: COLORS.danger, marginTop: SPACING.sm },
-  approved: { fontSize: FONT_SIZES.sm, color: COLORS.success, marginTop: SPACING.sm },
+  smallMuted: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary, marginTop: SPACING.xs },
+  reason: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, marginTop: SPACING.sm },
+  rejected: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.danger, marginTop: SPACING.sm },
+  approved: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.success, marginTop: SPACING.sm },
   formHead: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   banner: {
     flexDirection: 'row',
@@ -264,8 +254,8 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     marginBottom: SPACING.md,
   },
-  bannerTitle: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.bold },
-  bannerText: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, marginTop: 2 },
+  bannerTitle: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.bold },
+  bannerText: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, marginTop: 2 },
   refundProofLink: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -274,7 +264,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   refundProofText: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.semibold,
     color: '#2563eb',
     textDecorationLine: 'underline',

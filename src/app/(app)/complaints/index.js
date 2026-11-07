@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import {
   AlertTriangle, Plus, Wrench, Clock, RefreshCw, ChevronLeft, ChevronRight,
+  ShieldCheck, Activity, TrendingUp, CheckCircle2,
 } from 'lucide-react-native';
 import api from '../../../lib/api';
 import { tenantService } from '../../../services/tenantService';
@@ -15,6 +16,7 @@ import {
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 const CATEGORIES = [
   { value: 'Electricity', label: '⚡ Electricity' },
@@ -42,6 +44,20 @@ const STATUS_CARDS = [
   { key: 'resolved', label: 'Resolved' },
   { key: 'closed', label: 'Closed' },
 ];
+
+const STAT_TONES = {
+  open: { light: { bg: '#fef3c7', fg: '#d97706' }, dark: { bg: 'rgba(217, 119, 6, 0.18)', fg: '#fbbf24' } },
+  in_progress: { light: { bg: '#eff6ff', fg: '#2563eb' }, dark: { bg: 'rgba(37, 99, 235, 0.18)', fg: '#60a5fa' } },
+  resolved: { light: { bg: '#ecfdf5', fg: '#047857' }, dark: { bg: 'rgba(16, 185, 129, 0.18)', fg: '#34d399' } },
+  closed: { light: { bg: '#f3e8ff', fg: '#7c3aed' }, dark: { bg: 'rgba(124, 58, 237, 0.18)', fg: '#a78bfa' } },
+};
+
+const STATUS_ICONS = {
+  open: AlertTriangle,
+  in_progress: Activity,
+  resolved: CheckCircle2,
+  closed: TrendingUp,
+};
 
 const PAGE_LIMIT = 10;
 
@@ -203,12 +219,22 @@ export default function ComplaintsScreen() {
       </View>
 
       <View style={styles.statGrid}>
-        {STATUS_CARDS.map((s) => (
-          <Card key={s.key} style={styles.statCard}>
-            <Text style={[styles.statLabel, { color: colors.textTertiary }]}>{s.label}</Text>
-            <Text style={[styles.statValue, { color: colors.textPrimary }]}>{stats[s.key]}</Text>
-          </Card>
-        ))}
+        {STATUS_CARDS.map((s) => {
+          const tone = STAT_TONES[s.key] || STAT_TONES.open;
+          const { bg, fg } = isDark ? tone.dark : tone.light;
+          const Icon = STATUS_ICONS[s.key];
+          return (
+            <Card key={s.key} style={[styles.statCard, { backgroundColor: bg, borderColor: colors.border }]}>
+              <View style={styles.statHeaderRow}>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{s.label}</Text>
+                <View style={[styles.statIconBox, { backgroundColor: bg }]}>
+                  <Icon size={14} color={fg} strokeWidth={2.2} />
+                </View>
+              </View>
+              <Text style={[styles.statValue, { color: colors.textPrimary }]}>{stats[s.key]}</Text>
+            </Card>
+          );
+        })}
       </View>
 
       <Card style={styles.filterCard}>
@@ -232,15 +258,7 @@ export default function ComplaintsScreen() {
       </Card>
 
       {loading && complaints.length === 0 ? (
-        <>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 }}>
-            <ActivityIndicator size="small" color={isDark ? '#60a5fa' : '#2563eb'} />
-            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textSecondary }}>
-              Loading complaints…
-            </Text>
-          </View>
-          <CardSkeleton count={3} />
-        </>
+        <PantroLoader fullScreen message="Loading complaints…" />
       ) : error && complaints.length === 0 ? (
         <EmptyState
           icon={AlertTriangle}
@@ -328,7 +346,7 @@ export default function ComplaintsScreen() {
         <View style={[styles.infoNote, { backgroundColor: isDark ? 'rgba(59, 130, 246, 0.12)' : `${COLORS.info}14` }]}>
           <Clock size={15} color={COLORS.info} style={{ marginTop: 1 }} />
           <Text style={[styles.infoNoteText, { color: colors.textSecondary }]}>
-            Your complaint will be reviewed by the management team. You'll be notified when there's an update.
+            Your complaint will be reviewed by the management team. You&apos;ll be notified when there&apos;s an update.
           </Text>
         </View>
       </ModalSheet>
@@ -510,17 +528,30 @@ const styles = StyleSheet.create({
   },
   statCard: { width: '48%', flexGrow: 1, padding: SPACING.md },
   statLabel: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: FONT_WEIGHTS.semibold,
     textTransform: 'uppercase',
     letterSpacing: 0.88,
   },
   statValue: {
-    fontSize: FONT_SIZES.xxl,
+    fontSize: responsiveFontSize(FONT_SIZES.xxl),
     fontWeight: '800',
     letterSpacing: -0.4,
     marginTop: 10,
     fontVariant: ['tabular-nums'],
+  },
+  statHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  statIconBox: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   filterCard: { marginBottom: SPACING.md },
   tabsShell: {
@@ -540,12 +571,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
-  tabLabel: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.semibold, letterSpacing: -0.12 },
+  tabLabel: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.semibold, letterSpacing: -0.12 },
   tabCount: {
     borderRadius: BORDER_RADIUS.full,
     paddingHorizontal: 6,
     paddingVertical: 1,
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '700',
     overflow: 'hidden',
   },
@@ -557,7 +588,7 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: SPACING.md,
   },
-  paginationText: { fontSize: FONT_SIZES.xs },
+  paginationText: { fontSize: responsiveFontSize(FONT_SIZES.xs) },
   paginationStrong: { fontWeight: FONT_WEIGHTS.semibold },
   paginationEllipsis: { paddingHorizontal: 4 },
   paginationBtns: { flexDirection: 'row', alignItems: 'center', gap: 6 },
@@ -570,7 +601,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 8,
   },
-  pageBtnText: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.semibold },
+  pageBtnText: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.semibold },
   infoNote: {
     flexDirection: 'row',
     gap: 10,
@@ -578,5 +609,5 @@ const styles = StyleSheet.create({
     padding: 14,
     marginTop: SPACING.xs,
   },
-  infoNoteText: { flex: 1, fontSize: 13, lineHeight: 19 },
+  infoNoteText: { flex: 1, fontSize: responsiveFontSize(13), lineHeight: 19 },
 });

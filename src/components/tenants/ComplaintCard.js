@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react-native';
 import { formatDate } from '../../lib/format';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../constants/colors';
 import { useTheme } from '../../hooks/useTheme';
+import { responsiveFontSize } from "../../theme";
 
 const CATEGORY_ICONS = {
   Electricity: '⚡',
@@ -122,19 +123,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emojiText: {
-    fontSize: 18,
+    fontSize: responsiveFontSize(18),
   },
   infoCol: {
     flex: 1,
   },
   title: {
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
     fontWeight: '700',
     color: '#0f172a',
     letterSpacing: -0.2,
   },
   categorySub: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
     marginTop: 2,
     textTransform: 'capitalize',
@@ -146,12 +147,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statusText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '800',
     letterSpacing: 0.5,
   },
   descText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     color: '#475569',
     lineHeight: 17,
     marginTop: 8,
@@ -168,7 +169,7 @@ const styles = StyleSheet.create({
     paddingLeft: 52,
   },
   dateText: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#94a3b8',
   },
   footerRight: {
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   priorityLabel: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '700',
     textTransform: 'capitalize',
   },

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Bell, Megaphone } from 'lucide-react-native';
 import { tenantService } from '../../../services/tenantService';
 import { useToast } from '../../../hooks/useToast';
@@ -11,6 +11,7 @@ import {
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 const FILTERS = [
   { value: 'all', label: 'All' },
@@ -57,18 +58,7 @@ export default function NoticesScreen() {
   const filtered = filter === 'all' ? notices : notices.filter(isImportant);
 
   if (loading && notices.length === 0) {
-    return (
-      <Screen>
-        <TenantPageHeader title="Notices" subtitle="Important updates from management" icon={Megaphone} iconTone="amber" />
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 }}>
-          <ActivityIndicator size="small" color={isDark ? '#60a5fa' : '#2563eb'} />
-          <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textSecondary }}>
-            Loading notices…
-          </Text>
-        </View>
-        <CardSkeleton count={3} />
-      </Screen>
-    );
+    return <PantroLoader fullScreen message="Loading notices…" />;
   }
 
   return (
@@ -149,8 +139,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: SPACING.md },
   icon: { width: 38, height: 38, borderRadius: BORDER_RADIUS.md, alignItems: 'center', justifyContent: 'center' },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, flexWrap: 'wrap' },
-  title: { flexShrink: 1, fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
-  message: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, marginTop: 4, lineHeight: 19 },
+  title: { flexShrink: 1, fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
+  message: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, marginTop: 4, lineHeight: 19 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: SPACING.sm },
-  meta: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary },
+  meta: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary },
 });

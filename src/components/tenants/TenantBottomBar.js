@@ -9,6 +9,7 @@ import {
   User,
 } from 'lucide-react-native';
 import { useTheme } from '../../hooks/useTheme';
+import { responsiveFontSize } from "../../theme";
 
 export const NAV_TABS = [
   { key: 'dashboard', name: 'dashboard', label: 'Home', icon: LayoutDashboard },
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   tabLabel: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     letterSpacing: 0.1,
   },
 });

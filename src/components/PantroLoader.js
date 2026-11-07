@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/colors';
 import { useTheme } from '../hooks/useTheme';
+import { responsiveFontSize } from "../theme";
 
 const LOCAL_ICON = require('../../assets/icon.png');
 const REMOTE_ICON = 'https://ik.imagekit.io/fkhvlkpi1/pantro-icon.png?tr=w-160,s-30';
@@ -449,20 +450,20 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   brandText: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: '800',
     letterSpacing: 2.5,
   },
   brandDot: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
   },
   portalText: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     fontWeight: '700',
     letterSpacing: 1.8,
   },
   messageText: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     fontWeight: '700',
     letterSpacing: -0.2,
     textAlign: 'center',
@@ -494,7 +495,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   footnoteText: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     fontWeight: '500',
   },
   footnoteBold: {
@@ -525,7 +526,7 @@ const styles = StyleSheet.create({
     borderTopColor: 'transparent',
   },
   minimalText: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: FONT_WEIGHTS.semibold,
   },
   inlineWrap: {
@@ -559,11 +560,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inlineTitle: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: FONT_WEIGHTS.bold,
   },
   inlineSubtext: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     marginTop: 1,
   },
 });

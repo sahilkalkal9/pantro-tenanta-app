@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import {
   DoorOpen, BedDouble, History as HistoryIcon, MoveRight, RefreshCw,
   IndianRupee, AlertTriangle, Send, Home, Building2, Calendar,
@@ -14,6 +14,7 @@ import {
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 const ROOM_TYPES = [
   { value: 'single', label: 'Single' },
@@ -121,18 +122,7 @@ export default function RoomScreen() {
   };
 
   if (loading && !profile) {
-    return (
-      <Screen>
-        <TenantPageHeader title="Room" icon={BedDouble} iconTone="violet" />
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 }}>
-          <ActivityIndicator size="small" color={isDark ? '#60a5fa' : '#2563eb'} />
-          <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textSecondary }}>
-            Loading your room details…
-          </Text>
-        </View>
-        <CardSkeleton count={2} />
-      </Screen>
-    );
+    return <PantroLoader fullScreen message="Loading your room details…" />;
   }
 
   if (!profile) {
@@ -343,9 +333,9 @@ const styles = StyleSheet.create({
   card: { marginBottom: SPACING.md },
   cardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.sm },
   headLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
-  cardTitle: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
-  cardSub: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, lineHeight: 19 },
-  count: { fontSize: FONT_SIZES.sm, color: COLORS.textTertiary },
+  cardTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
+  cardSub: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, lineHeight: 19 },
+  count: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textTertiary },
   grid: { marginTop: SPACING.sm, gap: 12 },
   tile: {
     width: '100%',
@@ -358,20 +348,20 @@ const styles = StyleSheet.create({
   },
   tileIcon: { width: 40, height: 40, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   tileBody: { flex: 1, minWidth: 0 },
-  tileLabel: { fontSize: 11, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textTertiary, textTransform: 'uppercase', letterSpacing: 0.9 },
-  tileValue: { fontSize: 13.5, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary, marginTop: 2 },
+  tileLabel: { fontSize: responsiveFontSize(11), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textTertiary, textTransform: 'uppercase', letterSpacing: 0.9 },
+  tileValue: { fontSize: responsiveFontSize(13.5), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary, marginTop: 2 },
   tileBedRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  noteWarn: { fontSize: FONT_SIZES.sm, color: COLORS.warning },
-  noteMuted: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary },
+  noteWarn: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.warning },
+  noteMuted: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary },
   request: { borderLeftWidth: 4, borderRadius: BORDER_RADIUS.md, borderWidth: 1, borderColor: COLORS.borderLight, padding: SPACING.sm, marginBottom: SPACING.sm },
   requestHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
-  requestStatus: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary, textTransform: 'capitalize' },
-  requestMeta: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, lineHeight: 17 },
-  requestReason: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, marginTop: 4 },
-  requestRejected: { fontSize: FONT_SIZES.sm, color: COLORS.danger, marginTop: 4 },
+  requestStatus: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary, textTransform: 'capitalize' },
+  requestMeta: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, lineHeight: 17 },
+  requestReason: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, marginTop: 4 },
+  requestRejected: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.danger, marginTop: 4 },
   timelineRow: { flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.md },
   timelineDot: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
-  timelineTitle: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary, textTransform: 'capitalize' },
-  timelineDesc: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: 2 },
-  timelineDate: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary, marginTop: 2 },
+  timelineTitle: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary, textTransform: 'capitalize' },
+  timelineDesc: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginTop: 2 },
+  timelineDate: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary, marginTop: 2 },
 });

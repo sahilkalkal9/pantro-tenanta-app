@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Linking, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Linking, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import {
-  Phone, Mail, MapPin, Clock, MessageSquare, ChevronRight,
+  Phone, Mail, MapPin, Clock, ChevronRight,
   ShieldCheck, Sparkles, AlertTriangle, Building2, LifeBuoy,
+  IndianRupee,
 } from 'lucide-react-native';
 import { tenantService } from '../../../services/tenantService';
 import { useToast } from '../../../hooks/useToast';
@@ -13,6 +14,7 @@ import {
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 export default function SupportScreen() {
   const toast = useToast();
@@ -47,18 +49,7 @@ export default function SupportScreen() {
   }, []);
 
   if (loading && !profile) {
-    return (
-      <Screen>
-        <TenantPageHeader title="Help & Support" subtitle="Need assistance with your stay, payments, or room? We're here to help." icon={LifeBuoy} iconTone="violet" />
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 }}>
-          <ActivityIndicator size="small" color={isDark ? '#60a5fa' : '#2563eb'} />
-          <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textSecondary }}>
-            Loading support details…
-          </Text>
-        </View>
-        <CardSkeleton count={2} />
-      </Screen>
-    );
+    return <PantroLoader fullScreen message="Loading support details…" />;
   }
 
   const property = profile?.propertyId || null;
@@ -213,14 +204,16 @@ export default function SupportScreen() {
       </Card>
 
       {/* Platform & Technology Partner Info */}
-      <Card style={styles.card}>
+      <Card style={styles.card} onPress={() => Linking.openURL('https://www.pantro.in')}>
         <View style={styles.row}>
           <View style={[styles.icon, { backgroundColor: 'rgba(20, 184, 166, 0.15)' }]}>
             <Sparkles size={20} color="#0d9488" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>Platform & Technology</Text>
-            <Text style={[styles.sub, { color: colors.textTertiary }]}>Official technology partner information</Text>
+            <View style={[styles.partnerHeaderRow, { marginBottom: 8 }]}>
+              <Text style={[styles.title, { color: colors.textPrimary }]}>Platform & Technology</Text>
+              <Text style={[styles.sub, { color: colors.textTertiary }]}>Official technology partner information</Text>
+            </View>
 
             <View style={[styles.partnerBox, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.12)' : '#eff6ff', borderColor: isDark ? 'rgba(37, 99, 235, 0.3)' : '#bfdbfe' }]}>
               <View style={{ flex: 1 }}>
@@ -230,6 +223,14 @@ export default function SupportScreen() {
                 <Text style={[styles.partnerDesc, { color: colors.textSecondary }]}>
                   Modern PropTech Software for PG, Hostel, RK & Flat Management.
                 </Text>
+                <View style={styles.partnerMetaRow}>
+                  <Text style={[styles.partnerMetaLabel, { color: colors.textFaint }]}>Platform</Text>
+                  <Text style={[styles.partnerMetaValue, { color: colors.textSecondary }]}>Pantro Tenant Portal</Text>
+                </View>
+                <View style={styles.partnerMetaRow}>
+                  <Text style={[styles.partnerMetaLabel, { color: colors.textFaint }]}>License</Text>
+                  <Text style={[styles.partnerMetaValue, { color: colors.textSecondary }]}>© Wabsyte Studio (OPC) Private Limited</Text>
+                </View>
               </View>
               <View style={styles.verifiedBadge}>
                 <ShieldCheck size={14} color="#2563eb" />
@@ -237,11 +238,30 @@ export default function SupportScreen() {
               </View>
             </View>
 
-            <Text style={[styles.licenseText, { color: colors.textTertiary }]}>
-              All tenancy records, rent receipts, security deposit calculations, and digital rent agreements in this
-              portal are powered by Pantro under license from{' '}
-              <Text style={{ fontWeight: FONT_WEIGHTS.bold }}>Wabsyte Studio (OPC) Private Limited</Text>.
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => Linking.openURL('https://www.pantro.in')}
+              style={styles.visitSiteBtn}
+            >
+              <Text style={styles.visitSiteText}>Visit pantro.in →</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={[styles.partnerBox, { backgroundColor: isDark ? 'rgba(217, 119, 6, 0.12)' : '#fef3c7', borderColor: isDark ? 'rgba(217, 119, 6, 0.3)' : '#fde68a' }]}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.partnerCompany, { color: colors.textPrimary }]}>
+              Zero Platform Fees on Rent Collection
             </Text>
+            <Text style={[styles.partnerDesc, { color: colors.textSecondary }]}>
+              Collect rent directly from tenants to your bank account — no gateway commission deducted by Pantro.
+            </Text>
+          </View>
+          <View style={styles.verifiedBadge}>
+            <IndianRupee size={14} color="#d97706" />
+            <Text style={[styles.verifiedText, { color: '#b45309' }]}>Direct Settlement</Text>
           </View>
         </View>
       </Card>
@@ -253,11 +273,11 @@ const styles = StyleSheet.create({
   card: { marginBottom: SPACING.md },
   row: { flexDirection: 'row', gap: SPACING.md, alignItems: 'flex-start' },
   icon: { width: 40, height: 40, borderRadius: BORDER_RADIUS.md, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold },
+  title: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold },
   emergencyNumberRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
-  emergencyLink: { fontSize: FONT_SIZES.xl, fontWeight: FONT_WEIGHTS.bold, color: COLORS.danger },
-  muted: { fontSize: FONT_SIZES.sm, marginTop: 4 },
-  sub: { fontSize: FONT_SIZES.xs, lineHeight: 17, marginTop: 4 },
+  emergencyLink: { fontSize: responsiveFontSize(FONT_SIZES.xl), fontWeight: FONT_WEIGHTS.bold, color: COLORS.danger },
+  muted: { fontSize: responsiveFontSize(FONT_SIZES.sm), marginTop: 4 },
+  sub: { fontSize: responsiveFontSize(FONT_SIZES.xs), lineHeight: 17, marginTop: 4 },
   scheduleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -265,21 +285,36 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderBottomWidth: 1,
   },
-  scheduleLabel: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.semibold },
-  scheduleValue: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.normal },
+  scheduleLabel: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: FONT_WEIGHTS.semibold },
+  scheduleValue: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: FONT_WEIGHTS.normal },
   contactGrid: { flexDirection: 'column', gap: SPACING.md, marginTop: SPACING.sm },
   contactBox: { padding: 12, borderRadius: BORDER_RADIUS.md, borderWidth: 1 },
   contactLabel: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     fontWeight: FONT_WEIGHTS.bold,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
     marginBottom: 4,
   },
   contactValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  contactValue: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.semibold, flexShrink: 1 },
+  contactValue: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.semibold, flexShrink: 1 },
   addressRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: SPACING.sm, padding: 12, borderRadius: BORDER_RADIUS.md, borderWidth: 1 },
-  address: { flex: 1, fontSize: FONT_SIZES.xs, lineHeight: 16 },
+  address: { flex: 1, fontSize: responsiveFontSize(FONT_SIZES.xs), lineHeight: 16 },
+  partnerHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  partnerMetaRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
+  partnerMetaLabel: { fontSize: responsiveFontSize(10), fontWeight: FONT_WEIGHTS.bold, color: COLORS.gray500, textTransform: 'uppercase', letterSpacing: 0.6 },
+  partnerMetaValue: { fontSize: responsiveFontSize(11), color: COLORS.gray600 },
+  visitSiteBtn: {
+    marginTop: SPACING.sm,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+  },
+  visitSiteText: { fontSize: responsiveFontSize(11), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.primary },
+  divider: { height: 1, backgroundColor: COLORS.border, marginVertical: SPACING.sm },
   partnerBox: {
     borderWidth: 1,
     borderRadius: BORDER_RADIUS.md,
@@ -289,13 +324,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
-  partnerCompany: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold },
-  partnerDesc: { fontSize: 11, marginTop: 2 },
+  partnerCompany: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold },
+  partnerDesc: { fontSize: responsiveFontSize(11), marginTop: 2 },
   verifiedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-  verifiedText: { fontSize: 11, fontWeight: FONT_WEIGHTS.semibold, color: '#2563eb' },
-  licenseText: { fontSize: 11, lineHeight: 16, marginTop: SPACING.md },
+  verifiedText: { fontSize: responsiveFontSize(11), fontWeight: FONT_WEIGHTS.semibold, color: '#2563eb' },
+  licenseText: { fontSize: responsiveFontSize(11), lineHeight: 16, marginTop: SPACING.md },
 });

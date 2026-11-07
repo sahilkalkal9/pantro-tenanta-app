@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import {
   ShieldCheck, Receipt, Wallet, AlertCircle,
@@ -11,11 +11,13 @@ import { getErrorMessage } from '../../lib/normalize';
 import { formatCurrency, formatMonthYear } from '../../lib/format';
 import {
   Screen, TenantPageHeader, Card, Button, EmptyState, SegmentedControl, CardSkeleton,
+  PantroLoader,
 } from '../../components';
 import PaymentSheet from '../../components/tenants/PaymentSheet';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../constants/colors';
 import { useTheme } from '../../hooks/useTheme';
 import RentStatusCard from '../../components/tenants/RentStatusCard';
+import { responsiveFontSize } from "../../theme";
 
 const FILTERS = [
   { value: 'all', label: 'All' },
@@ -189,23 +191,7 @@ export default function RentScreen() {
 
 
   if (loading && !payload) {
-    return (
-      <Screen scroll={false}>
-        <TenantPageHeader
-          title="Rent & Payments"
-          subtitle="View and pay your rent & security deposit"
-          icon={LayoutDashboard}
-          iconTone="blue"
-        />
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14 }}>
-          <ActivityIndicator size="small" color={isDark ? '#60a5fa' : '#2563eb'} />
-          <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textSecondary }}>
-            Loading rent details…
-          </Text>
-        </View>
-        <CardSkeleton count={3} />
-      </Screen>
-    );
+    return <PantroLoader fullScreen message="Loading rent details…" />;
   }
 
   const depositPaid = Number(securityDeposit?.collected) || 0;
@@ -404,8 +390,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardTitle: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
-  cardSub: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary, marginTop: 1 },
+  cardTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
+  cardSub: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginTop: 1 },
   depositRow: { flexDirection: 'row', gap: SPACING.sm },
   depositCell: {
     flex: 1,
@@ -414,12 +400,12 @@ const styles = StyleSheet.create({
     padding: SPACING.sm,
   },
   cellLabel: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: FONT_WEIGHTS.semibold,
     color: COLORS.textSecondary,
     textTransform: 'uppercase',
   },
-  cellValue: { fontSize: FONT_SIZES.lg, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary, marginTop: 4 },
+  cellValue: { fontSize: responsiveFontSize(FONT_SIZES.lg), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary, marginTop: 4 },
   warnNote: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -432,7 +418,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     marginBottom: SPACING.md,
   },
-  warnNoteText: { flex: 1, fontSize: FONT_SIZES.xs, color: COLORS.warning },
+  warnNoteText: { flex: 1, fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.warning },
   feeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -441,8 +427,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.borderLight,
   },
-  feeName: { fontSize: FONT_SIZES.md, color: COLORS.textSecondary },
-  feeAmount: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
+  feeName: { fontSize: responsiveFontSize(FONT_SIZES.md), color: COLORS.textSecondary },
+  feeAmount: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary },
   multiCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -450,7 +436,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   upcomingLabel: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     fontWeight: FONT_WEIGHTS.semibold,
     color: COLORS.textTertiary,
     textTransform: 'uppercase',
@@ -462,12 +448,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   rejectBannerTitle: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '700',
     marginBottom: 4,
   },
   rejectBannerText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     lineHeight: 17,
   },
 });

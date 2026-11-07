@@ -11,7 +11,6 @@ import {
   TouchableWithoutFeedback,
   Alert,
   useWindowDimensions,
-  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePathname, router } from 'expo-router';
@@ -37,6 +36,7 @@ import {
 import { logout } from '../../slices/authSlice';
 import { useTheme } from '../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../constants/colors';
+import { responsiveFontSize } from "../../theme";
 
 const PANTRO_ICON = require('../../../assets/pantro-icon.png');
 
@@ -176,7 +176,7 @@ export default function TenantDrawer({ visible, onClose }) {
               backgroundColor: drawerBg,
               borderRightColor: borderColor,
               transform: [{ translateX: slideAnim }],
-              marginTop: Platform.OS === 'android' ? 0 : Math.max(insets.top, 0),
+              marginTop: Math.max(insets.top, 0),
               marginBottom: Math.max(insets.bottom, 0),
             },
           ]}
@@ -334,7 +334,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   drawer: {
-    height: '100%',
     borderRightWidth: 1,
     borderTopRightRadius: 20,
     borderBottomRightRadius: 20,
@@ -363,12 +362,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   brandTitle: {
-    fontSize: 16,
+    fontSize: responsiveFontSize(16),
     fontWeight: '800',
     letterSpacing: -0.3,
   },
   brandSub: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '600',
   },
   closeBtn: {
@@ -398,18 +397,18 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     color: '#ffffff',
-    fontSize: 15,
+    fontSize: responsiveFontSize(15),
     fontWeight: '800',
   },
   profileInfo: {
     flex: 1,
   },
   profileName: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontWeight: '700',
   },
   profileContact: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     marginTop: 1,
   },
   navScroll: {
@@ -430,7 +429,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   navLabel: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     flex: 1,
   },
   activeDot: {
@@ -461,11 +460,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   themeLabel: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: '600',
   },
   themeSwitchText: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '700',
     color: '#64748b',
     textTransform: 'uppercase',
@@ -481,7 +480,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(225, 29, 72, 0.08)',
   },
   signOutText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: '700',
     color: '#e11d48',
   },
@@ -490,11 +489,11 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   brandingTitle: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '700',
   },
   brandingSub: {
-    fontSize: 8,
+    fontSize: responsiveFontSize(8),
     marginTop: 1,
     textAlign: 'center',
   },

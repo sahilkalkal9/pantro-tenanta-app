@@ -19,6 +19,7 @@ import {
 } from '../constants/colors';
 import PantroLoader from './PantroLoader';
 import { useTheme } from '../hooks/useTheme';
+import { responsiveFontSize } from "../theme";
 
 /* ------------------------------------------------------------------ */
 /* Card                                                                */
@@ -490,7 +491,7 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search...', styl
   const { colors } = useTheme();
   return (
     <View style={[styles.searchBar, { backgroundColor: colors.inputBg, borderColor: colors.border }, style]}>
-      <Text style={{ color: colors.textTertiary, fontSize: 15, marginRight: 6 }}>⌕</Text>
+      <Text style={{ color: colors.textTertiary, fontSize: responsiveFontSize(15), marginRight: 6 }}>⌕</Text>
       <TextInput
         style={[styles.searchInput, { color: colors.textPrimary }]}
         value={value}
@@ -510,7 +511,7 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search...', styl
 
 function SearchIcon() {
   return (
-    <Text style={{ color: COLORS.textTertiary, fontSize: 15, marginRight: 6 }}>⌕</Text>
+    <Text style={{ color: COLORS.textTertiary, fontSize: responsiveFontSize(15), marginRight: 6 }}>⌕</Text>
   );
 }
 
@@ -639,7 +640,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: BORDER_RADIUS.full,
   },
-  badgeText: { fontSize: FONT_SIZES.xs, fontWeight: FONT_WEIGHTS.semibold },
+  badgeText: { fontSize: responsiveFontSize(FONT_SIZES.xs), fontWeight: FONT_WEIGHTS.semibold },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -648,11 +649,11 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.full,
     borderWidth: 1,
   },
-  chipText: { fontSize: FONT_SIZES.sm, fontWeight: FONT_WEIGHTS.medium },
+  chipText: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.medium },
   divider: { height: 1, backgroundColor: COLORS.border },
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   dividerLine: { flex: 1, height: 1, backgroundColor: COLORS.border },
-  dividerLabel: { fontSize: FONT_SIZES.sm, color: COLORS.textTertiary },
+  dividerLabel: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textTertiary },
   progressTrack: {
     width: '100%',
     backgroundColor: COLORS.gray200,
@@ -666,13 +667,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   sectionTitle: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: responsiveFontSize(FONT_SIZES.lg),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.textPrimary,
   },
   sectionAction: { flexDirection: 'row', alignItems: 'center' },
   sectionActionText: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.primary,
   },
@@ -691,18 +692,18 @@ const styles = StyleSheet.create({
   },
   listItemBody: { flex: 1 },
   listItemTitle: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.textPrimary,
   },
   listItemSubtitle: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     color: COLORS.textSecondary,
     marginTop: 2,
   },
   listItemRight: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   listItemRightText: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     fontWeight: FONT_WEIGHTS.semibold,
     color: COLORS.textPrimary,
   },
@@ -712,9 +713,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: SPACING.xs,
   },
-  keyValueLabel: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary },
+  keyValueLabel: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary },
   keyValueValue: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.semibold,
     color: COLORS.textPrimary,
     maxWidth: '60%',
@@ -736,13 +737,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   emptyTitle: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: responsiveFontSize(FONT_SIZES.lg),
     fontWeight: FONT_WEIGHTS.semibold,
     color: COLORS.textPrimary,
     textAlign: 'center',
   },
   emptyMessage: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     color: COLORS.textSecondary,
     textAlign: 'center',
     marginTop: SPACING.xs,
@@ -757,7 +758,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.sm,
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     color: COLORS.textSecondary,
   },
   searchBar: {
@@ -770,8 +771,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     height: 46,
   },
-  searchInput: { flex: 1, fontSize: FONT_SIZES.md, color: COLORS.textPrimary },
-  searchClear: { color: COLORS.textTertiary, fontSize: 14, paddingHorizontal: 4 },
+  searchInput: { flex: 1, fontSize: responsiveFontSize(FONT_SIZES.md), color: COLORS.textPrimary },
+  searchClear: { color: COLORS.textTertiary, fontSize: responsiveFontSize(14), paddingHorizontal: 4 },
   fab: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -782,7 +783,7 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     ...SHADOWS.large,
   },
-  fabLabel: { color: COLORS.white, fontWeight: FONT_WEIGHTS.semibold, fontSize: FONT_SIZES.md },
+  fabLabel: { color: COLORS.white, fontWeight: FONT_WEIGHTS.semibold, fontSize: responsiveFontSize(FONT_SIZES.md) },
   segmented: {
     flexDirection: 'row',
     backgroundColor: COLORS.gray100,
@@ -797,7 +798,7 @@ const styles = StyleSheet.create({
   },
   segmentedItemActive: { backgroundColor: COLORS.white, ...SHADOWS.small },
   segmentedText: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.textSecondary,
   },
@@ -812,12 +813,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   statValue: {
-    fontSize: FONT_SIZES.xl,
+    fontSize: responsiveFontSize(FONT_SIZES.xl),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.textPrimary,
   },
-  statLabel: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, marginTop: 2 },
-  statSub: { fontSize: FONT_SIZES.xs, color: COLORS.textTertiary, marginTop: 2 },
+  statLabel: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, marginTop: 2 },
+  statSub: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textTertiary, marginTop: 2 },
   pageHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -825,12 +826,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   pageHeaderTitle: {
-    fontSize: FONT_SIZES.xxl,
+    fontSize: responsiveFontSize(FONT_SIZES.xxl),
     fontWeight: FONT_WEIGHTS.bold,
     color: COLORS.textPrimary,
   },
   pageHeaderSubtitle: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     color: COLORS.textSecondary,
     marginTop: 2,
   },

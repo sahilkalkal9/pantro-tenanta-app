@@ -15,6 +15,7 @@ import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../
 import { useToast } from '../../../hooks/useToast';
 import { useTheme } from '../../../hooks/useTheme';
 import { otaService } from '../../../services/otaService';
+import { responsiveFontSize } from "../../../theme";
 
 const MENU = [
   {
@@ -154,14 +155,14 @@ export default function MoreScreen() {
 const styles = StyleSheet.create({
   profileCard: { marginBottom: SPACING.lg },
   profileRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
-  profileName: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
-  profileEmail: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, marginTop: 2 },
+  profileName: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
+  profileEmail: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, marginTop: 2 },
   group: { marginBottom: SPACING.lg },
   groupCard: { paddingHorizontal: SPACING.md },
   listItem: { paddingVertical: SPACING.md },
   version: {
     textAlign: 'center',
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     color: COLORS.textTertiary,
     marginTop: SPACING.md,
   },

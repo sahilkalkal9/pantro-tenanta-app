@@ -4,6 +4,7 @@ import { Bell, AlertCircle } from 'lucide-react-native';
 import { formatDate } from '../../lib/format';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../constants/colors';
 import { useTheme } from '../../hooks/useTheme';
+import { responsiveFontSize } from "../../theme";
 
 export default function NoticeCard({ notice, onClick, style }) {
   const { colors, isDark } = useTheme();
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
     fontWeight: '800',
     color: '#0f172a',
     letterSpacing: -0.2,
@@ -143,13 +144,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(217, 119, 6, 0.3)',
   },
   importantText: {
-    fontSize: 9,
+    fontSize: responsiveFontSize(9),
     fontWeight: '800',
     color: '#b45309',
     letterSpacing: 0.6,
   },
   messageText: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     color: '#475569',
     lineHeight: 19,
     marginBottom: 10,
@@ -160,15 +161,15 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   metaText: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#94a3b8',
   },
   metaDot: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#94a3b8',
   },
   metaAudience: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
     textTransform: 'capitalize',
   },

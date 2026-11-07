@@ -19,6 +19,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ArrowRight, ArrowLeft, Clock, Zap, AlertTriangle } from 'lucide-react-native';
 import { verifyOtp, requestOtp } from '../../slices/authSlice';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../constants/colors';
+import { responsiveFontSize } from "../../theme";
 
 const LOGO_URI = 'https://ik.imagekit.io/fkhvlkpi1/FULL%20LOGO%20P.png';
 const LOCAL_ICON = require('../../../assets/icon.png');
@@ -396,13 +397,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#2dd4bf',
   },
   portalBadgeText: {
-    fontSize: 10.5,
+    fontSize: responsiveFontSize(10.5),
     fontWeight: '700',
     letterSpacing: 1.4,
     color: '#2dd4bf',
   },
   title: {
-    fontSize: 22,
+    fontSize: responsiveFontSize(22),
     fontWeight: '800',
     color: '#ffffff',
     letterSpacing: -0.4,
@@ -410,7 +411,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     color: '#94a3b8',
     textAlign: 'center',
     maxWidth: 300,
@@ -450,12 +451,12 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   changeNumberText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     color: '#2dd4bf',
     fontWeight: '600',
   },
   phonePill: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: '700',
     color: '#cbd5e1',
     letterSpacing: 0.5,
@@ -474,7 +475,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: 'rgba(51, 65, 85, 0.6)',
     color: '#ffffff',
-    fontSize: 20,
+    fontSize: responsiveFontSize(20),
     fontWeight: '800',
   },
   otpBoxFilled: {
@@ -499,12 +500,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   devChipText: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontWeight: '600',
     color: '#fde68a',
   },
   devChipAction: {
-    fontSize: 11.5,
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '700',
     color: '#fbbf24',
     textDecorationLine: 'underline',
@@ -522,7 +523,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     flex: 1,
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     color: '#fca5a5',
     lineHeight: 16,
   },
@@ -545,7 +546,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   buttonText: {
-    fontSize: 15,
+    fontSize: responsiveFontSize(15),
     fontWeight: '700',
     color: '#ffffff',
     letterSpacing: 0.2,
@@ -562,12 +563,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   resendTextCooldown: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     color: '#64748b',
     fontWeight: '500',
   },
   resendTextActive: {
-    fontSize: 12.5,
+    fontSize: responsiveFontSize(12.5),
     color: '#2dd4bf',
     fontWeight: '700',
   },
@@ -577,11 +578,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   footerCopy: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
   },
   footerBrand: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
   },
   footerBrandBold: {
@@ -596,12 +597,12 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   legalLink: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#2dd4bf',
     textDecorationLine: 'underline',
   },
   legalSeparator: {
-    fontSize: 11,
+    fontSize: responsiveFontSize(11),
     color: '#64748b',
   },
 });

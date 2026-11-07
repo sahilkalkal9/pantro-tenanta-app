@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { useTheme } from '../../../hooks/useTheme';
 import { Screen, TenantPageHeader, Card } from '../../../components';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
+import { responsiveFontSize } from "../../../theme";
 
 const SECTIONS = [
   {
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sectionTitle: {
-    fontSize: FONT_SIZES.md,
+    fontSize: responsiveFontSize(FONT_SIZES.md),
     fontWeight: FONT_WEIGHTS.bold,
     flex: 1,
   },
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   paragraph: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
     lineHeight: 20,
   },
   footerNote: {
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
   },
   footerText: {
-    fontSize: FONT_SIZES.xs,
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
     textAlign: 'center',
   },
 });
