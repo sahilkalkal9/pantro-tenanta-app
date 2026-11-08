@@ -1,4 +1,5 @@
 import Expo
+import EXUpdates
 import React
 import ReactAppDependencyProvider
 
@@ -13,6 +14,8 @@ public class AppDelegate: ExpoAppDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+    AppController.initializeWithoutStarting()
+
     let delegate = ReactNativeDelegate()
     let factory = ExpoReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
@@ -64,6 +67,9 @@ class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
 #if DEBUG
     return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry")
 #else
+    if AppController.isInitialized(), let updatesUrl = AppController.sharedInstance.launchAssetUrl() {
+      return updatesUrl
+    }
     return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif
   }
