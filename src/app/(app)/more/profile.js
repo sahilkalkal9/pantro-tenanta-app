@@ -9,6 +9,7 @@ import {
   Modal,
   Linking,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,21 +19,26 @@ import {
   CheckCircle2, GraduationCap, Briefcase, Banknote, FileText,
   ExternalLink, X, Save, Heart, Edit3, Lock, FileCheck, PenLine,
   Check, ArrowRight, ShieldCheck, BadgeCheck, ShieldAlert,
-  HelpCircle, Sparkles, RotateCcw, LogOut, Loader2, Upload,
+  HelpCircle, Sparkles, RotateCcw, LogOut, Loader2, Upload, Info,
 } from 'lucide-react-native';
 import { tenantService } from '../../../services/tenantService';
 import { logout } from '../../../slices/authSlice';
 import { useToast } from '../../../hooks/useToast';
+import { useOtaUpdates } from '../../../hooks/useOtaUpdates';
 import { getErrorMessage } from '../../../lib/normalize';
 import api, { resolveMediaUrl } from '../../../lib/api';
 import { formatCurrency, formatDate } from '../../../lib/format';
 import {
   Screen, Card, Button, Badge, Avatar, ProgressBar, Chip, TextField, SelectField,
   EmptyState, ImageKitUploader, TenantPageHeader, Skeleton, CardSkeleton, PantroLoader,
+  Divider,
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
 import { responsiveFontSize } from "../../../theme";
+import { NATIVE_APP_VERSION, NATIVE_BUILD_NUMBER, RUNTIME_VERSION } from '../../../services/otaService';
+
+const LOCAL_ICON = require('../../../../assets/icon.png');
 
 const EDUCATION_LEVELS = [
   { value: 'high_school',   label: 'High school' },
@@ -144,6 +150,39 @@ export default function TenantProfileScreen() {
 
   // Lightbox modal state
   const [lightbox, setLightbox] = useState(null); // { url, label }
+
+  // OTA Updates State & Hook
+  const {
+    isChecking: isOtaChecking,
+    isDownloading: isOtaDownloading,
+    isPendingRestart: isOtaPendingRestart,
+    installedInfo: otaInstalledInfo,
+    checkForUpdates: checkOtaUpdates,
+    reloadApp: reloadOtaApp,
+  } = useOtaUpdates({ autoCheck: false });
+
+  const [checkStatusText, setCheckStatusText] = useState('');
+
+  const handleManualCheckUpdate = async () => {
+    setCheckStatusText('Checking server for updates…');
+    try {
+      const res = await checkOtaUpdates();
+      if (res?.updateAvailable && res?.downloaded) {
+        toast.success(`Update v${res.update?.version} downloaded! Restart to apply.`);
+        setCheckStatusText(`Update v${res.update?.version} ready!`);
+      } else if (res?.updateAvailable) {
+        toast.info(`Update v${res.update?.version} is available.`);
+        setCheckStatusText(`Update v${res.update?.version} is available`);
+      } else {
+        toast.success('App is up to date!');
+        setCheckStatusText("You're on the latest version ✓");
+        setTimeout(() => setCheckStatusText(''), 4500);
+      }
+    } catch (err) {
+      toast.error('Could not check for updates');
+      setCheckStatusText('');
+    }
+  };
 
   // Quick navigation
   const [activeSection, setActiveSection] = useState('personal');
@@ -1444,6 +1483,118 @@ export default function TenantProfileScreen() {
             </View>
           </Card>
         </View>
+
+        {/* ── 9. APP VERSION & SYSTEM INFO ── */}
+        <View style={styles.versionCardWrap}>
+          <Card style={styles.versionCard}>
+            <View style={styles.versionHeaderRow}>
+              <View style={[styles.versionIconWrap, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.15)' : '#eff6ff', borderColor: isDark ? 'rgba(59, 130, 246, 0.3)' : '#bfdbfe' }]}>
+                <Image source={LOCAL_ICON} style={styles.versionAppIcon} resizeMode="contain" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={styles.versionTitleRow}>
+                  <Text style={[styles.versionAppName, { color: colors.textPrimary }]}>Pantro Tenant</Text>
+                  <View style={[styles.versionPill, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.18)' : '#eff6ff', borderColor: isDark ? 'rgba(59, 130, 246, 0.35)' : '#bfdbfe' }]}>
+                    <Text style={[styles.versionPillText, { color: isDark ? '#60a5fa' : '#2563eb' }]}>
+                      {otaInstalledInfo?.displayVersion || `v${NATIVE_APP_VERSION}`}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.versionTagRow}>
+                  <View style={[styles.versionStatusDot, { backgroundColor: otaInstalledInfo?.isEmbedded === false ? '#10b981' : '#64748b' }]} />
+                  <Text style={[styles.versionTagline, { color: colors.textSecondary }]}>
+                    {otaInstalledInfo?.isEmbedded === false
+                      ? 'Live OTA Bundle Active'
+                      : 'Production Binary Build'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <Divider style={{ marginVertical: SPACING.md }} />
+
+            <View style={styles.versionMetaGrid}>
+              <View style={[styles.versionMetaBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc', borderColor: colors.border }]}>
+                <Text style={[styles.versionMetaLabel, { color: colors.textTertiary }]}>VERSION</Text>
+                <Text style={[styles.versionMetaVal, { color: colors.textPrimary }]}>
+                  {otaInstalledInfo?.otaVersion ? `v${otaInstalledInfo.otaVersion}` : `v${NATIVE_APP_VERSION}`}
+                </Text>
+              </View>
+
+              <View style={[styles.versionMetaBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc', borderColor: colors.border }]}>
+                <Text style={[styles.versionMetaLabel, { color: colors.textTertiary }]}>BUILD</Text>
+                <Text style={[styles.versionMetaVal, { color: colors.textPrimary }]}>
+                  #{otaInstalledInfo?.buildNumber || NATIVE_BUILD_NUMBER}
+                </Text>
+              </View>
+
+              <View style={[styles.versionMetaBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc', borderColor: colors.border }]}>
+                <Text style={[styles.versionMetaLabel, { color: colors.textTertiary }]}>RUNTIME</Text>
+                <Text style={[styles.versionMetaVal, { color: colors.textPrimary }]}>
+                  {otaInstalledInfo?.runtimeVersion || RUNTIME_VERSION}
+                </Text>
+              </View>
+
+              <View style={[styles.versionMetaBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc', borderColor: colors.border }]}>
+                <Text style={[styles.versionMetaLabel, { color: colors.textTertiary }]}>CHANNEL</Text>
+                <Text style={[styles.versionMetaVal, { color: colors.textPrimary }]}>
+                  {otaInstalledInfo?.channel || 'production'}
+                </Text>
+              </View>
+            </View>
+
+            {isOtaPendingRestart ? (
+              <View style={[styles.restartBanner, { backgroundColor: isDark ? 'rgba(16, 185, 129, 0.12)' : '#ecfdf5', borderColor: isDark ? 'rgba(16, 185, 129, 0.3)' : '#a7f3d0' }]}>
+                <Text style={[styles.restartBannerText, { color: isDark ? '#34d399' : '#065f46' }]}>
+                  🎉 A new update has been downloaded and is ready to apply!
+                </Text>
+                <Button
+                  title="Restart App to Apply Update"
+                  variant="primary"
+                  size="sm"
+                  icon={RotateCcw}
+                  onPress={() => reloadOtaApp()}
+                  style={{ marginTop: SPACING.xs }}
+                />
+              </View>
+            ) : (
+              <View style={styles.updateActionWrap}>
+                <TouchableOpacity
+                  style={[styles.checkUpdateBtn, { borderColor: isDark ? 'rgba(255,255,255,0.12)' : '#cbd5e1', backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#f8fafc' }]}
+                  onPress={handleManualCheckUpdate}
+                  disabled={isOtaChecking || isOtaDownloading}
+                  activeOpacity={0.7}
+                >
+                  {isOtaChecking || isOtaDownloading ? (
+                    <ActivityIndicator size="small" color={COLORS.primary} />
+                  ) : (
+                    <RefreshCw size={14} color={isDark ? '#60a5fa' : '#2563eb'} />
+                  )}
+                  <Text style={[styles.checkUpdateBtnText, { color: isDark ? '#60a5fa' : '#2563eb' }]}>
+                    {isOtaChecking
+                      ? 'Checking for updates…'
+                      : isOtaDownloading
+                      ? 'Downloading update…'
+                      : 'Check for Updates'}
+                  </Text>
+                </TouchableOpacity>
+
+                {!!checkStatusText && (
+                  <Text style={[styles.checkStatusText, { color: colors.textSecondary }]}>
+                    {checkStatusText}
+                  </Text>
+                )}
+              </View>
+            )}
+
+            <View style={styles.corporateFootnoteRow}>
+              <View style={[styles.corporateFootnoteDot, { backgroundColor: isDark ? '#475569' : '#cbd5e1' }]} />
+              <Text style={[styles.corporateFootnote, { color: colors.textTertiary }]}>
+                A Product of <Text style={{ color: colors.textSecondary, fontWeight: '700' }}>Wabsyte Studio (OPC) Private Limited</Text>
+              </Text>
+            </View>
+          </Card>
+        </View>
       </View>
 
       {/* Document Lightbox Modal */}
@@ -2387,6 +2538,143 @@ const styles = StyleSheet.create({
   lightboxImage: {
     width: '100%',
     height: '85%',
+  },
+  versionCardWrap: {
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xl,
+  },
+  versionCard: {
+    padding: SPACING.lg,
+  },
+  versionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  versionIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 6,
+  },
+  versionAppIcon: {
+    width: '100%',
+    height: '100%',
+  },
+  versionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  versionAppName: {
+    fontSize: responsiveFontSize(FONT_SIZES.md),
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  versionPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  versionPillText: {
+    fontSize: responsiveFontSize(11),
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  versionTagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 3,
+  },
+  versionStatusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+  },
+  versionTagline: {
+    fontSize: responsiveFontSize(11.5),
+    fontWeight: '500',
+  },
+  versionMetaGrid: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+    marginBottom: SPACING.md,
+  },
+  versionMetaBox: {
+    flex: 1,
+    minWidth: '22%',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  versionMetaLabel: {
+    fontSize: responsiveFontSize(9.5),
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
+  versionMetaVal: {
+    fontSize: responsiveFontSize(12),
+    fontWeight: '800',
+  },
+  restartBanner: {
+    padding: SPACING.md,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: SPACING.sm,
+  },
+  restartBannerText: {
+    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontWeight: '700',
+    marginBottom: SPACING.xs,
+  },
+  updateActionWrap: {
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: SPACING.sm,
+  },
+  checkUpdateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  checkUpdateBtnText: {
+    fontSize: responsiveFontSize(12),
+    fontWeight: '700',
+  },
+  checkStatusText: {
+    fontSize: responsiveFontSize(11),
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  corporateFootnoteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: SPACING.xs,
+  },
+  corporateFootnoteDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+  },
+  corporateFootnote: {
+    fontSize: responsiveFontSize(10.5),
+    textAlign: 'center',
   },
 });
 

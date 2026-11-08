@@ -145,7 +145,7 @@ export default function MoreScreen() {
         <Text style={[styles.version, { color: colors.textTertiary, marginTop: 0 }]}>
           {checkingUpdate
             ? 'Checking for updates...'
-            : `${versionInfo?.displayVersion ? `Pantro Tenant ${versionInfo.displayVersion}` : 'Pantro Tenant v1.0.3'} • Check for updates`}
+            : `${versionInfo?.displayVersion ? `Pantro Tenant ${versionInfo.displayVersion}` : 'Pantro Tenant v1.0.16'} • Check for updates`}
         </Text>
       </TouchableOpacity>
     </Screen>

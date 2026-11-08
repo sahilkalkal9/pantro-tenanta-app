@@ -12,11 +12,13 @@ const OTA_STORAGE_KEYS = {
   RELEASE_NOTES: 'pantro_ota_release_notes',
 };
 
-export const NATIVE_APP_VERSION = Constants.expoConfig?.version || '1.0.3';
+export const NATIVE_APP_VERSION = Constants.expoConfig?.version || '1.0.16';
 export const NATIVE_BUILD_NUMBER =
   Platform.OS === 'android'
-    ? Constants.expoConfig?.android?.versionCode || 5
-    : Constants.expoConfig?.ios?.buildNumber || 2;
+    ? Constants.expoConfig?.android?.versionCode || 10
+    : Constants.expoConfig?.ios?.buildNumber || '6';
+export const RUNTIME_VERSION =
+  Updates.runtimeVersion || Constants.expoConfig?.runtimeVersion || '1.1.0';
 
 class OtaService {
   /**
@@ -54,14 +56,21 @@ class OtaService {
         await AsyncStorage.removeItem(OTA_STORAGE_KEYS.PENDING_RESTART);
       }
 
-      const otaVersion = isEmbedded ? null : storedVersion;
+      const manifestVer =
+        Updates.manifest?.metadata?.version ||
+        Updates.manifest?.extra?.version ||
+        null;
+      const otaVersion = isEmbedded ? null : (manifestVer || storedVersion);
 
       return {
         nativeVersion: NATIVE_APP_VERSION,
         buildNumber: NATIVE_BUILD_NUMBER,
+        runtimeVersion: RUNTIME_VERSION,
         otaVersion,
         displayVersion: otaVersion ? `v${otaVersion} (OTA)` : `v${NATIVE_APP_VERSION}`,
+        updateId,
         isEmbedded,
+        channel: Updates.channel || 'production',
         lastChecked: lastChecked ? new Date(lastChecked) : null,
         isUpdatesEnabled: Updates.isEnabled ?? false,
       };
@@ -69,9 +78,12 @@ class OtaService {
       return {
         nativeVersion: NATIVE_APP_VERSION,
         buildNumber: NATIVE_BUILD_NUMBER,
+        runtimeVersion: RUNTIME_VERSION,
         otaVersion: null,
         displayVersion: `v${NATIVE_APP_VERSION}`,
+        updateId: null,
         isEmbedded: true,
+        channel: 'production',
         lastChecked: null,
         isUpdatesEnabled: false,
       };
@@ -93,7 +105,7 @@ class OtaService {
           nativeVersion: NATIVE_APP_VERSION,
           buildNumber: NATIVE_BUILD_NUMBER,
           currentOtaVersion: currentOtaVersion || '',
-          runtimeVersion: NATIVE_APP_VERSION,
+          runtimeVersion: RUNTIME_VERSION,
         },
         timeout: 15000,
       });

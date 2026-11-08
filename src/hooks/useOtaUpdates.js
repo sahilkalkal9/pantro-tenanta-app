@@ -103,6 +103,7 @@ export function useOtaUpdates({ autoCheck = true, checkDelayMs = 2500 } = {}) {
     installedInfo,
     checkForUpdates,
     loadInstalledInfo,
+    reloadApp: () => otaService.reloadApp(),
   };
 }
 
