@@ -17,7 +17,8 @@ import {
   Nunito_700Bold,
   Nunito_800ExtraBold,
 } from '@expo-google-fonts/nunito';
-import { PixelRatio, useWindowDimensions } from 'react-native';
+import { PixelRatio, useWindowDimensions, AppState, Platform, StatusBar as RNStatusBar } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setTheme } from '../slices/uiSlice';
 import { useTheme } from '../hooks/useTheme';
@@ -26,7 +27,6 @@ import { warmupBackend } from '../lib/api';
 import apiCache from '../services/apiCache';
 import { initLiveSocket } from '../services/liveSocket';
 import { setupPushNotifications, registerDeviceToken } from '../services/pushNotifications';
-import { AppState } from 'react-native';
 import { setFontMetrics } from '../theme/tokens';
 
 preventAutoHideAsync();
@@ -77,6 +77,11 @@ function RootNav() {
   return (
     <>
       <AppEffects />
+      <StatusBar
+        style={isDark ? 'light' : 'dark'}
+        backgroundColor={isDark ? '#070b14' : '#ffffff'}
+        translucent={Platform.OS === 'android'}
+      />
       <Stack
         screenOptions={{
           headerShown: false,
@@ -102,6 +107,12 @@ function AppEffects() {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   useEffect(() => {
+    if (Platform.OS === 'android') {
+      try {
+        RNStatusBar.setTranslucent(true);
+        RNStatusBar.setBackgroundColor('transparent', true);
+      } catch (_) {}
+    }
     warmupBackend();
     apiCache.hydrate();
     initLiveSocket();

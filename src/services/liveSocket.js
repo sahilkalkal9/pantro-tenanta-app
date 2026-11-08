@@ -10,7 +10,7 @@ const listeners = new Set();
 const TOKEN_KEY = 'pantro_tenant_token';
 
 function getWsUrl() {
-  const origin = API_ORIGIN || 'https://stayverse-backend-zyl7.onrender.com';
+  const origin = API_ORIGIN || 'https://api.pantro.in';
   return origin.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:') + '/ws';
 }
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, Alert, ActivityIndicator } from 'react-native';
 import {
   Receipt, CheckCircle, XCircle, Clock, TrendingUp, ShieldCheck, ShieldX,
   Wallet, Hash, IndianRupee, AlertTriangle, Calendar, MessageSquare, ImageIcon,
@@ -270,19 +270,7 @@ export default function PaymentsScreen() {
   }, [filtered]);
 
   if (loading && allTransactions.length === 0) {
-    return (
-      <Screen scroll={false}>
-        <TenantPageHeader
-          title="Transactions"
-          subtitle="Your complete payment history with approval status"
-          icon={Receipt}
-          iconTone="blue"
-          right={<Button variant="secondary" size="sm" onPress={() => fetchData({ refresh: true })}><RefreshCw size={14} /> Refresh</Button>}
-        />
-        <PantroLoader fullScreen message="Loading your transactions…" />
-        <CardSkeleton count={2} />
-      </Screen>
-    );
+    return <PantroLoader fullScreen message="Loading your transactions…" />;
   }
 
   const handleRefresh = () => fetchData({ refresh: true });
@@ -817,7 +805,17 @@ function PaymentMethodsCard({ info, loading, onPreviewQr }) {
   };
 
   if (loading) {
-    return <PantroLoader message="Loading payment options..." />;
+    return (
+      <Card style={styles.payOptionsCard}>
+        <View style={styles.payOptionsHead}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.payOptionsTitle, { color: colors.textPrimary }]}>Payment Options</Text>
+            <Text style={[styles.payOptionsSubtitle, { color: colors.textSecondary }]}>Loading available accounts…</Text>
+          </View>
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        </View>
+      </Card>
+    );
   }
 
   const upiAccounts = info?.upiAccounts || [];

@@ -8,7 +8,10 @@ import {
   Modal,
   ScrollView,
   Alert,
+  Platform,
+  StatusBar as RNStatusBar,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
 import { router } from 'expo-router';
 import {
@@ -36,6 +39,10 @@ export default function TenantTopbar({ onMenuToggle }) {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { theme, toggleTheme, isDark, mounted } = useTheme();
+  const insets = useSafeAreaInsets();
+  const topInset = Platform.OS === 'android'
+    ? Math.max(insets.top, RNStatusBar.currentHeight || 0)
+    : insets.top;
 
   const [propertyName, setPropertyName] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
@@ -209,7 +216,7 @@ export default function TenantTopbar({ onMenuToggle }) {
         onRequestClose={() => setNotifOpen(false)}
       >
         <TouchableOpacity
-          style={styles.modalBackdrop}
+          style={[styles.modalBackdrop, { paddingTop: topInset + 54 }]}
           activeOpacity={1}
           onPress={() => setNotifOpen(false)}
         >
@@ -318,7 +325,7 @@ export default function TenantTopbar({ onMenuToggle }) {
         onRequestClose={() => setProfileMenuOpen(false)}
       >
         <TouchableOpacity
-          style={styles.modalBackdrop}
+          style={[styles.modalBackdrop, { paddingTop: topInset + 54 }]}
           activeOpacity={1}
           onPress={() => setProfileMenuOpen(false)}
         >

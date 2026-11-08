@@ -11,10 +11,11 @@ import {
   StyleSheet,
   Image,
   Linking,
+  StatusBar as RNStatusBar,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocalSearchParams, router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowRight, ArrowLeft, Clock, Zap, AlertTriangle } from 'lucide-react-native';
 import { verifyOtp, requestOtp } from '../../slices/authSlice';
@@ -27,6 +28,10 @@ const LOCAL_ICON = require('../../../assets/icon.png');
 export default function VerifyOtpScreen() {
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.auth);
+  const insets = useSafeAreaInsets();
+  const topInset = Platform.OS === 'android'
+    ? Math.max(insets.top, RNStatusBar.currentHeight || 0)
+    : insets.top;
   const params = useLocalSearchParams();
 
   const phone = params.phone || '';
@@ -156,8 +161,8 @@ export default function VerifyOtpScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <StatusBar style="light" backgroundColor="#06090e" translucent={false} />
+    <View style={[styles.safeArea, { paddingTop: topInset, paddingBottom: Math.max(insets.bottom, SPACING.md) }]}>
+      <StatusBar style="light" backgroundColor="#06090e" translucent={Platform.OS === 'android'} />
       <KeyboardAvoidingView
         style={styles.screen}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -319,7 +324,7 @@ export default function VerifyOtpScreen() {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -345,7 +350,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
-    paddingTop: Platform.OS === 'ios' ? 54 : 36,
+    paddingTop: SPACING.md,
     paddingBottom: SPACING.lg,
   },
   centeredWrap: {

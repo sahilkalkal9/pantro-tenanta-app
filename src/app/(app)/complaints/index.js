@@ -204,6 +204,10 @@ export default function ComplaintsScreen() {
     }
   };
 
+  if (loading && complaints.length === 0) {
+    return <PantroLoader fullScreen message="Loading complaints…" />;
+  }
+
   return (
     <Screen refreshing={refreshing} onRefresh={refreshAll}>
       <TenantPageHeader
@@ -257,8 +261,8 @@ export default function ComplaintsScreen() {
         />
       </Card>
 
-      {loading && complaints.length === 0 ? (
-        <PantroLoader fullScreen message="Loading complaints…" />
+      {loading ? (
+        <CardSkeleton count={3} />
       ) : error && complaints.length === 0 ? (
         <EmptyState
           icon={AlertTriangle}

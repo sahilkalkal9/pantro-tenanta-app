@@ -89,7 +89,7 @@ const runtimeVersion = getArg('--runtime', '*');
 const urgency = getArg('--urgency', 'flexible'); // Safe flexible background updates
 const title = getArg('--title', `Pantro ${appName === 'tenant' ? 'Tenant' : 'Owner'} v${version}`);
 const notes = getArg('--notes', 'Over-The-Air bug fixes and improvements.');
-const apiBase = getArg('--api', 'https://stayverse-backend-zyl7.onrender.com/api');
+const apiBase = getArg('--api', 'https://api.pantro.in/api');
 const adminEmail = getArg('--email', process.env.SUPER_ADMIN_EMAIL || 'sahil@wabsyte.com');
 const adminPassword = getArg('--password', process.env.SUPER_ADMIN_PASSWORD || 'mangal911$');
 const shouldExport = !args.includes('--no-export');

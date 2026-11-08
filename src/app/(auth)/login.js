@@ -10,10 +10,11 @@ import {
   ActivityIndicator,
   StyleSheet,
   Image,
+  StatusBar as RNStatusBar,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowRight, Check, RotateCcw, AlertTriangle } from 'lucide-react-native';
 import { requestOtp, clearError } from '../../slices/authSlice';
@@ -26,6 +27,10 @@ const LOCAL_ICON = require('../../../assets/icon.png');
 export default function LoginScreen() {
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.auth);
+  const insets = useSafeAreaInsets();
+  const topInset = Platform.OS === 'android'
+    ? Math.max(insets.top, RNStatusBar.currentHeight || 0)
+    : insets.top;
 
   const [phone, setPhone] = useState('');
   const [localError, setLocalError] = useState('');
@@ -79,8 +84,8 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <StatusBar style="light" backgroundColor="#06090e" translucent={false} />
+    <View style={[styles.safeArea, { paddingTop: topInset, paddingBottom: Math.max(insets.bottom, SPACING.md) }]}>
+      <StatusBar style="light" backgroundColor="#06090e" translucent={Platform.OS === 'android'} />
       <KeyboardAvoidingView
         style={styles.screen}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -215,7 +220,7 @@ export default function LoginScreen() {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -241,7 +246,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
-    paddingTop: Platform.OS === 'ios' ? 54 : 36,
+    paddingTop: SPACING.md,
     paddingBottom: SPACING.lg,
   },
   centeredWrap: {

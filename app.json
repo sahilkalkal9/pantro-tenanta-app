@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pantro Tenant",
     "slug": "pantro-tenant",
-    "version": "1.1.0",
+    "version": "1.0.16",
     "platforms": [
       "ios",
       "android",
@@ -16,7 +16,7 @@
     "newArchEnabled": true,
     "runtimeVersion": "1.1.0",
     "updates": {
-      "url": "https://stayverse-backend-zyl7.onrender.com/api/ota/expo-manifest?app=tenant",
+      "url": "https://api.pantro.in/api/ota/expo-manifest?app=tenant",
       "enabled": true,
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0
@@ -105,7 +105,7 @@
       ]
     ],
     "extra": {
-      "apiBaseUrl": "https://stayverse-backend-zyl7.onrender.com/api",
+      "apiBaseUrl": "https://api.pantro.in/api",
       "router": {},
       "eas": {
         "projectId": "5d2bd7c1-abe1-45ab-bf0b-ee548647d10a"

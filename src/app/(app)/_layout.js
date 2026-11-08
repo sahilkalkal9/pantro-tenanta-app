@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Platform } from 'react-native';
+import { Platform, View, StatusBar as RNStatusBar } from 'react-native';
 import { Tabs, Redirect } from 'expo-router';
 import { useSelector } from 'react-redux';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { TenantTopbar, TenantBottomBar, TenantDrawer, PantroLoader } from '../../components';
 import { useTheme } from '../../hooks/useTheme';
@@ -12,6 +12,7 @@ export default function AppLayout() {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const { isDark } = useTheme();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     tenantService.preloadPortalData();
@@ -22,13 +23,16 @@ export default function AppLayout() {
   }
 
   const bgColor = isDark ? '#070b14' : '#ffffff';
+  const topInset = Platform.OS === 'android'
+    ? Math.max(insets.top, RNStatusBar.currentHeight || 0)
+    : insets.top;
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: bgColor }}>
+    <View style={{ flex: 1, backgroundColor: bgColor, paddingTop: topInset }}>
       <StatusBar
         style={isDark ? 'light' : 'dark'}
         backgroundColor={bgColor}
-        translucent={false}
+        translucent={Platform.OS === 'android'}
       />
       <TenantTopbar onMenuToggle={() => setDrawerOpen(true)} />
       <TenantDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
@@ -83,6 +87,6 @@ export default function AppLayout() {
           }}
         />
       </Tabs>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const API_ORIGIN = 'https://stayverse-backend-zyl7.onrender.com';
+export const API_ORIGIN = 'https://api.pantro.in';
 // export const API_ORIGIN = "http://localhost:5000";
 const API_BASE_URL = `${API_ORIGIN}/api`;
 

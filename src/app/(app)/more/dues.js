@@ -280,17 +280,7 @@ export default function DuesScreen() {
   };
 
   if (loading && dues.length === 0) {
-    return (
-      <Screen scroll={false}>
-        <View style={styles.flex}>
-          <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-            <TenantPageHeader title="Dues" subtitle="Everything you need to pay" icon={Wallet} iconTone="rose" />
-            <PantroLoader fullScreen message="Loading your dues…" />
-            <CardSkeleton count={3} />
-          </ScrollView>
-        </View>
-      </Screen>
-    );
+    return <PantroLoader fullScreen message="Loading your dues…" />;
   }
 
   return (
