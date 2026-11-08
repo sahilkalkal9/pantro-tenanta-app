@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pantro Tenant",
     "slug": "pantro-tenant",
-    "version": "1.0.19",
+    "version": "1.0.20",
     "platforms": [
       "ios",
       "android",
