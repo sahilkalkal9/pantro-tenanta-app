@@ -11,6 +11,6 @@
     <key>EXUpdatesRuntimeVersion</key>
     <string>1.0.9</string>
     <key>EXUpdatesURL</key>
-    <string>https://stayverse-backend-zyl7.onrender.com/api/ota/expo-manifest?app=tenant</string>
+    <string>https://api.pantro.in/api/ota/expo-manifest?app=tenant</string>
   </dict>
 </plist>
