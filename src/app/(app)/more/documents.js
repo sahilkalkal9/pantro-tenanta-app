@@ -382,6 +382,85 @@ export default function DocumentsScreen({ navigation }) {
         </View>
       </Card>
 
+      {/* ── Official 11-Month Rent Agreement Card ────────────── */}
+      {(() => {
+        const agr = profile?.rentAgreement || {};
+        const isAgrGenerated = Boolean(agr.documentUrl);
+        const startDateFormatted = agr.startDate ? formatDate(agr.startDate) : (profile?.moveInDate ? formatDate(profile.moveInDate) : '—');
+        const endDateFormatted = agr.endDate
+          ? formatDate(agr.endDate)
+          : (profile?.moveInDate ? formatDate(new Date(new Date(profile.moveInDate).setMonth(new Date(profile.moveInDate).getMonth() + 11))) : '—');
+
+        return (
+          <Card>
+            <View style={[styles.head, { borderBottomColor: colors.border }]}>
+              <View style={[styles.icon, { backgroundColor: 'rgba(37, 99, 235, 0.10)' }]}>
+                <FileText size={16} color={COLORS.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.headTitle, { color: colors.textPrimary }]}>Rent Agreement & Rules</Text>
+                <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary }}>11-Month Official Leave & License Deed</Text>
+              </View>
+              {isAgrGenerated ? (
+                <Badge label="Active" color={COLORS.success} />
+              ) : (
+                <Badge label={isAadhaarDone ? "Ready" : "Pending KYC"} color={isAadhaarDone ? COLORS.primary : COLORS.warning} />
+              )}
+            </View>
+
+            <View style={{ marginTop: 12 }}>
+              <Text style={{ fontSize: responsiveFontSize(11.5), color: colors.textSecondary, lineHeight: 16 }}>
+                Comprehensive 12-page official agreement with DigiLocker verified identity, Pantro Platform Annexures, and Dual Digital Signatures.
+              </Text>
+
+              {isAgrGenerated ? (
+                <View style={{ marginTop: 12 }}>
+                  <View style={{ padding: 12, borderRadius: 12, backgroundColor: isDark ? colors.cardSecondary : COLORS.gray50, borderWidth: 1, borderColor: colors.border }}>
+                    <Text style={{ fontSize: responsiveFontSize(12), fontWeight: '700', color: colors.textPrimary }}>
+                      {agr.agreementNumber || 'Pantro Rent Agreement'}
+                    </Text>
+                    <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary, marginTop: 2 }}>
+                      Term: {startDateFormatted} to {endDateFormatted}
+                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                      <Text style={{ fontSize: responsiveFontSize(10.5), fontWeight: '700', color: COLORS.success }}>✓ Landlord Attested</Text>
+                      <Text style={{ fontSize: responsiveFontSize(10.5), color: colors.textTertiary }}>•</Text>
+                      <Text style={{ fontSize: responsiveFontSize(10.5), fontWeight: '700', color: COLORS.success }}>✓ Tenant Signed</Text>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    style={[styles.downloadBtn, { backgroundColor: COLORS.primary, paddingVertical: 10, marginTop: 10, justifyContent: 'center' }]}
+                    activeOpacity={0.8}
+                    onPress={() => Linking.openURL(resolveMediaUrl(agr.documentUrl)).catch(() => {})}
+                  >
+                    <Download size={14} color="#fff" />
+                    <Text style={styles.downloadBtnText}>Download Agreement (PDF)</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={{ padding: 12, borderRadius: 10, backgroundColor: isDark ? colors.cardSecondary : COLORS.gray50, borderWidth: 1, borderColor: colors.border, marginTop: 10 }}>
+                  <Text style={{ fontSize: responsiveFontSize(11.5), fontWeight: '600', color: colors.textPrimary }}>
+                    {isAadhaarDone ? 'Ready to Generate' : 'Complete DigiLocker KYC'}
+                  </Text>
+                  <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary, marginTop: 2 }}>
+                    {isAadhaarDone
+                      ? 'Your DigiLocker KYC is completed. Agreement will be available once final profile checks finish.'
+                      : 'Complete DigiLocker Aadhaar authentication and 100% profile to generate your official lease deed.'}
+                  </Text>
+                </View>
+              )}
+
+              <View style={[styles.attributionBox, { borderTopColor: colors.border, marginTop: 12 }]}>
+                <Text style={[styles.attributionText, { color: colors.textTertiary }]}>
+                  Tamper-evident 12-page electronic lease deed with Pantro watermark & room inventory.
+                </Text>
+              </View>
+            </View>
+          </Card>
+        );
+      })()}
+
       {/* KYC Documents Card */}
       <Card>
         <View style={[styles.head, { borderBottomColor: colors.border }]}>

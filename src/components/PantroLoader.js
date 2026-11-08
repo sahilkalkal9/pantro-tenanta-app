@@ -194,7 +194,7 @@ export default function PantroLoader({
     return (
       <View style={[styles.minimalWrap, style]}>
         <View style={styles.minimalRingWrap}>
-          <View style={[styles.minimalTrack, { borderColor: isDark ? 'rgba(59, 130, 246, 0.2)' : '#bfdbfe' }]} />
+          <View style={[styles.minimalTrack, { borderColor: isDark ? 'rgba(40, 100, 178, 0.25)' : '#bfdbfe' }]} />
           <Animated.View style={[styles.minimalSpinner, { transform: [{ rotate: spin }] }]} />
         </View>
         {displayMessage ? (
@@ -208,7 +208,7 @@ export default function PantroLoader({
   if (variant === 'inline') {
     return (
       <View style={[styles.inlineWrap, style]}>
-        <View style={[styles.inlineBox, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.15)' : '#eff6ff', borderColor: isDark ? 'rgba(59, 130, 246, 0.3)' : '#bfdbfe' }]}>
+        <View style={[styles.inlineBox, { backgroundColor: isDark ? 'rgba(40, 100, 178, 0.15)' : '#eff6ff', borderColor: isDark ? 'rgba(40, 100, 178, 0.35)' : '#bfdbfe' }]}>
           <Image source={LOCAL_ICON} defaultSource={{ uri: REMOTE_ICON }} style={styles.inlineIcon} resizeMode="contain" />
           <Animated.View style={[styles.inlineOrbiter, { transform: [{ rotate: spin }] }]} />
         </View>
@@ -308,7 +308,7 @@ export default function PantroLoader({
 
       {/* ── Brand Lockup (PANTRO • TENANT) ───────────────────── */}
       <View style={styles.brandRow}>
-        <Text style={[styles.brandText, { color: isDark ? '#60a5fa' : '#2563eb' }]}>PANTRO</Text>
+        <Text style={[styles.brandText, { color: isDark ? '#397FC1' : '#2864B2' }]}>PANTRO</Text>
         <Text style={[styles.brandDot, { color: isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8' }]}>•</Text>
         <Text style={[styles.portalText, { color: colors.textSecondary }]}>TENANT</Text>
       </View>
@@ -395,25 +395,25 @@ const styles = StyleSheet.create({
   },
   ambientGlow: {
     position: 'absolute',
-    backgroundColor: 'rgba(37, 99, 235, 0.28)',
+    backgroundColor: 'rgba(40, 100, 178, 0.28)',
   },
   outerOrbitalRing: {
     position: 'absolute',
     borderWidth: 1.5,
-    borderColor: 'rgba(59, 130, 246, 0.35)',
+    borderColor: 'rgba(40, 100, 178, 0.35)',
     borderStyle: 'dashed',
   },
   innerOrbitalRing: {
     position: 'absolute',
     borderWidth: 1.5,
-    borderColor: 'rgba(99, 102, 241, 0.3)',
+    borderColor: 'rgba(57, 127, 193, 0.3)',
     borderTopColor: 'transparent',
   },
   logoContainer: {
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#2563eb',
+    shadowColor: '#2864B2',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
@@ -434,13 +434,13 @@ const styles = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: '#60a5fa',
+    backgroundColor: '#397FC1',
   },
   satelliteDot: {
     width: 9,
     height: 9,
     borderRadius: 4.5,
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#2864B2',
     borderWidth: 1.5,
   },
   brandRow: {
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: '100%',
     borderRadius: 2.5,
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#2864B2',
   },
   footnoteRow: {
     flexDirection: 'row',
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#2563eb',
+    borderColor: '#2864B2',
     borderTopColor: 'transparent',
   },
   minimalText: {
@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
     inset: -3,
     borderRadius: BORDER_RADIUS.md + 2,
     borderWidth: 1,
-    borderColor: '#3b82f6',
+    borderColor: '#2864B2',
     borderTopColor: 'transparent',
   },
   inlineTextWrap: {

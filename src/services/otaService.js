@@ -31,13 +31,18 @@ class OtaService {
       return { enabled: false, available: false, fetched: false };
     }
 
-    const check = await Updates.checkForUpdateAsync();
-    if (!check?.isAvailable) {
-      return { enabled: true, available: false, fetched: false };
-    }
+    try {
+      const check = await Updates.checkForUpdateAsync();
+      if (!check?.isAvailable) {
+        return { enabled: true, available: false, fetched: false };
+      }
 
-    await Updates.fetchUpdateAsync();
-    return { enabled: true, available: true, fetched: true };
+      await Updates.fetchUpdateAsync();
+      return { enabled: true, available: true, fetched: true };
+    } catch (e) {
+      console.warn('[OTA:Tenant] fetchNativeUpdate error:', e?.message || e);
+      return { enabled: true, available: false, fetched: false, error: e?.message };
+    }
   }
 
   /**

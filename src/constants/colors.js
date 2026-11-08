@@ -1,10 +1,11 @@
 export const COLORS = {
-  primary: '#2563eb',
-  primaryLight: '#3b82f6',
-  primaryDark: '#1d4ed8',
-  secondary: '#059669',
-  secondaryLight: '#10b981',
-  secondaryDark: '#047857',
+  primary: '#2864B2',
+  primaryLight: '#397FC1',
+  primaryDark: '#1E4E8C',
+  secondary: '#397FC1',
+  secondaryLight: '#5B9CD8',
+  secondaryDark: '#1D4E88',
+  brandName: 'Royal Blue',
   accent: '#f59e0b',
   accentLight: '#fbbf24',
   accentDark: '#d97706',
@@ -41,14 +42,14 @@ export const COLORS = {
   // Borders
   border: '#e2e8f0',
   borderLight: '#f1f5f9',
-  borderFocus: '#2563eb',
+  borderFocus: '#2864B2',
   
   // Text
   textPrimary: '#0f172a',
   textSecondary: '#475569',
   textTertiary: '#94a3b8',
   textInverse: '#ffffff',
-  textLink: '#2563eb',
+  textLink: '#2864B2',
   
   // Status
   online: '#059669',
