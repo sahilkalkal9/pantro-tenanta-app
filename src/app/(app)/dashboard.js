@@ -1360,7 +1360,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fef3c7',
   },
   complaintBadgeText: {
-    fontSize: responsiveFontSize(9.5),
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '800',
     letterSpacing: 0.5,
   },
@@ -1371,7 +1371,7 @@ const styles = StyleSheet.create({
     color: '#d97706',
   },
   complaintMeta: {
-    fontSize: responsiveFontSize(11),
+    fontSize: responsiveFontSize(12.5),
     color: '#64748b',
   },
   noticeItem: {
@@ -1394,12 +1394,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   noticeTitle: {
-    fontSize: responsiveFontSize(13),
+    fontSize: responsiveFontSize(14.5),
     fontWeight: '700',
     color: '#0f172a',
   },
   noticeMeta: {
-    fontSize: responsiveFontSize(11),
+    fontSize: responsiveFontSize(12),
     color: '#64748b',
     marginTop: 2,
   },
