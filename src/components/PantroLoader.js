@@ -12,7 +12,6 @@ import { useTheme } from '../hooks/useTheme';
 import { responsiveFontSize } from "../theme";
 
 const LOCAL_ICON = require('../../assets/icon.png');
-const REMOTE_ICON = 'https://ik.imagekit.io/fkhvlkpi1/pantro-icon.png?tr=w-160,s-30';
 
 /**
  * PantroLoader — Exact Mobile Replica of Tenant Web Panel PantroLoader.jsx:
@@ -285,7 +284,6 @@ export default function PantroLoader({
         >
           <Image
             source={LOCAL_ICON}
-            defaultSource={{ uri: REMOTE_ICON }}
             style={{ width: iconDim, height: iconDim }}
             resizeMode="contain"
           />

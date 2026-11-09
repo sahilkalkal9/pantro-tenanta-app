@@ -22,7 +22,6 @@ import { verifyOtp, requestOtp } from '../../slices/authSlice';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../constants/colors';
 import { responsiveFontSize } from "../../theme";
 
-const LOGO_URI = 'https://ik.imagekit.io/fkhvlkpi1/FULL%20LOGO%20P.png';
 const LOCAL_ICON = require('../../../assets/icon.png');
 
 export default function VerifyOtpScreen() {
@@ -179,8 +178,7 @@ export default function VerifyOtpScreen() {
           <View style={styles.header}>
             <View style={styles.logoTile}>
               <Image
-                source={{ uri: LOGO_URI }}
-                defaultSource={LOCAL_ICON}
+                source={LOCAL_ICON}
                 style={styles.logoImage}
                 resizeMode="contain"
               />
