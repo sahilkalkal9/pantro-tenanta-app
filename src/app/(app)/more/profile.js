@@ -10,6 +10,7 @@ import {
   Linking,
   Platform,
   ActivityIndicator,
+  AppState,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
@@ -1588,12 +1589,21 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
   const { colors, isDark } = useTheme();
   const toast = useToast();
   const [loading, setLoading] = useState(false);
+  const [pendingClientId, setPendingClientId] = useState(null);
+  const [completing, setCompleting] = useState(false);
 
   const startVerification = async () => {
     setLoading(true);
     try {
       const res = await kycInit({ aadhaarNumber: initialAadhaar ? String(initialAadhaar).replace(/\D/g, '') : undefined });
-      const url = res?.url || res?.data?.url || res?.redirectUrl;
+      const payload = res?.data || res;
+      const url = payload?.url || payload?.redirectUrl || res?.url || res?.redirectUrl;
+      const clientId = payload?.clientId || res?.clientId;
+
+      if (clientId) {
+        setPendingClientId(clientId);
+      }
+
       if (url) {
         await Linking.openURL(url);
         toast.info('Complete verification in your browser and return to Pantro');
@@ -1607,6 +1617,38 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
     }
   };
 
+  const handleCompleteVerification = async () => {
+    if (!pendingClientId) return;
+    setCompleting(true);
+    try {
+      await kycComplete(pendingClientId);
+      toast.success('Aadhaar verified successfully!');
+      setPendingClientId(null);
+      onVerified?.();
+    } catch (e) {
+      toast.error(getErrorMessage(e) || 'Verification not completed yet. Please finish in browser first.');
+    } finally {
+      setCompleting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!pendingClientId) return;
+    const sub = AppState.addEventListener('change', async (nextState) => {
+      if (nextState === 'active') {
+        try {
+          await kycComplete(pendingClientId);
+          toast.success('Aadhaar verified successfully!');
+          setPendingClientId(null);
+          onVerified?.();
+        } catch {
+          // not ready yet
+        }
+      }
+    });
+    return () => sub.remove();
+  }, [pendingClientId, onVerified, toast]);
+
   return (
     <View style={[styles.dlCard, { borderColor: colors.border, backgroundColor: isDark ? 'rgba(37,99,235,0.08)' : '#eff6ff' }]}>
       <View style={styles.dlHead}>
@@ -1616,16 +1658,35 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
       <Text style={[styles.dlSub, { color: colors.textSecondary }]}>
         Verify your Aadhaar record instantly via official government DigiLocker.
       </Text>
-      <TouchableOpacity
-        style={[styles.smallBtn, styles.smallBtnPrimary, { alignSelf: 'flex-start', marginTop: SPACING.xs }]}
-        onPress={startVerification}
-        disabled={loading}
-      >
-        <ShieldCheck size={14} color="#ffffff" />
-        <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700' }]}>
-          {loading ? 'Opening DigiLocker...' : 'Verify with DigiLocker'}
-        </Text>
-      </TouchableOpacity>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: SPACING.xs }}>
+        <TouchableOpacity
+          style={[styles.smallBtn, styles.smallBtnPrimary, { alignSelf: 'flex-start' }]}
+          onPress={startVerification}
+          disabled={loading || completing}
+        >
+          <ShieldCheck size={14} color="#ffffff" />
+          <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700' }]}>
+            {loading ? 'Opening DigiLocker...' : pendingClientId ? 'Re-open DigiLocker' : 'Verify with DigiLocker'}
+          </Text>
+        </TouchableOpacity>
+
+        {pendingClientId ? (
+          <TouchableOpacity
+            style={[styles.smallBtn, { backgroundColor: '#059669', alignSelf: 'flex-start' }]}
+            onPress={handleCompleteVerification}
+            disabled={completing}
+          >
+            {completing ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <CheckCircle2 size={14} color="#ffffff" />
+            )}
+            <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700' }]}>
+              {completing ? 'Checking...' : 'I Completed Verification'}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
     </View>
   );
 }
