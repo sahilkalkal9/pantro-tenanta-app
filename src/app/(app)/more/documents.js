@@ -162,7 +162,7 @@ export default function DocumentsScreen({ navigation }) {
         </View>
 
         <Text style={[styles.note, { color: colors.textSecondary }]}>
-          Official two-step tenant background clearance powered by Surepass eCourts and UIDAI DigiLocker.
+          Official two-step tenant background clearance powered by eCourtsIndia and UIDAI DigiLocker.
         </Text>
 
         {/* Steps */}
@@ -349,7 +349,7 @@ export default function DocumentsScreen({ navigation }) {
                 eCourts Background Check In Progress
               </Text>
               <Text style={[styles.actionDesc, { color: colors.textSecondary }]}>
-                Surepass is searching court records (~1-3 mins).
+                eCourtsIndia is searching court records (~1-2 mins).
               </Text>
             </View>
             <TouchableOpacity
@@ -374,7 +374,7 @@ export default function DocumentsScreen({ navigation }) {
         <View style={[styles.attributionBox, { borderTopColor: colors.border }]}>
           <Text style={[styles.attributionText, { color: colors.textTertiary }]}>
             Background Verification Done by <Text style={{ fontWeight: '700' }}>Pantro</Text> powered with{' '}
-            <Text style={{ fontWeight: '700' }}>Surepass Technologies Private Limited</Text>.
+            <Text style={{ fontWeight: '700' }}>eCourtsIndia Judicial Registry Engine</Text>.
           </Text>
           <Text style={[styles.attributionText, { color: colors.textTertiary, marginTop: 2 }]}>
             Pantro is a product of <Text style={{ fontWeight: '700' }}>Wabsyte Studio Private Limited</Text>.

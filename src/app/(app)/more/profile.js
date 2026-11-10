@@ -439,7 +439,7 @@ export default function TenantProfileScreen() {
   const signatureUrl = resolveMediaUrl(profile.signatureUrl);
 
   const propertyPlan = profile?.propertyId?.plan || profile?.property?.plan || 'free';
-  const isBasicPlan = propertyPlan === 'basic';
+  const isBasicPlan = propertyPlan === 'basic' || profile?.canDigilockerVerify === true;
 
   return (
     <Screen
