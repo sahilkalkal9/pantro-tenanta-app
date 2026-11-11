@@ -124,13 +124,13 @@ export const BORDER_RADIUS = {
 };
 
 export const FONT_SIZES = {
-  xs: 11.5,
-  sm: 13,
-  md: 15,
-  lg: 17,
-  xl: 19.5,
-  xxl: 22,
-  xxxl: 26,
+  xs: 10.5,
+  sm: 12.5,
+  md: 14,
+  lg: 16,
+  xl: 18.5,
+  xxl: 21,
+  xxxl: 25,
   display: 32,
 };
 
