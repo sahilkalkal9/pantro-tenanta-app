@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Modal,
   ScrollView,
   Alert,
@@ -31,9 +30,7 @@ import { logout } from '../../slices/authSlice';
 import { useTheme } from '../../hooks/useTheme';
 import { formatDate } from '../../lib/format';
 import { COLORS, SPACING, SHADOWS } from '../../constants/colors';
-import { responsiveFontSize } from "../../theme";
-
-const PANTRO_ICON = require('../../../assets/pantro-icon.png');
+import { responsiveFontSize } from '../../theme';
 
 export default function TenantTopbar({ onMenuToggle }) {
   const dispatch = useDispatch();
@@ -143,7 +140,7 @@ export default function TenantTopbar({ onMenuToggle }) {
   return (
     <>
       <View style={[styles.topbar, isDark && styles.topbarDark]}>
-        {/* ── Left: Menu & Brand & Property ──────────────── */}
+        {/* ── Left: Menu button ─── */}
         <View style={styles.leftRow}>
           {!!onMenuToggle && (
             <TouchableOpacity
@@ -156,26 +153,9 @@ export default function TenantTopbar({ onMenuToggle }) {
               <Menu size={18} color={isDark ? '#e2e8f0' : '#1e293b'} strokeWidth={2.2} />
             </TouchableOpacity>
           )}
-
-          <TouchableOpacity
-            style={styles.brandRow}
-            onPress={() => router.push('/dashboard')}
-            activeOpacity={0.7}
-          >
-            <Image
-              source={PANTRO_ICON}
-              style={styles.logoIcon}
-              resizeMode="contain"
-            />
-            <View style={styles.brandTitleWrap}>
-              <Text style={[styles.brandText, isDark && styles.brandTextDark]} numberOfLines={1}>
-                PANTRO
-              </Text>
-            </View>
-          </TouchableOpacity>
         </View>
 
-        {/* ── Right: Notifications & Profile (Unclustered & clean) ─── */}
+        {/* ── Right: Notifications & Profile ─── */}
         <View style={styles.actionsRow}>
           {/* Notification Bell */}
           <TouchableOpacity
@@ -428,9 +408,6 @@ const styles = StyleSheet.create({
   leftRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    marginRight: 6,
-    gap: 8,
   },
   menuBtn: {
     width: 36,
@@ -446,40 +423,6 @@ const styles = StyleSheet.create({
   menuBtnDark: {
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
     borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    minWidth: 0,
-  },
-  logoIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 7,
-    marginRight: 8,
-  },
-  brandTitleWrap: {
-    flex: 1,
-    minWidth: 0,
-    justifyContent: 'center',
-  },
-  brandText: {
-    fontSize: responsiveFontSize(13.5),
-    fontWeight: '900',
-    color: '#2563eb',
-    letterSpacing: -0.3,
-  },
-  brandTextDark: {
-    color: '#3b82f6',
-  },
-  propertyNameSub: {
-    fontSize: responsiveFontSize(11.5),
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  propertyNameSubDark: {
-    color: '#94a3b8',
   },
   actionsRow: {
     flexDirection: 'row',

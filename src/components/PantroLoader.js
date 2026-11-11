@@ -221,8 +221,8 @@ export default function PantroLoader({
 
   const isLg = size === 'lg' || isFullScreen;
   const isSm = size === 'sm';
-  const boxDim = isLg ? 82 : isSm ? 58 : 70;
-  const iconDim = isLg ? 44 : isSm ? 30 : 38;
+  const boxDim = isLg ? 88 : isSm ? 62 : 76;
+  const iconDim = isLg ? 80 : isSm ? 56 : 68;
 
   const content = (
     <View style={[styles.contentWrap, variant === 'card' && styles.cardWrap, style]}>
@@ -233,51 +233,36 @@ export default function PantroLoader({
           style={[
             styles.ambientGlow,
             {
-              width: boxDim * 1.8,
-              height: boxDim * 1.8,
-              borderRadius: (boxDim * 1.8) / 2,
+              width: boxDim * 1.6,
+              height: boxDim * 1.6,
+              borderRadius: (boxDim * 1.6) / 2,
               transform: [{ scale: glowScale }],
               opacity: glowOpacity,
             },
           ]}
         />
 
-        {/* Orbital Outer Dashed Ring */}
+        {/* Orbital Outer Dashed Blue Circle */}
         <Animated.View
           style={[
             styles.outerOrbitalRing,
             {
-              width: boxDim + 22,
-              height: boxDim + 22,
-              borderRadius: (boxDim + 22) / 2.7,
+              width: boxDim + 24,
+              height: boxDim + 24,
+              borderRadius: (boxDim + 24) / 2,
+              borderColor: isDark ? '#3b82f6' : '#2563eb',
               transform: [{ rotate: spin }],
             },
           ]}
         />
 
-        {/* Reverse Orbital Halo Ring */}
-        <Animated.View
-          style={[
-            styles.innerOrbitalRing,
-            {
-              width: boxDim + 12,
-              height: boxDim + 12,
-              borderRadius: (boxDim + 12) / 2.8,
-              transform: [{ rotate: reverseSpin }],
-            },
-          ]}
-        />
-
-        {/* Central Logo Container */}
+        {/* Central Logo Container — transparent, no white box, enlarged logo */}
         <Animated.View
           style={[
             styles.logoContainer,
             {
               width: boxDim,
               height: boxDim,
-              borderRadius: boxDim / 3.4,
-              backgroundColor: isDark ? '#141f36' : '#ffffff',
-              borderColor: isDark ? 'rgba(255, 255, 255, 0.16)' : '#e2e8f0',
               transform: [{ translateY: floatY }],
             },
           ]}
@@ -397,25 +382,20 @@ const styles = StyleSheet.create({
   },
   outerOrbitalRing: {
     position: 'absolute',
-    borderWidth: 1.5,
-    borderColor: 'rgba(40, 100, 178, 0.35)',
+    borderWidth: 2,
     borderStyle: 'dashed',
   },
   innerOrbitalRing: {
     position: 'absolute',
-    borderWidth: 1.5,
-    borderColor: 'rgba(57, 127, 193, 0.3)',
-    borderTopColor: 'transparent',
   },
   logoContainer: {
-    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#2864B2',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 6,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    elevation: 0,
     position: 'relative',
   },
   satelliteWrap: {

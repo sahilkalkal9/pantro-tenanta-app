@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { ScrollText, CreditCard, Home, AlertCircle, Mail, ArrowLeft } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, Linking } from 'react-native';
+import { ScrollText, CreditCard, Home, AlertCircle, Mail, ArrowLeft, ExternalLink } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useTheme } from '../../../hooks/useTheme';
-import { Screen, TenantPageHeader, Card } from '../../../components';
+import { Screen, TenantPageHeader, Card, Button } from '../../../components';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
 import { responsiveFontSize } from "../../../theme";
+
+const TERMS_URL = 'https://pantro.in/terms';
 
 const SECTIONS = [
   {
@@ -74,6 +76,7 @@ export default function TenantTermsScreen() {
       />
 
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -104,6 +107,24 @@ export default function TenantTermsScreen() {
           );
         })}
 
+        <Card style={styles.webActionCard}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.webActionTitle, { color: colors.textPrimary }]}>
+              Official Web Terms
+            </Text>
+            <Text style={[styles.webActionSub, { color: colors.textSecondary }]}>
+              View the full legal document on pantro.in
+            </Text>
+          </View>
+          <Button
+            title="Open Web Page"
+            icon={ExternalLink}
+            size="sm"
+            variant="outline"
+            onPress={() => Linking.openURL(TERMS_URL).catch(() => {})}
+          />
+        </Card>
+
         <View style={styles.footerNote}>
           <Text style={[styles.footerText, { color: colors.textSecondary }]}>
             © {new Date().getFullYear()} Pantro. A Product of Wabsyte Studio (OPC) Private Limited.
@@ -115,6 +136,9 @@ export default function TenantTermsScreen() {
 }
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     padding: SPACING.md,
     paddingBottom: SPACING.xxl,
@@ -148,6 +172,21 @@ const styles = StyleSheet.create({
   paragraph: {
     fontSize: responsiveFontSize(FONT_SIZES.sm),
     lineHeight: 20,
+  },
+  webActionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
+    gap: SPACING.md,
+  },
+  webActionTitle: {
+    fontSize: responsiveFontSize(FONT_SIZES.sm),
+    fontWeight: '700',
+  },
+  webActionSub: {
+    fontSize: responsiveFontSize(11),
+    marginTop: 2,
   },
   footerNote: {
     marginTop: SPACING.md,

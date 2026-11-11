@@ -436,7 +436,7 @@ export default function TenantProfileScreen() {
   const empStatusLabel = EMPLOYMENT_STATUSES.find((s) => s.value === emp.status)?.label || emp.status;
 
   const bank = profile.bankDetails || {};
-  const signatureUrl = resolveMediaUrl(profile.signatureUrl);
+  const signatureUrl = resolveMediaUrl(profile.signatureUrl || storedUser?.signatureUrl || user?.signatureUrl);
 
   const propertyPlan = profile?.propertyId?.plan || profile?.property?.plan || 'free';
   const isBasicPlan = propertyPlan === 'basic' || profile?.canDigilockerVerify === true;
@@ -2398,13 +2398,16 @@ const styles = StyleSheet.create({
     color: '#d97706',
   },
   sigThumbBox: {
-    width: 80,
-    height: 38,
-    borderRadius: 6,
+    width: 100,
+    height: 44,
+    borderRadius: 8,
     backgroundColor: '#ffffff',
-    padding: 2,
-    borderWidth: 1,
-    borderColor: 'rgba(5,150,105,0.3)',
+    padding: 3,
+    borderWidth: 1.5,
+    borderColor: 'rgba(5,150,105,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   sigThumbImg: {
     width: '100%',

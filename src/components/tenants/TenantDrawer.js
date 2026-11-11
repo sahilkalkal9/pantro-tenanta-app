@@ -354,20 +354,20 @@ const styles = StyleSheet.create({
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
   },
   brandLogo: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: 44,
+    height: 44,
+    borderRadius: 10,
   },
   brandTitle: {
-    fontSize: responsiveFontSize(16),
+    fontSize: responsiveFontSize(17),
     fontWeight: '800',
     letterSpacing: -0.3,
   },
   brandSub: {
-    fontSize: responsiveFontSize(10),
+    fontSize: responsiveFontSize(11),
     fontWeight: '600',
   },
   closeBtn: {

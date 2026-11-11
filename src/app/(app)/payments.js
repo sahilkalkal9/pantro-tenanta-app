@@ -1,11 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, Alert, ActivityIndicator } from 'react-native';
-import {
-  Receipt, CheckCircle, XCircle, Clock, TrendingUp, ShieldCheck, ShieldX,
-  Wallet, Hash, IndianRupee, AlertTriangle, Calendar, MessageSquare, ImageIcon,
-  Copy, Check, QrCode, Building, Info, ExternalLink, RefreshCw, ChevronRight,
-  MessageSquareWarning,
-} from 'lucide-react-native';
 import { tenantService } from '../../services/tenantService';
 import { subscribeLiveUpdates } from '../../services/liveSocket';
 import { useToast } from '../../hooks/useToast';
@@ -46,11 +40,11 @@ const FILTERS = [
 ];
 
 const CATEGORY_GROUPS = [
-  { key: 'rent', label: 'Rent Payments', icon: IndianRupee, color: COLORS.secondary },
-  { key: 'security_deposit', label: 'Security Deposit', icon: ShieldCheck, color: COLORS.success },
-  { key: 'mixed', label: 'Rent + Deposit', icon: Wallet, color: '#7c3aed' },
-  { key: 'pending_payment', label: 'Other Charges', icon: Receipt, color: COLORS.warning },
-  { key: 'other', label: 'Other', icon: Receipt, color: COLORS.gray500 },
+  { key: 'rent', label: 'Rent Payments', color: COLORS.secondary },
+  { key: 'security_deposit', label: 'Security Deposit', color: COLORS.success },
+  { key: 'mixed', label: 'Rent + Deposit', color: '#7c3aed' },
+  { key: 'pending_payment', label: 'Other Charges', color: COLORS.warning },
+  { key: 'other', label: 'Other', color: COLORS.gray500 },
 ];
 
 function buildTransactions(proofs, rents) {
@@ -280,19 +274,16 @@ export default function PaymentsScreen() {
       <TenantPageHeader
         title="Transactions"
         subtitle="Your complete payment history with approval status"
-        icon={Receipt}
-        iconTone="blue"
         right={
           <Button variant="secondary" size="sm" onPress={handleRefresh} style={{ marginLeft: 8 }}>
-            <RefreshCw size={14} /> Refresh
+            Refresh
           </Button>
         }
       />
 
       <View style={styles.statRow}>
-        <StatCard icon={TrendingUp} label="Total Paid" value={formatCurrency(stats.paid)} color={COLORS.success} style={styles.statCard} />
+        <StatCard label="Total Paid" value={formatCurrency(stats.paid)} color={COLORS.success} style={styles.statCard} />
         <StatCard
-          icon={Clock}
           label="Approval in Progress"
           value={formatCurrency(stats.pendingAmount)}
           color={stats.pendingAmount > 0 ? COLORS.warning : COLORS.gray400}
@@ -300,9 +291,8 @@ export default function PaymentsScreen() {
         />
       </View>
       <View style={styles.statRow}>
-        <StatCard icon={ShieldCheck} label="Approved" value={stats.approved} color={COLORS.info} style={styles.statCard} />
+        <StatCard label="Approved" value={stats.approved} color={COLORS.info} style={styles.statCard} />
         <StatCard
-          icon={ShieldX}
           label="Rejected"
           value={stats.rejected}
           color={stats.rejected > 0 ? COLORS.danger : COLORS.gray400}
@@ -312,25 +302,22 @@ export default function PaymentsScreen() {
 
       {stats.rejected > 0 && (
         <Card style={[styles.rejectBanner, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.12)' : '#fef2f2', borderColor: isDark ? 'rgba(239, 68, 68, 0.3)' : '#fecaca' }]}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm }}>
-            <MessageSquare size={20} color={COLORS.danger} style={{ marginTop: 2 }} />
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.rejectBannerTitle, { color: isDark ? '#fca5a5' : '#991b1b' }]}>
-                {stats.rejected} Rejected Transaction{stats.rejected > 1 ? 's' : ''} Awaiting Clarification
-              </Text>
-              <Text style={[styles.rejectBannerText, { color: isDark ? '#f87171' : '#b91c1c' }]}>
-                Instead of submitting a duplicate payment, click on the rejected transaction to chat directly with your owner, clarify details, or upload a new payment screenshot. The owner can approve it right away.
-              </Text>
-              {filter !== 'rejected' && (
-                <Button
-                  title="Filter Rejected"
-                  size="sm"
-                  variant="outline"
-                  onPress={() => router.push('/payments?filter=rejected')}
-                  style={{ alignSelf: 'flex-start', marginTop: SPACING.sm }}
-                />
-              )}
-            </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.rejectBannerTitle, { color: isDark ? '#fca5a5' : '#991b1b' }]}>
+              {stats.rejected} Rejected Transaction{stats.rejected > 1 ? 's' : ''} Awaiting Clarification
+            </Text>
+            <Text style={[styles.rejectBannerText, { color: isDark ? '#f87171' : '#b91c1c' }]}>
+              Instead of submitting a duplicate payment, click on the rejected transaction to chat directly with your owner, clarify details, or upload a new payment screenshot. The owner can approve it right away.
+            </Text>
+            {filter !== 'rejected' && (
+              <Button
+                title="Filter Rejected"
+                size="sm"
+                variant="outline"
+                onPress={() => router.push('/payments?filter=rejected')}
+                style={{ alignSelf: 'flex-start', marginTop: SPACING.sm }}
+              />
+            )}
           </View>
         </Card>
       )}
@@ -340,7 +327,6 @@ export default function PaymentsScreen() {
 
       {allTransactions.length === 0 ? (
         <EmptyState
-          icon={Receipt}
           title="No transactions yet"
           message="Your rent payments and proof submissions will appear here."
           action="Pay Rent"
@@ -354,10 +340,50 @@ export default function PaymentsScreen() {
             <Text style={styles.sectionSub}>Every rent payment and proof submission, with full details</Text>
           </View>
 
-          <SegmentedControl options={filterOptions} value={filter} onChange={setFilter} style={{ marginVertical: SPACING.md }} />
+          <View style={styles.filterTabsWrap}>
+            {filterOptions.map((opt) => {
+              const active = filter === opt.value;
+              return (
+                <TouchableOpacity
+                  key={opt.value}
+                  activeOpacity={0.75}
+                  onPress={() => setFilter(opt.value)}
+                  style={[
+                    styles.filterTabPill,
+                    {
+                      backgroundColor: active
+                        ? '#2563eb'
+                        : isDark
+                        ? colors.cardSecondary
+                        : '#f1f5f9',
+                      borderColor: active
+                        ? '#2563eb'
+                        : isDark
+                        ? 'rgba(255, 255, 255, 0.12)'
+                        : '#e2e8f0',
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.filterTabPillText,
+                      {
+                        color: active
+                          ? '#ffffff'
+                          : colors.textSecondary,
+                        fontWeight: active ? '700' : '600',
+                      },
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
 
           {filtered.length === 0 ? (
-            <EmptyState icon={Receipt} title="Nothing here" message={`No transactions match the "${filter}" filter.`} />
+            <EmptyState title="Nothing here" message={`No transactions match the "${filter}" filter.`} />
           ) : (
             grouped.map((group) => {
               const approvedTotal = group.items
@@ -369,11 +395,9 @@ export default function PaymentsScreen() {
               return (
                 <View key={group.key} style={styles.group}>
                   <View style={styles.groupHead}>
-                    <View style={[styles.groupIcon, { backgroundColor: `${group.color}15` }]}>
-                      <group.icon size={15} color={group.color} />
-                    </View>
+                    <View style={{ width: 4, height: 16, borderRadius: 2, backgroundColor: group.color, marginRight: 8 }} />
                     <Text style={[styles.groupTitle, { color: colors.textPrimary }]}>{group.label}</Text>
-                    <Text style={[styles.groupCount, { color: colors.textTertiary }]}>{group.items.length}</Text>
+                    <Text style={[styles.groupCount, { color: colors.textTertiary, marginLeft: 6 }]}>{group.items.length}</Text>
                     <View style={{ flex: 1 }} />
                     <View style={{ alignItems: 'flex-end' }}>
                       <Text style={styles.groupApproved}>Approved {formatCurrency(approvedTotal)}</Text>
@@ -422,7 +446,6 @@ export default function PaymentsScreen() {
 
       {error && (
         <EmptyState
-          icon={AlertTriangle}
           title="Failed to load transactions"
           message={error}
           action="Retry"
@@ -441,7 +464,6 @@ function TransactionRow({ tx, onPress, onSelect, onClick }) {
   const isRejected = tx.status === 'rejected';
 
   const tone = isPending ? COLORS.warning : isApproved ? COLORS.success : isRejected ? COLORS.danger : COLORS.gray500;
-  const StatusIcon = isProof ? (isPending ? Clock : isApproved ? CheckCircle : XCircle) : isApproved ? CheckCircle : Clock;
   const monthLabel = tx.rentMonth && tx.rentYear ? formatMonthYear(tx.rentMonth, tx.rentYear) : null;
 
   const handlePress = () => {
@@ -453,9 +475,6 @@ function TransactionRow({ tx, onPress, onSelect, onClick }) {
   return (
     <Card onPress={handlePress} style={styles.txCard}>
       <View style={styles.txTop}>
-        <View style={[styles.txIcon, { backgroundColor: `${tone}15` }]}>
-          {isProof ? <StatusIcon size={20} color={tone} /> : <IndianRupee size={20} color={tone} />}
-        </View>
         <View style={{ flex: 1 }}>
           <View style={styles.txTitleRow}>
             <Text style={[styles.txTitle, { color: colors.textPrimary }]}>{isProof ? 'Payment Proof' : 'Rent Payment'}</Text>
@@ -477,14 +496,13 @@ function TransactionRow({ tx, onPress, onSelect, onClick }) {
             </Text>
           ) : tx.conversation && tx.conversation.length > 0 ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-              <MessageSquare size={12} color={isDark ? '#93c5fd' : '#2563eb'} />
               <Text style={[styles.txRef, { color: isDark ? '#93c5fd' : '#2563eb' }]}>
                 {tx.conversation.length} message{tx.conversation.length !== 1 ? 's' : ''}
               </Text>
             </View>
           ) : null}
         </View>
-        <View style={{ alignItems: 'flex-end' }}>
+        <View style={{ alignItems: 'flex-end', paddingLeft: 8 }}>
           <Text style={[styles.txAmount, { color: isApproved ? COLORS.success : isPending ? COLORS.warning : isRejected ? COLORS.danger : colors.textPrimary }]}>
             {formatCurrency(tx.amount)}
           </Text>
@@ -512,7 +530,6 @@ function TransactionRow({ tx, onPress, onSelect, onClick }) {
                 },
           ]}
         >
-          <MessageSquare size={14} color={isApproved ? (isDark ? '#6ee7b7' : '#059669') : (isDark ? '#93c5fd' : '#2563eb')} />
           <Text style={[styles.clarifyBigBtnText, { color: isApproved ? (isDark ? '#6ee7b7' : '#065f46') : (isDark ? '#93c5fd' : '#1d4ed8') }]}>
             {isApproved
               ? `View Discussion with Owner ${tx.conversation?.length ? `(${tx.conversation.length} msgs)` : ''}`
@@ -681,7 +698,6 @@ function TransactionDetail({ tx, onClose, onReplySuccess }) {
       {!isApproved && tx.status === 'rejected' && !!tx.rejectionReason ? (
         <View style={styles.rejectBox}>
           <View style={styles.rejectHead}>
-            <MessageSquareWarning size={15} color={COLORS.danger} />
             <Text style={styles.rejectTitle}>Owner rejection reason:</Text>
           </View>
           <Text style={styles.rejectText}>{tx.rejectionReason}</Text>
@@ -699,7 +715,6 @@ function TransactionDetail({ tx, onClose, onReplySuccess }) {
         </View>
       ) : isProof ? (
         <View style={[styles.noShot, { borderColor: colors.border }]}>
-          <ImageIcon size={26} color={colors.textTertiary} />
           <Text style={[styles.noShotText, { color: colors.textTertiary }]}>No screenshot was uploaded with this payment proof</Text>
         </View>
       ) : null}
@@ -855,8 +870,8 @@ function PaymentMethodsCard({ info, loading, onPreviewQr }) {
                     <Image source={{ uri: qrUri }} style={styles.qrThumb} resizeMode="cover" />
                   </TouchableOpacity>
                 ) : (
-                  <View style={[styles.qrPlaceholder, { backgroundColor: isDark ? colors.card : '#ffffff', borderColor: colors.border }]}>
-                    <QrCode size={22} color={colors.textTertiary} />
+                  <View style={[styles.qrPlaceholder, { backgroundColor: isDark ? colors.card : '#ffffff', borderColor: colors.border, alignItems: 'center', justifyContent: 'center' }]}>
+                    <Text style={{ fontSize: responsiveFontSize(11), fontWeight: '800', color: colors.textTertiary }}>QR</Text>
                   </View>
                 )}
 
@@ -873,7 +888,6 @@ function PaymentMethodsCard({ info, loading, onPreviewQr }) {
                   onPress={() => handleCopy(u.upiId, copyKey, 'UPI ID')}
                   style={[styles.copyPill, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.2)' : '#eff6ff', borderColor: isDark ? 'rgba(37, 99, 235, 0.4)' : '#bfdbfe' }]}
                 >
-                  {isCopied ? <Check size={12} color="#2563eb" /> : <Copy size={12} color="#2563eb" />}
                   <Text style={[styles.copyPillText, { color: isDark ? '#93c5fd' : '#2563eb' }]}>
                     {isCopied ? 'Copied' : 'Copy'}
                   </Text>
@@ -908,7 +922,6 @@ function PaymentMethodsCard({ info, loading, onPreviewQr }) {
                     onPress={() => handleCopy(b.accountNumber, copyKey, 'Account Number')}
                     style={[styles.copyPill, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.2)' : '#eff6ff', borderColor: isDark ? 'rgba(37, 99, 235, 0.4)' : '#bfdbfe' }]}
                   >
-                    {isCopied ? <Check size={12} color="#2563eb" /> : <Copy size={12} color="#2563eb" />}
                     <Text style={[styles.copyPillText, { color: isDark ? '#93c5fd' : '#2563eb' }]}>
                       {isCopied ? 'Copied' : 'Copy'}
                     </Text>
@@ -935,7 +948,6 @@ function PaymentMethodsCard({ info, loading, onPreviewQr }) {
 
           {instructions ? (
             <View style={[styles.instructionsBox, { backgroundColor: isDark ? 'rgba(245, 158, 11, 0.12)' : '#fffbeb', borderColor: isDark ? 'rgba(245, 158, 11, 0.3)' : '#fef3c7' }]}>
-              <Info size={14} color="#d97706" style={{ marginTop: 2 }} />
               <Text style={[styles.instructionsText, { color: isDark ? '#fcd34d' : '#92400e' }]}>
                 <Text style={{ fontWeight: 'bold' }}>Instructions: </Text>
                 {instructions}
@@ -1119,6 +1131,23 @@ const styles = StyleSheet.create({
   },
   instructionsText: { flex: 1, fontSize: responsiveFontSize(11), lineHeight: 16 },
   // New styles for web parity
+  filterTabsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginVertical: SPACING.md,
+  },
+  filterTabPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterTabPillText: {
+    fontSize: responsiveFontSize(12),
+  },
   sectionHeader: { marginTop: SPACING.lg, marginBottom: SPACING.md, paddingHorizontal: SPACING.md },
   sectionTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
   sectionSub: { fontSize: responsiveFontSize(FONT_SIZES.xs), color: COLORS.textSecondary, marginTop: 2 },

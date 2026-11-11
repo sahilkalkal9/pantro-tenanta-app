@@ -6,12 +6,17 @@ export const API_ORIGIN = 'https://api.pantro.in';
 const API_BASE_URL = `${API_ORIGIN}/api`;
 
 // Resolves server-relative asset paths (e.g. "/uploads/abc.jpg") into an
-// absolute URL usable by <Image source={{ uri }} />. Already-absolute URLs
-// are returned untouched.
+// absolute URL usable by <Image source={{ uri }} />. Also rewrites localhost
+// references to the active API_ORIGIN so mobile devices can access local/dev uploads.
 export function resolveMediaUrl(url) {
   if (!url) return null;
-  if (/^https?:\/\//i.test(url)) return url;
-  return `${API_ORIGIN}${url.startsWith('/') ? '' : '/'}${url}`;
+  let cleanUrl = String(url).trim().replace(/^["']|["']$/g, '');
+  if (!cleanUrl) return null;
+  if (/^https?:\/\/(localhost|127\.0\.0\.1|10\.0\.2\.2)(:\d+)?/i.test(cleanUrl)) {
+    return cleanUrl.replace(/^https?:\/\/(localhost|127\.0\.0\.1|10\.0\.2\.2)(:\d+)?/i, API_ORIGIN);
+  }
+  if (/^https?:\/\//i.test(cleanUrl)) return cleanUrl;
+  return `${API_ORIGIN}${cleanUrl.startsWith('/') ? '' : '/'}${cleanUrl}`;
 }
 
 export const api = axios.create({

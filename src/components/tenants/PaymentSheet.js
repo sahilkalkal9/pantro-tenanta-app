@@ -493,42 +493,46 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
           <>
             <Text style={[styles.prompt, { color: colors.textPrimary }]}>How would you like to pay?</Text>
 
-            <View style={styles.methodRow}>
-              <Card onPress={selectUpi} style={styles.methodCard}>
-                <View style={[styles.methodIcon, { backgroundColor: '#eff6ff' }]}>
-                  <Smartphone size={20} color="#2563eb" />
-                </View>
-                <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>UPI</Text>
-                <Text style={[styles.methodSub, { color: colors.textSecondary }]}>GPay, PhonePe, Paytm &amp; screenshot</Text>
-              </Card>
-
-              <Card onPress={selectCash} style={styles.methodCard}>
-                <View style={[styles.methodIcon, { backgroundColor: '#ecfdf5' }]}>
-                  <Banknote size={20} color="#059669" />
-                </View>
-                <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Cash</Text>
-                <Text style={[styles.methodSub, { color: colors.textSecondary }]}>Pay in person, confirmed by OTP</Text>
-              </Card>
-            </View>
-
-            {showOnline ? (
-              <Card onPress={selectOnline} style={styles.methodCardWide}>
-                <View style={[styles.methodIcon, { backgroundColor: '#f5f3ff' }]}>
-                  <Globe size={20} color="#7c3aed" />
+            <View style={styles.methodCol}>
+              <Card onPress={selectUpi} style={styles.methodCardWide}>
+                <View style={[styles.methodIconWide, { backgroundColor: '#eff6ff' }]}>
+                  <Smartphone size={22} color="#2563eb" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <View style={styles.methodTitleRow}>
-                    <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Pay Online Gateway</Text>
-                    <View style={styles.instantPill}>
-                      <Text style={styles.instantPillText}>Instant</Text>
-                    </View>
-                  </View>
-                  <Text style={[styles.methodSub, { color: colors.textSecondary }]}>
-                    UPI, Credit/Debit Cards, Netbanking — auto-verified instantly
-                  </Text>
+                  <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>UPI</Text>
+                  <Text style={[styles.methodSub, { color: colors.textSecondary }]}>GPay, PhonePe, Paytm &amp; screenshot</Text>
                 </View>
               </Card>
-            ) : null}
+
+              <Card onPress={selectCash} style={styles.methodCardWide}>
+                <View style={[styles.methodIconWide, { backgroundColor: '#ecfdf5' }]}>
+                  <Banknote size={22} color="#059669" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Cash</Text>
+                  <Text style={[styles.methodSub, { color: colors.textSecondary }]}>Pay in person, confirmed by OTP</Text>
+                </View>
+              </Card>
+
+              {showOnline ? (
+                <Card onPress={selectOnline} style={styles.methodCardWide}>
+                  <View style={[styles.methodIconWide, { backgroundColor: '#f5f3ff' }]}>
+                    <Globe size={22} color="#7c3aed" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.methodTitleRow}>
+                      <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Pay Online Gateway</Text>
+                      <View style={styles.instantPill}>
+                        <Text style={styles.instantPillText}>Instant</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.methodSub, { color: colors.textSecondary }]}>
+                      UPI, Credit/Debit Cards, Netbanking — auto-verified instantly
+                    </Text>
+                  </View>
+                </Card>
+              ) : null}
+            </View>
 
             <View style={[styles.otherMethods, { borderTopColor: colors.border }]}>
               <Text style={[styles.otherMethodsLabel, { color: colors.textSecondary }]}>OTHER METHODS</Text>
@@ -987,10 +991,12 @@ const styles = StyleSheet.create({
   totalAmount: { fontSize: responsiveFontSize(28), fontWeight: '800', marginVertical: 2 },
   totalSub: { fontSize: responsiveFontSize(12), textAlign: 'center' },
   prompt: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: '600' },
-  methodRow: { flexDirection: 'row', gap: SPACING.sm },
-  methodCard: { flex: 1 },
-  methodCardWide: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
+  methodCol: { flexDirection: 'column', gap: SPACING.sm, width: '100%' },
+  methodRow: { flexDirection: 'column', gap: SPACING.sm, width: '100%' },
+  methodCard: { flex: 1, width: '100%' },
+  methodCardWide: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, width: '100%' },
   methodIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  methodIconWide: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   methodTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   methodTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: '700' },
   methodSub: { fontSize: responsiveFontSize(10.5), marginTop: 2 },
