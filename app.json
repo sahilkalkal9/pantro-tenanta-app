@@ -29,7 +29,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pantro.tenant",
-      "buildNumber": "12",
+      "buildNumber": "13",
       "entitlements": {
         "aps-environment": "production"
       },
