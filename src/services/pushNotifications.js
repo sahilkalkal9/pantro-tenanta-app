@@ -22,11 +22,11 @@ const EAS_PROJECT_ID =
 
 // Map backend TENANT_ROUTE_MAP web links -> expo-router mobile routes so a
 // tapped push notification opens the right screen.
-export function tenantRouteFromLink(link: string | undefined | null) {
+export function tenantRouteFromLink(link) {
   if (!link) return null;
   const url = new URL(link, 'https://tenant.pantro.in');
   const { pathname } = url;
-  const map: Record<string, string> = {
+  const map = {
     '/tenants/payments': '/(app)/payments',
     '/tenants/payment-proofs': '/(app)/more/documents',
     '/tenants/complaints': '/(app)/complaints',
