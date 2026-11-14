@@ -87,6 +87,16 @@ async function kycCheckAadhaarUnique(aadhaarNumber) {
   return res?.data;
 }
 
+async function kycCheckout(payload = {}) {
+  const res = await api.post('/tenant/kyc/checkout', payload);
+  return res?.data;
+}
+
+async function kycGetCoupons() {
+  const res = await api.get('/coupons/tenant-kyc');
+  return res?.data;
+}
+
 async function kycInit(payload = {}) {
   const res = await api.post('/tenant/kyc/init', payload);
   return res?.data;
@@ -1302,8 +1312,8 @@ export default function TenantProfileScreen() {
               </View>
             ) : null}
 
-            {/* DigiLocker verify card only if property has Basic plan and not yet verified */}
-            {!isVerified && isBasicPlan ? (
+            {/* DigiLocker verify card for any tenant not yet verified */}
+            {!isVerified ? (
               <View style={styles.dlWrapper}>
                 <DigiLockerVerifyCard
                   initialAadhaar={profile?.aadhaarNumber || ''}
@@ -1592,10 +1602,30 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
   const [pendingClientId, setPendingClientId] = useState(null);
   const [completing, setCompleting] = useState(false);
 
+  // Checkout sheet & coupon state
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [coupons, setCoupons] = useState([]);
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [checkoutData, setCheckoutData] = useState(null);
+
+  const fetchCheckout = async (code = null) => {
+    try {
+      const payload = code ? { couponCode: code } : {};
+      const res = await kycCheckout(payload);
+      const data = res?.data || res;
+      setCheckoutData(data);
+      if (code) setAppliedCoupon(code);
+    } catch (e) {
+      toast.error(getErrorMessage(e) || 'Failed to apply coupon');
+    }
+  };
+
   const startVerification = async () => {
     setLoading(true);
     try {
-      const res = await kycInit({ aadhaarNumber: initialAadhaar ? String(initialAadhaar).replace(/\D/g, '') : undefined });
+      const cleanAadhaar = initialAadhaar ? String(initialAadhaar).replace(/\D/g, '') : undefined;
+      const res = await kycInit({ aadhaarNumber: cleanAadhaar });
       const payload = res?.data || res;
       const url = payload?.url || payload?.redirectUrl || res?.url || res?.redirectUrl;
       const clientId = payload?.clientId || res?.clientId;
@@ -1609,6 +1639,55 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
         toast.info('Complete verification in your browser and return to Pantro');
       } else {
         toast.error('Verification service unavailable. Please contact manager.');
+      }
+    } catch (e) {
+      if (e?.response?.status === 402 || e?.status === 402) {
+        // Payment/coupon required: open checkout sheet
+        setShowCheckout(true);
+        try {
+          const cRes = await kycGetCoupons();
+          const list = cRes?.data?.coupons || cRes?.data || cRes?.coupons || [];
+          setCoupons(list);
+        } catch {}
+        await fetchCheckout();
+      } else {
+        toast.error(getErrorMessage(e));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApplyCoupon = async (code) => {
+    const clean = String(code || couponInput).trim().toUpperCase();
+    if (!clean) return;
+    await fetchCheckout(clean);
+  };
+
+  const handleConfirmCheckoutAndOpen = async () => {
+    setLoading(true);
+    try {
+      const cleanAadhaar = initialAadhaar ? String(initialAadhaar).replace(/\D/g, '') : undefined;
+      const isFree = checkoutData?.freeEligible || checkoutData?.amountRupees === '0.00' || checkoutData?.totalPaise === 0;
+
+      if (isFree) {
+        const res = await kycInit({
+          aadhaarNumber: cleanAadhaar,
+          couponCode: appliedCoupon || checkoutData?.couponCode,
+        });
+        const payload = res?.data || res;
+        const url = payload?.url || payload?.redirectUrl || res?.url || res?.redirectUrl;
+        const clientId = payload?.clientId || res?.clientId;
+        if (clientId) setPendingClientId(clientId);
+        if (url) {
+          setShowCheckout(false);
+          await Linking.openURL(url);
+          toast.info('Complete verification in your browser and return to Pantro');
+        }
+      } else {
+        // Open web checkout or UPI
+        toast.info(`Please complete checkout for ₹${checkoutData?.amountRupees || '11.80'}`);
+        setShowCheckout(false);
       }
     } catch (e) {
       toast.error(getErrorMessage(e));
@@ -1653,22 +1732,81 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
     <View style={[styles.dlCard, { borderColor: colors.border, backgroundColor: isDark ? 'rgba(37,99,235,0.08)' : '#eff6ff' }]}>
       <View style={styles.dlHead}>
         <Sparkles size={16} color="#2563eb" />
-        <Text style={[styles.dlTitle, { color: colors.textPrimary }]}>Instant DigiLocker Verification</Text>
+        <Text style={[styles.dlTitle, { color: colors.textPrimary }]}>DigiLocker Identity Verification</Text>
       </View>
       <Text style={[styles.dlSub, { color: colors.textSecondary }]}>
-        Verify your Aadhaar record instantly via official government DigiLocker.
+        Verify your Aadhaar record directly via official government DigiLocker portal.
       </Text>
+
+      {/* Checkout breakdown sheet */}
+      {showCheckout ? (
+        <View style={{ marginTop: SPACING.sm, padding: SPACING.sm, borderRadius: 12, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : '#ffffff', borderWidth: 1, borderColor: colors.border }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+            <Text style={{ fontSize: 12, color: colors.textSecondary }}>DigiLocker Verification Fee</Text>
+            <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textPrimary }}>₹10.00</Text>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+            <Text style={{ fontSize: 12, color: colors.textSecondary }}>18% GST (SAC 998313)</Text>
+            <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textPrimary }}>₹1.80</Text>
+          </View>
+          {appliedCoupon ? (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+              <Text style={{ fontSize: 12, fontWeight: '600', color: '#059669' }}>Coupon ({appliedCoupon})</Text>
+              <Text style={{ fontSize: 12, fontWeight: '700', color: '#059669' }}>-₹{((checkoutData?.gstBreakdown?.discountPaise || 1180) / 100).toFixed(2)}</Text>
+            </View>
+          ) : null}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingTop: 8 }}>
+            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.textPrimary }}>Total Payable</Text>
+            <Text style={{ fontSize: 14, fontWeight: '800', color: '#2563eb' }}>
+              ₹{checkoutData?.amountRupees || (checkoutData?.freeEligible ? '0.00' : '11.80')}
+            </Text>
+          </View>
+
+          {/* Featured Coupons */}
+          {coupons.length > 0 ? (
+            <View style={{ marginTop: 10 }}>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: colors.textSecondary, marginBottom: 4 }}>AVAILABLE OFFERS</Text>
+              {coupons.map((c) => (
+                <TouchableOpacity
+                  key={c.code}
+                  onPress={() => handleApplyCoupon(c.code)}
+                  style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6, backgroundColor: '#fef3c7', borderRadius: 8, marginBottom: 4 }}
+                >
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: '#92400e' }}>{c.code} ({c.discountPercent}% OFF)</Text>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: '#b45309' }}>{appliedCoupon === c.code ? 'Applied ✓' : 'Tap to Apply'}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : null}
+
+          {/* Action button */}
+          <TouchableOpacity
+            style={[styles.smallBtn, styles.smallBtnPrimary, { marginTop: 10, alignSelf: 'stretch', justifyContent: 'center' }]}
+            onPress={handleConfirmCheckoutAndOpen}
+            disabled={loading}
+          >
+            <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700', textAlign: 'center' }]}>
+              {checkoutData?.freeEligible || checkoutData?.amountRupees === '0.00'
+                ? 'Claim 100% OFF & Verify (₹0 FREE)'
+                : `Pay ₹${checkoutData?.amountRupees || '11.80'} & Open DigiLocker`}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: SPACING.xs }}>
-        <TouchableOpacity
-          style={[styles.smallBtn, styles.smallBtnPrimary, { alignSelf: 'flex-start' }]}
-          onPress={startVerification}
-          disabled={loading || completing}
-        >
-          <ShieldCheck size={14} color="#ffffff" />
-          <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700' }]}>
-            {loading ? 'Opening DigiLocker...' : pendingClientId ? 'Re-open DigiLocker' : 'Verify with DigiLocker'}
-          </Text>
-        </TouchableOpacity>
+        {!showCheckout ? (
+          <TouchableOpacity
+            style={[styles.smallBtn, styles.smallBtnPrimary, { alignSelf: 'flex-start' }]}
+            onPress={startVerification}
+            disabled={loading || completing}
+          >
+            <ShieldCheck size={14} color="#ffffff" />
+            <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700' }]}>
+              {loading ? 'Opening DigiLocker...' : pendingClientId ? 'Re-open DigiLocker' : 'Verify with DigiLocker'}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
 
         {pendingClientId ? (
           <TouchableOpacity

@@ -391,6 +391,11 @@ export default function DashboardScreen() {
                 <Text style={[styles.metricLabelText, { color: colors.textSecondary }]}>MONTHLY RENT</Text>
               </View>
               <Text style={[styles.metricValueText, { color: colors.textPrimary }]}>{formatCurrency(monthlyRent)}</Text>
+              <Text style={[styles.metricSubText, { color: colors.textTertiary }]} numberOfLines={1}>
+                {profile?.billingCycleType === 'anniversary'
+                  ? `Due ${profile?.rentDueDay || 5}th of month`
+                  : 'Due 1st - 5th of month'}
+              </Text>
             </TouchableOpacity>
 
             <View style={[styles.metricDivider, { backgroundColor: colors.border }]} />

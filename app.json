@@ -29,7 +29,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pantro.tenant",
-      "buildNumber": "14",
+      "buildNumber": "15",
       "entitlements": {
         "aps-environment": "production"
       },
@@ -97,7 +97,10 @@
     ],
     "extra": {
       "apiBaseUrl": "https://api.pantro.in/api",
-      "router": {}
+      "router": {},
+      "eas": {
+        "projectId": "093fcaeb-cbd6-48c3-8ca0-cc252f0bc35b"
+      }
     },
     "androidStatusBar": {
       "barStyle": "dark-content",
@@ -108,6 +111,6 @@
       "barStyle": "dark-content",
       "backgroundColor": "#ffffff"
     },
-    "owner": "sahilkalkal"
+    "owner": "skalkal540"
   }
 }
