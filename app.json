@@ -45,7 +45,7 @@
     },
     "android": {
       "package": "com.pantro.tenant",
-      "versionCode": 13,
+      "versionCode": 14,
       "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
