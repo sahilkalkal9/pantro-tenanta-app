@@ -135,6 +135,7 @@ export default function TenantProfileScreen() {
   const dispatch = useDispatch();
   const { colors, isDark } = useTheme();
   const storedUser = useSelector((state) => state.auth?.user);
+  const user = storedUser;
 
   const cachedForm = tenantService.getCachedProfileForm();
   const [form, setForm] = useState(cachedForm);
@@ -446,7 +447,7 @@ export default function TenantProfileScreen() {
   const empStatusLabel = EMPLOYMENT_STATUSES.find((s) => s.value === emp.status)?.label || emp.status;
 
   const bank = profile.bankDetails || {};
-  const signatureUrl = resolveMediaUrl(profile.signatureUrl || storedUser?.signatureUrl || user?.signatureUrl);
+  const signatureUrl = resolveMediaUrl(profile.signatureUrl || storedUser?.signatureUrl);
 
   const propertyPlan = profile?.propertyId?.plan || profile?.property?.plan || 'free';
   const isBasicPlan = propertyPlan === 'basic' || profile?.canDigilockerVerify === true;
