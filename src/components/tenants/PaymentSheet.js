@@ -654,32 +654,18 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
               </View>
             )}
 
-            <TextField
-              label="12-Digit UPI Reference / UTR Number"
-              placeholder="e.g. 429812345678"
-              value={transactionId}
-              onChangeText={setTransactionId}
-              helper={isFullUtr ? "✨ Valid 12-digit UTR detected" : "Copied from Google Pay, PhonePe, or Paytm payment receipt"}
-              required
-              keyboardType="numeric"
-            />
-
-            <ImageKitUploader
-              label={isFullUtr ? "Payment screenshot (optional)" : "Payment screenshot (required)"}
-              value={screenshotUrl}
-              onChange={setScreenshotUrl}
-              folder="/tenants/payments"
-              required={!isFullUtr}
-            />
-
-            <Button
-              title={detectedRrn ? "⚡ Submit Auto-Detected RRN" : "Submit for Approval"}
-              icon={detectedRrn ? Zap : CreditCard}
-              variant={detectedRrn ? "success" : "primary"}
-              onPress={submitProof}
-              loading={submitting}
-              fullWidth
-            />
+            {/* Automated Live Verification Banner */}
+            <View style={[styles.banner, { backgroundColor: blueBg, borderColor: blueBorder, paddingVertical: 14, flexDirection: 'column', alignItems: 'center', gap: 6 }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Zap size={16} color="#2563eb" />
+                <Text style={{ fontSize: responsiveFontSize(13), fontWeight: '800', color: isDark ? '#93c5fd' : '#1d4ed8' }}>
+                  Awaiting Smart Collect Confirmation
+                </Text>
+              </View>
+              <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary, textAlign: 'center', lineHeight: 16 }}>
+                ⚡ Once approved in your UPI app, this payment is automatically confirmed. No screenshot or reference number needed.
+              </Text>
+            </View>
 
             <TouchableOpacity onPress={backToMethods} style={styles.backBtn}>
               <Text style={[styles.backText, { color: colors.textSecondary }]}>← Change payment method</Text>
