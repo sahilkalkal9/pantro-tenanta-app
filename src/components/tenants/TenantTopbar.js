@@ -150,7 +150,7 @@ export default function TenantTopbar({ onMenuToggle }) {
               hitSlop={6}
               accessibilityLabel="Open navigation menu"
             >
-              <Menu size={18} color={isDark ? '#e2e8f0' : '#1e293b'} strokeWidth={2.2} />
+              <Menu size={18} color="#ffffff" strokeWidth={2.2} />
             </TouchableOpacity>
           )}
         </View>
@@ -165,7 +165,7 @@ export default function TenantTopbar({ onMenuToggle }) {
             hitSlop={8}
             aria-label="Notifications"
           >
-            <Bell size={18} color={isDark ? '#cbd5e1' : '#475569'} strokeWidth={2} />
+            <Bell size={18} color="#ffffff" strokeWidth={2} />
             {unreadCount > 0 && (
               <View style={styles.badgePill}>
                 <Text style={styles.badgeText}>
@@ -183,7 +183,7 @@ export default function TenantTopbar({ onMenuToggle }) {
             hitSlop={8}
             aria-label="Account menu"
           >
-            <Text style={styles.avatarInitial}>{initial}</Text>
+            <User size={18} color="#ffffff" strokeWidth={2.2} />
           </TouchableOpacity>
         </View>
       </View>
@@ -391,9 +391,9 @@ export default function TenantTopbar({ onMenuToggle }) {
 const styles = StyleSheet.create({
   topbar: {
     height: 54,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#2864B2',
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    borderBottomColor: 'rgba(0, 0, 0, 0.12)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -402,8 +402,8 @@ const styles = StyleSheet.create({
     ...SHADOWS.small,
   },
   topbarDark: {
-    backgroundColor: '#070b14',
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: '#2864B2',
+    borderBottomColor: 'rgba(0, 0, 0, 0.2)',
   },
   leftRow: {
     flexDirection: 'row',
@@ -414,15 +414,15 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 11,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#ffffff',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
     alignItems: 'center',
     justifyContent: 'center',
     ...SHADOWS.small,
   },
   menuBtnDark: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
   },
   actionsRow: {
     flexDirection: 'row',
@@ -455,16 +455,16 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 11,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#ffffff',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
     ...SHADOWS.small,
   },
   iconBtnDark: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
   },
   badgePill: {
     position: 'absolute',
@@ -488,8 +488,10 @@ const styles = StyleSheet.create({
   avatarBtn: {
     width: 36,
     height: 36,
-    borderRadius: 10,
-    backgroundColor: '#2563eb',
+    borderRadius: 11,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
     alignItems: 'center',
     justifyContent: 'center',
     ...SHADOWS.small,

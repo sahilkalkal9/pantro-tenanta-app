@@ -42,6 +42,7 @@ const PANTRO_ICON = require('../../../assets/pantro-icon.png');
 
 const MENU_ITEMS = [
   { key: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { key: 'profile', label: 'My Profile', href: '/profile', icon: User },
   { key: 'dues', label: 'Dues & Pending', href: '/dues', icon: IndianRupee },
   { key: 'rent', label: 'Rent Payments', href: '/rent', icon: CreditCard },
   { key: 'payments', label: 'Transactions', href: '/payments', icon: Receipt },
@@ -51,7 +52,6 @@ const MENU_ITEMS = [
   { key: 'notice-period', label: 'Notice Period', href: '/more/notice-period', icon: CalendarClock },
   { key: 'documents', label: 'Documents', href: '/more/documents', icon: FileText },
   { key: 'support', label: 'Support & Help', href: '/more/support', icon: HeadphonesIcon },
-  { key: 'profile', label: 'My Profile', href: '/profile', icon: User },
   { key: 'privacy-policy', label: 'Privacy Policy', href: '/more/privacy-policy', icon: FileText },
   { key: 'terms', label: 'Terms & Conditions', href: '/more/terms', icon: FileText },
 ];
@@ -182,13 +182,15 @@ export default function TenantDrawer({ visible, onClose }) {
           ]}
         >
           <View style={styles.safeArea}>
-            {/* Header: Brand + Close */}
+            {/* Header: Brand Logo + Tagline + Close */}
             <View style={[styles.header, { borderBottomColor: borderColor }]}>
               <View style={styles.brandRow}>
                 <Image source={PANTRO_ICON} style={styles.brandLogo} resizeMode="contain" />
-                <View>
-                  <Text style={[styles.brandTitle, { color: textPrimary }]}>Pantro</Text>
-                  <Text style={[styles.brandSub, { color: textFaint }]}>Tenant Portal</Text>
+                <View style={{ flex: 1, minWidth: 0, justifyContent: 'center' }}>
+                  <Text style={[styles.brandTagline, { color: textPrimary }]} numberOfLines={2}>
+                    Your Property, Our Management
+                  </Text>
+                  <Text style={[styles.brandSub, { color: '#2563eb' }]}>Tenant Portal</Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -201,32 +203,6 @@ export default function TenantDrawer({ visible, onClose }) {
                 <X size={18} color={textSecondary} strokeWidth={2.3} />
               </TouchableOpacity>
             </View>
-
-            {/* Profile summary card */}
-            <TouchableOpacity
-              activeOpacity={0.75}
-              onPress={() => handleNavigate('/profile')}
-              style={[
-                styles.profileCard,
-                {
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : '#f8fafc',
-                  borderColor: borderColor,
-                },
-              ]}
-            >
-              <View style={styles.avatarBox}>
-                <Text style={styles.avatarText}>{initial}</Text>
-              </View>
-              <View style={styles.profileInfo}>
-                <Text style={[styles.profileName, { color: textPrimary }]} numberOfLines={1}>
-                  {displayName}
-                </Text>
-                <Text style={[styles.profileContact, { color: textFaint }]} numberOfLines={1}>
-                  {displayContact}
-                </Text>
-              </View>
-              <ChevronRight size={16} color={textFaint} />
-            </TouchableOpacity>
 
             {/* Navigation links */}
             <ScrollView
@@ -357,18 +333,20 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   brandLogo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: 52,
+    height: 52,
+    borderRadius: 12,
   },
-  brandTitle: {
-    fontSize: responsiveFontSize(17),
+  brandTagline: {
+    fontSize: responsiveFontSize(13),
     fontWeight: '800',
-    letterSpacing: -0.3,
+    letterSpacing: -0.2,
+    lineHeight: 17,
   },
   brandSub: {
     fontSize: responsiveFontSize(11),
-    fontWeight: '600',
+    fontWeight: '700',
+    marginTop: 2,
   },
   closeBtn: {
     width: 32,

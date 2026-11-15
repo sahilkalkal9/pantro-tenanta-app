@@ -391,11 +391,11 @@ export default function DuesScreen() {
                 {selected.length > 0 ? `${selected.length} items selected` : 'Select dues to pay'}
               </Text>
               <Text style={[styles.bottomAmount, { color: colors.textPrimary }]}>
-                {formatCurrency(selectedTotal > 0 ? selectedTotal + 5 : 0)}
+                {formatCurrency(selectedTotal)}
               </Text>
               {selectedTotal > 0 ? (
-                <Text style={{ fontSize: responsiveFontSize(10), color: colors.textSecondary }}>
-                  Incl. ₹5 handling fee
+                <Text style={{ fontSize: responsiveFontSize(10), color: '#2563eb', fontWeight: '600' }}>
+                  ₹5 fee applies only for UPI
                 </Text>
               ) : null}
             </View>

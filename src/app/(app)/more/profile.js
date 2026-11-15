@@ -478,56 +478,72 @@ export default function TenantProfileScreen() {
         {/* Hero Overview & Tenancy Card */}
         <Card style={styles.heroCard} padded={false}>
           <View style={[styles.heroHeader, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.12)' : '#f0f7ff' }]}>
-            <View style={styles.heroInfo}>
-              <View style={styles.heroNameRow}>
-                <Text style={[styles.heroName, { color: colors.textPrimary }]} numberOfLines={1}>
-                  {fullName}
+            <View style={styles.heroAvatarRow}>
+              <View style={styles.cuteAvatarBox}>
+                <Text style={styles.cuteAvatarText}>
+                  {(fullName || 'T').trim().charAt(0).toUpperCase()}
                 </Text>
-                <Badge
-                  label={(profile.status || 'active').replace('_', ' ').toUpperCase()}
-                  color={profile.status === 'active' ? COLORS.success : COLORS.warning}
-                />
-              </View>
-
-              <View style={styles.contactItemsWrap}>
-                {email ? (
-                  <View style={styles.contactItem}>
-                    <Mail size={12} color={colors.textTertiary} />
-                    <Text style={[styles.contactText, { color: colors.textSecondary }]} numberOfLines={1}>
-                      {email}
-                    </Text>
-                  </View>
-                ) : null}
-
-                {phone ? (
-                  <View style={styles.contactItem}>
-                    <Phone size={12} color="#3b82f6" />
-                    <Text style={[styles.contactText, { color: colors.textSecondary }]}>{phone}</Text>
-                    <View style={styles.loginPill}>
-                      <Text style={styles.loginPillText}>Login</Text>
-                    </View>
-                  </View>
-                ) : null}
-
-                {aadhaarPhone ? (
-                  <View style={styles.contactItem}>
-                    <ShieldCheck size={12} color={COLORS.success} />
-                    <Text style={[styles.contactText, { color: colors.textSecondary }]}>{aadhaarPhone}</Text>
-                    <View style={styles.aadhaarPill}>
-                      <Text style={styles.aadhaarPillText}>Aadhaar Linked</Text>
-                    </View>
-                  </View>
-                ) : null}
-
-                {profile.gender ? (
-                  <View style={styles.contactItem}>
-                    <User size={12} color={colors.textTertiary} />
-                    <Text style={[styles.contactText, { color: colors.textSecondary }]}>
-                      {profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)}
-                    </Text>
+                {isVerified ? (
+                  <View style={styles.verifiedCheckBadge}>
+                    <ShieldCheck size={11} color="#ffffff" strokeWidth={2.5} />
                   </View>
                 ) : null}
               </View>
+
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <View style={styles.heroNameRow}>
+                  <Text style={[styles.heroName, { color: colors.textPrimary }]} numberOfLines={1}>
+                    {fullName}
+                  </Text>
+                  <Badge
+                    label={(profile.status || 'active').replace('_', ' ').toUpperCase()}
+                    color={profile.status === 'active' ? COLORS.success : COLORS.warning}
+                  />
+                </View>
+                <Text style={{ fontSize: responsiveFontSize(11.5), color: colors.textSecondary, marginTop: 2 }} numberOfLines={1}>
+                  {property?.name ? `${property.name} • Room ${room?.roomNumber || '—'}` : 'Resident Profile'}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.contactItemsWrap}>
+              {email ? (
+                <View style={styles.contactItem}>
+                  <Mail size={12} color={colors.textTertiary} />
+                  <Text style={[styles.contactText, { color: colors.textSecondary }]} numberOfLines={1}>
+                    {email}
+                  </Text>
+                </View>
+              ) : null}
+
+              {phone ? (
+                <View style={styles.contactItem}>
+                  <Phone size={12} color="#3b82f6" />
+                  <Text style={[styles.contactText, { color: colors.textSecondary }]}>{phone}</Text>
+                  <View style={styles.loginPill}>
+                    <Text style={styles.loginPillText}>Login</Text>
+                  </View>
+                </View>
+              ) : null}
+
+              {aadhaarPhone ? (
+                <View style={styles.contactItem}>
+                  <ShieldCheck size={12} color={COLORS.success} />
+                  <Text style={[styles.contactText, { color: colors.textSecondary }]}>{aadhaarPhone}</Text>
+                  <View style={styles.aadhaarPill}>
+                    <Text style={styles.aadhaarPillText}>Aadhaar Linked</Text>
+                  </View>
+                </View>
+              ) : null}
+
+              {profile.gender ? (
+                <View style={styles.contactItem}>
+                  <User size={12} color={colors.textTertiary} />
+                  <Text style={[styles.contactText, { color: colors.textSecondary }]}>
+                    {profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)}
+                  </Text>
+                </View>
+              ) : null}
             </View>
           </View>
 
@@ -985,9 +1001,8 @@ export default function TenantProfileScreen() {
             </View>
 
             {/* Privacy notice banner */}
-            <View style={[styles.infoBanner, { backgroundColor: isDark ? 'rgba(37,99,235,0.1)' : '#eff6ff', borderColor: 'rgba(37,99,235,0.25)' }]}>
-              <Lock size={15} color="#2563eb" style={{ marginTop: 1 }} />
-              <Text style={[styles.infoBannerSubVerified, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
+            <View style={[styles.bankNoticeBanner, { backgroundColor: isDark ? 'rgba(37,99,235,0.08)' : '#eff6ff', borderColor: isDark ? 'rgba(37,99,235,0.2)' : '#dbeafe' }]}>
+              <Text style={[styles.bankNoticeText, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
                 Your bank details are securely stored and strictly used for returning your security deposit at the end of your stay. For privacy, your property manager will only see the last 4 digits of your account number.
               </Text>
             </View>
@@ -2029,8 +2044,57 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(12),
     fontWeight: '600',
   },
+  heroAvatarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  cuteAvatarBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: '#2864B2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    shadowColor: '#2864B2',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  cuteAvatarText: {
+    color: '#ffffff',
+    fontSize: responsiveFontSize(20),
+    fontWeight: '800',
+  },
+  verifiedCheckBadge: {
+    position: 'absolute',
+    bottom: -3,
+    right: -3,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#059669',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#ffffff',
+  },
+  bankNoticeBanner: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  bankNoticeText: {
+    fontSize: responsiveFontSize(11.5),
+    lineHeight: 16,
+    flexWrap: 'wrap',
+  },
   contactItemsWrap: {
-    marginTop: 8,
+    marginTop: 10,
     gap: 6,
   },
   contactItem: {

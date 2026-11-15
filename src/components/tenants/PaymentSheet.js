@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, ActivityIndicator, Image, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   AlertCircle,
@@ -126,12 +126,48 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
   const items = useMemo(() => target?.items || [], [target]);
   const amount = Number(target?.amount) || 0;
   const baseAmount = amount;
-  const handlingFee = 5;
+  const isUpi = method === 'upi' || view === 'upi';
+  const handlingFee = isUpi ? 5 : 0;
   const totalPayable = baseAmount > 0 ? baseAmount + handlingFee : 0;
+  const upiPayable = baseAmount > 0 ? baseAmount + 5 : 0;
   const rentIds = useMemo(() => target?.rentIds || [], [target]);
   const depositAmount = Number(target?.depositAmount) || 0;
   const showOnline = target?.showOnline !== false && (rentIds.length > 0 || depositAmount > 0);
   const depositToggle = target?.depositToggle || null;
+
+  const handleLaunchUpiApp = async (appKey) => {
+    if (!upiLink) return;
+    try {
+      let targetScheme = '';
+      if (appKey === 'gpay') targetScheme = Platform.OS === 'android' ? 'gpay://' : 'tez://upi/pay';
+      else if (appKey === 'phonepe') targetScheme = 'phonepe://';
+      else if (appKey === 'paytm') targetScheme = 'paytmmp://';
+      else if (appKey === 'kotak') targetScheme = 'kotakbank://';
+      else if (appKey === 'pop') targetScheme = 'popclub://';
+
+      if (targetScheme) {
+        const customUrl = upiLink.replace(/^upi:\/\//, targetScheme);
+        try {
+          const can = await Linking.canOpenURL(customUrl);
+          if (can) {
+            await Linking.openURL(customUrl);
+            return;
+          }
+        } catch {
+          // fallback to generic
+        }
+      }
+      await Linking.openURL(upiLink);
+    } catch {
+      toast.warning('Could not launch selected UPI app. Please scan the QR code.');
+    }
+  };
+
+  const handleConfirmPaidUpi = async () => {
+    toast.success('⚡ Payment submitted via Smart Collect. Verifying balance...');
+    close();
+    onSuccess?.();
+  };
 
   const {
     detectedRrn,
@@ -475,14 +511,22 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
       <View style={{ gap: SPACING.md }}>
         {/* ── Total ─────────────────────────────────────────────── */}
         <View style={[styles.totalBox, { backgroundColor: blueBg, borderColor: blueBorder }]}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
             <View>
-              <Text style={[styles.totalLabel, { color: isDark ? '#93c5fd' : '#1d4ed8' }]}>TOTAL PAYABLE</Text>
-              <Text style={[styles.totalAmount, { color: isDark ? '#ffffff' : '#1e3a8a' }]}>{formatCurrency(totalPayable || amount)}</Text>
+              <Text style={[styles.totalLabel, { color: isDark ? '#93c5fd' : '#1d4ed8' }]}>
+                {view === 'upi' ? 'TOTAL PAYABLE (VIA UPI)' : 'TOTAL DUES'}
+              </Text>
+              <Text style={[styles.totalAmount, { color: isDark ? '#ffffff' : '#1e3a8a' }]}>
+                {formatCurrency(view === 'upi' ? upiPayable : baseAmount)}
+              </Text>
             </View>
             <View style={{ alignItems: 'flex-end', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#ffffff', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}>
-              <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary }}>Due: <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{formatCurrency(baseAmount)}</Text></Text>
-              <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary }}>Handling Fee: <Text style={{ fontWeight: '700', color: '#2563eb' }}>+₹{handlingFee}</Text></Text>
+              <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary }}>
+                Dues: <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{formatCurrency(baseAmount)}</Text>
+              </Text>
+              <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary, marginTop: 2 }}>
+                Fee: <Text style={{ fontWeight: '700', color: '#2563eb' }}>{view === 'upi' ? '+₹5' : '+₹5 for UPI only'}</Text>
+              </Text>
             </View>
           </View>
           {target.summary ? (
@@ -490,7 +534,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
           ) : null}
 
           {depositToggle && depositToggle.amount > 0 ? (
-            <View style={{ marginTop: SPACING.sm }}>
+            <View style={{ marginTop: SPACING.sm, width: '100%' }}>
               <SwitchRow
                 label={`Also pay ${formatCurrency(depositToggle.amount)} security deposit`}
                 value={!!depositToggle.checked}
@@ -511,8 +555,15 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                   <Smartphone size={22} color="#2563eb" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>⚡ Instant UPI &amp; QR</Text>
-                  <Text style={[styles.methodSub, { color: colors.textSecondary }]}>Smart Collect • GPay, PhonePe, Paytm, CRED</Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Via UPI</Text>
+                    <Text style={{ fontSize: responsiveFontSize(14), fontWeight: '800', color: '#2563eb' }}>
+                      {formatCurrency(upiPayable)}
+                    </Text>
+                  </View>
+                  <Text style={[styles.methodSub, { color: colors.textSecondary, marginTop: 2 }]}>
+                    Smart Collect • GPay, PhonePe, Paytm, QR (Incl. ₹5 handling fee)
+                  </Text>
                 </View>
               </Card>
 
@@ -521,8 +572,15 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                   <Banknote size={22} color="#059669" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Cash</Text>
-                  <Text style={[styles.methodSub, { color: colors.textSecondary }]}>Pay in person, confirmed by OTP</Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Cash</Text>
+                    <Text style={{ fontSize: responsiveFontSize(14), fontWeight: '800', color: '#059669' }}>
+                      {formatCurrency(baseAmount)}
+                    </Text>
+                  </View>
+                  <Text style={[styles.methodSub, { color: colors.textSecondary, marginTop: 2 }]}>
+                    Pay in person • ₹0 handling fee (confirmed by OTP)
+                  </Text>
                 </View>
               </Card>
 
@@ -547,7 +605,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
             </View>
 
             <View style={[styles.otherMethods, { borderTopColor: colors.border }]}>
-              <Text style={[styles.otherMethodsLabel, { color: colors.textSecondary }]}>OTHER METHODS</Text>
+              <Text style={[styles.otherMethodsLabel, { color: colors.textSecondary }]}>OTHER METHODS (₹0 HANDLING FEE)</Text>
               <View style={styles.otherMethodsRow}>
                 {OTHER_METHODS.map((key) => (
                   <TouchableOpacity
@@ -556,7 +614,9 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                     onPress={() => selectProofMethod(key)}
                     style={[styles.otherChip, { borderColor: colors.border, backgroundColor: colors.cardSecondary }]}
                   >
-                    <Text style={[styles.otherChipText, { color: colors.textPrimary }]}>{PROOF_METHODS[key].label}</Text>
+                    <Text style={[styles.otherChipText, { color: colors.textPrimary }]}>
+                      {PROOF_METHODS[key].label} ({formatCurrency(baseAmount)})
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -564,102 +624,156 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
           </>
         ) : null}
 
-        {/* ── 2. UPI ────────────────────────────────────────────── */}
+        {/* ── 2. UPI (No UTR field, QR code + Installed Apps) ─── */}
         {view === 'upi' ? (
           <View style={{ gap: SPACING.md }}>
-            {detectedRrn ? (
-              <View style={[styles.banner, { backgroundColor: greenBg, borderColor: greenBorder }]}>
-                <Zap size={18} color="#059669" style={{ marginTop: 1 }} />
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.bannerText, { color: isDark ? '#6ee7b7' : '#065f46', fontWeight: '800' }]}>
-                    ⚡ Auto-Detected RRN: {detectedRrn}
-                  </Text>
-                  <Text style={[styles.bannerText, { color: isDark ? '#a7f3d0' : '#047857', fontSize: responsiveFontSize(11), marginTop: 2 }]}>
-                    {detectedMeta?.appName ? `Matched ₹${formatCurrency(amount)} debit from ${detectedMeta.appName}` : 'Captured from payment receipt'}
+            {/* QR Code Card */}
+            <View style={[styles.qrCard, { backgroundColor: isDark ? '#0f172a' : '#ffffff', borderColor: colors.border }]}>
+              {upiLoading ? (
+                <View style={{ height: 210, justifyContent: 'center', alignItems: 'center' }}>
+                  <ActivityIndicator size="large" color={COLORS.primary} />
+                  <Text style={{ fontSize: responsiveFontSize(12), color: colors.textSecondary, marginTop: 10 }}>
+                    Generating Smart Collect QR…
                   </Text>
                 </View>
-              </View>
-            ) : isFullUtr ? (
-              <View style={[styles.banner, { backgroundColor: greenBg, borderColor: greenBorder }]}>
-                <CheckCircle size={16} color="#059669" style={{ marginTop: 1 }} />
-                <Text style={[styles.bannerText, { color: isDark ? '#6ee7b7' : '#065f46' }]}>
-                  ✨ 12-digit UTR entered! Screenshot is optional. Tap submit to send for owner approval.
-                </Text>
-              </View>
-            ) : (
-              <View style={[styles.banner, { backgroundColor: blueBg, borderColor: blueBorder }]}>
-                <Zap size={18} color="#2563eb" style={{ marginTop: 1 }} />
-                <Text style={[styles.bannerText, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
-                  Pay <Text style={{ fontWeight: 'bold' }}>{formatCurrency(totalPayable || amount)}</Text> via UPI (₹{handlingFee} fee included). Enter your{' '}
-                  <Text style={{ fontWeight: 'bold' }}>12-digit UPI Reference (UTR)</Text> for{' '}
-                  <Text style={{ fontWeight: 'bold' }}>instant verification</Text>!
-                </Text>
-              </View>
-            )}
-
-            {isNativeListenerSupported && !hasNotificationAccess && !rrnDismissed ? (
-              <TouchableOpacity
-                onPress={() => {
-                  setRrnDismissed(true);
-                  AsyncStorage.setItem('pantro_auto_rrn_enabled', 'true').catch(() => {});
-                  openNotificationSettings();
-                }}
-                activeOpacity={0.7}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  paddingHorizontal: 12,
-                  paddingVertical: 9,
-                  borderRadius: 10,
-                  backgroundColor: isDark ? 'rgba(59, 130, 246, 0.12)' : '#eff6ff',
-                  borderWidth: 1,
-                  borderColor: isDark ? 'rgba(59, 130, 246, 0.3)' : '#bfdbfe',
-                }}
-              >
-                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Sparkles size={15} color="#2563eb" />
-                  <Text style={{ fontSize: responsiveFontSize(12), color: isDark ? '#93c5fd' : '#1e40af', flex: 1 }}>
-                    Enable Auto-RRN detection from UPI notifications
+              ) : upiLink ? (
+                <View style={{ alignItems: 'center', paddingVertical: 14 }}>
+                  <Image
+                    source={{
+                      uri: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=${encodeURIComponent(upiLink)}`,
+                    }}
+                    style={{ width: 180, height: 180, borderRadius: 12, backgroundColor: '#ffffff' }}
+                    resizeMode="contain"
+                  />
+                  <View style={styles.qrAmountPill}>
+                    <ShieldCheck size={14} color="#059669" />
+                    <Text style={styles.qrAmountPillText}>
+                      Locked Amount: {formatCurrency(upiPayable)}
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: responsiveFontSize(11.5), color: colors.textSecondary, marginTop: 6, textAlign: 'center' }}>
+                    Scan with Google Pay, PhonePe, Paytm, or any UPI app
                   </Text>
                 </View>
-                <Text style={{ fontSize: responsiveFontSize(12), fontWeight: '700', color: '#2563eb' }}>Enable</Text>
-              </TouchableOpacity>
-            ) : null}
+              ) : (
+                <View style={{ padding: 20, alignItems: 'center' }}>
+                  <Text style={{ color: '#ef4444', fontSize: responsiveFontSize(12) }}>
+                    Unable to generate UPI QR. Please retry or choose Cash.
+                  </Text>
+                </View>
+              )}
 
-            {upiLoading ? (
-              <View style={styles.centerRow}>
-                <ActivityIndicator size="small" color={COLORS.primary} />
-                <Text style={[styles.muted, { color: colors.textSecondary }]}>Generating UPI link…</Text>
-              </View>
-            ) : upiId ? (
-              <View style={[styles.upiIdRow, { backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : '#ecfdf5', borderColor: isDark ? 'rgba(16, 185, 129, 0.2)' : '#a7f3d0' }]}>
-                <ShieldCheck size={16} color="#059669" />
-                <Text style={{ fontSize: responsiveFontSize(12), color: isDark ? '#6ee7b7' : '#065f46', fontWeight: '700', marginLeft: 6 }}>
-                  🔒 Exact Amount Locked: {formatCurrency(totalPayable || amount)}
-                </Text>
-              </View>
-            ) : (
-              <View style={[styles.banner, { backgroundColor: isDark ? 'rgba(245, 158, 11, 0.15)' : '#fffbeb', borderColor: isDark ? 'rgba(245, 158, 11, 0.3)' : '#fde68a' }]}>
-                <Zap size={16} color="#d97706" style={{ marginTop: 1 }} />
-                <Text style={[styles.bannerText, { color: isDark ? '#fcd34d' : '#92400e' }]}>
-                  Smart Collect details syncing... Please retry or use Cash / Bank Transfer.
-                </Text>
-              </View>
-            )}
-
-            {/* Automated Live Verification Banner */}
-            <View style={[styles.banner, { backgroundColor: blueBg, borderColor: blueBorder, paddingVertical: 14, flexDirection: 'column', alignItems: 'center', gap: 6 }]}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Zap size={16} color="#2563eb" />
-                <Text style={{ fontSize: responsiveFontSize(13), fontWeight: '800', color: isDark ? '#93c5fd' : '#1d4ed8' }}>
-                  Awaiting Smart Collect Confirmation
-                </Text>
-              </View>
-              <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary, textAlign: 'center', lineHeight: 16 }}>
-                ⚡ Once approved in your UPI app, this payment is automatically confirmed. No screenshot or reference number needed.
-              </Text>
+              {upiId ? (
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={copyUpiId}
+                  style={[styles.upiCopyBar, { borderTopColor: isDark ? 'rgba(255,255,255,0.08)' : '#f1f5f9' }]}
+                >
+                  <Text style={{ fontSize: responsiveFontSize(11.5), color: colors.textSecondary, flex: 1 }} numberOfLines={1}>
+                    UPI ID: <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{upiId}</Text>
+                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Copy size={13} color="#2563eb" />
+                    <Text style={{ fontSize: responsiveFontSize(11.5), fontWeight: '700', color: '#2563eb' }}>Copy</Text>
+                  </View>
+                </TouchableOpacity>
+              ) : null}
             </View>
+
+            {/* Installed Applications Section */}
+            <View style={{ gap: 8 }}>
+              <Text style={{ fontSize: responsiveFontSize(11), fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Pay Directly with Installed App
+              </Text>
+              <View style={styles.upiAppsGrid}>
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  onPress={() => handleLaunchUpiApp('gpay')}
+                  style={[styles.upiAppBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff', borderColor: colors.border }]}
+                >
+                  <View style={[styles.upiAppIconBox, { backgroundColor: '#e8f0fe' }]}>
+                    <Text style={{ fontSize: responsiveFontSize(13), fontWeight: '800', color: '#1a73e8' }}>G</Text>
+                  </View>
+                  <Text style={[styles.upiAppBtnText, { color: colors.textPrimary }]} numberOfLines={1}>Google Pay</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  onPress={() => handleLaunchUpiApp('phonepe')}
+                  style={[styles.upiAppBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff', borderColor: colors.border }]}
+                >
+                  <View style={[styles.upiAppIconBox, { backgroundColor: '#f3e8ff' }]}>
+                    <Text style={{ fontSize: responsiveFontSize(13), fontWeight: '800', color: '#6739b7' }}>P</Text>
+                  </View>
+                  <Text style={[styles.upiAppBtnText, { color: colors.textPrimary }]} numberOfLines={1}>PhonePe</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  onPress={() => handleLaunchUpiApp('paytm')}
+                  style={[styles.upiAppBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff', borderColor: colors.border }]}
+                >
+                  <View style={[styles.upiAppIconBox, { backgroundColor: '#e0f2fe' }]}>
+                    <Text style={{ fontSize: responsiveFontSize(12), fontWeight: '800', color: '#0284c7' }}>Pay</Text>
+                  </View>
+                  <Text style={[styles.upiAppBtnText, { color: colors.textPrimary }]} numberOfLines={1}>Paytm</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  onPress={() => handleLaunchUpiApp('kotak')}
+                  style={[styles.upiAppBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff', borderColor: colors.border }]}
+                >
+                  <View style={[styles.upiAppIconBox, { backgroundColor: '#fee2e2' }]}>
+                    <Text style={{ fontSize: responsiveFontSize(13), fontWeight: '800', color: '#dc2626' }}>K</Text>
+                  </View>
+                  <Text style={[styles.upiAppBtnText, { color: colors.textPrimary }]} numberOfLines={1}>Kotak</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  onPress={() => handleLaunchUpiApp('pop')}
+                  style={[styles.upiAppBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff', borderColor: colors.border }]}
+                >
+                  <View style={[styles.upiAppIconBox, { backgroundColor: '#fef3c7' }]}>
+                    <Text style={{ fontSize: responsiveFontSize(13), fontWeight: '800', color: '#d97706' }}>Pop</Text>
+                  </View>
+                  <Text style={[styles.upiAppBtnText, { color: colors.textPrimary }]} numberOfLines={1}>Pop UPI</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  onPress={() => handleLaunchUpiApp('generic')}
+                  style={[styles.upiAppBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff', borderColor: colors.border }]}
+                >
+                  <View style={[styles.upiAppIconBox, { backgroundColor: '#ecfdf5' }]}>
+                    <Zap size={16} color="#059669" />
+                  </View>
+                  <Text style={[styles.upiAppBtnText, { color: colors.textPrimary }]} numberOfLines={1}>Any App</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Smart Collect Realtime Settlement Banner */}
+            <View style={[styles.banner, { backgroundColor: isDark ? 'rgba(5, 150, 105, 0.12)' : '#ecfdf5', borderColor: isDark ? 'rgba(5, 150, 105, 0.25)' : '#a7f3d0' }]}>
+              <ShieldCheck size={16} color="#059669" style={{ marginTop: 1 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: responsiveFontSize(12.5), fontWeight: '700', color: isDark ? '#6ee7b7' : '#065f46' }}>
+                  Smart Collect Realtime Settlement Active
+                </Text>
+                <Text style={{ fontSize: responsiveFontSize(11.5), color: isDark ? '#a7f3d0' : '#047857', marginTop: 2, lineHeight: 16 }}>
+                  Payments made via UPI are verified in realtime through Smart Collect and settled directly via RazorpayX. No UTR entry needed!
+                </Text>
+              </View>
+            </View>
+
+            {/* Confirm button */}
+            <Button
+              title="I Have Completed Payment"
+              icon={CheckCircle}
+              onPress={handleConfirmPaidUpi}
+              fullWidth
+            />
 
             <TouchableOpacity onPress={backToMethods} style={styles.backBtn}>
               <Text style={[styles.backText, { color: colors.textSecondary }]}>← Change payment method</Text>
@@ -673,7 +787,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
             <View style={[styles.banner, { backgroundColor: blueBg, borderColor: blueBorder }]}>
               <Wallet size={16} color="#2563eb" style={{ marginTop: 1 }} />
               <Text style={[styles.bannerText, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
-                You are paying <Text style={{ fontWeight: 'bold' }}>{formatCurrency(totalPayable || amount)}</Text> via {proofMeta.label} (₹{handlingFee} handling fee included).
+                You are paying <Text style={{ fontWeight: 'bold' }}>{formatCurrency(baseAmount)}</Text> via {proofMeta.label} (₹0 handling fee).
                 Submit the reference and a screenshot so the owner can verify it.
               </Text>
             </View>
@@ -1003,6 +1117,64 @@ const styles = StyleSheet.create({
   otherMethodsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm },
   otherChip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   otherChipText: { fontSize: responsiveFontSize(12), fontWeight: '600' },
+  qrCard: {
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  qrAmountPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#ecfdf5',
+    borderWidth: 1,
+    borderColor: '#a7f3d0',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginTop: 10,
+  },
+  qrAmountPillText: {
+    fontSize: responsiveFontSize(12),
+    fontWeight: '700',
+    color: '#065f46',
+  },
+  upiCopyBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
+  },
+  upiAppsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  upiAppBtn: {
+    width: '31.5%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  upiAppIconBox: {
+    width: 26,
+    height: 26,
+    borderRadius: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  upiAppBtnText: {
+    fontSize: responsiveFontSize(11),
+    fontWeight: '700',
+    flex: 1,
+  },
   banner: {
     flexDirection: 'row',
     gap: 8,

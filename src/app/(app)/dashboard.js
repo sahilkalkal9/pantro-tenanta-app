@@ -179,15 +179,9 @@ export default function DashboardScreen() {
     ? Math.max(0, (Number(securityDeposit.expected) || 0) - (Number(securityDeposit.collected) || 0))
     : 0;
 
-  // Every "Pay" tap opens the one shared payment sheet.
+  // All payments route directly to Dues page
   const openPay = () => {
-    if (!currentRent) {
-      router.push('/rent');
-      return;
-    }
-    setIncludeDeposit(false);
-    setPayTarget(currentRent);
-    setPayOpen(true);
+    router.push('/dues');
   };
 
   const closePay = () => {
