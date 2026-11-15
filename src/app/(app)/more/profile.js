@@ -459,71 +459,6 @@ export default function TenantProfileScreen() {
       scrollRef={scrollRef}
     >
       <View style={styles.container}>
-        {/* Page Header */}
-        <TenantPageHeader
-          title="My Profile"
-          subtitle="Manage your personal details, emergency contacts, education, employment, bank details, and KYC in one place."
-          icon={User}
-          iconTone="blue"
-        />
-
-        {/* Global Action Bar */}
-        <View style={[styles.actionBar, { backgroundColor: isDark ? colors.card : '#ffffff', borderColor: colors.border }]}>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={handleToggleEditAll}
-            style={[
-              styles.actionBtn,
-              isAnyEditing ? styles.actionBtnSecondary : styles.actionBtnPrimary,
-              { borderColor: isAnyEditing ? colors.border : '#2563eb' }
-            ]}
-          >
-            {isAnyEditing ? (
-              <>
-                <RotateCcw size={14} color={colors.textPrimary} />
-                <Text style={[styles.actionBtnText, { color: colors.textPrimary }]}>Cancel Edits</Text>
-              </>
-            ) : (
-              <>
-                <Edit3 size={14} color="#ffffff" />
-                <Text style={[styles.actionBtnText, { color: '#ffffff', fontWeight: '700' }]}>Edit All Details</Text>
-              </>
-            )}
-          </TouchableOpacity>
-
-          {isAnyEditing && (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={handleSaveAll}
-              disabled={saving.all}
-              style={[styles.actionBtn, styles.actionBtnSuccess]}
-            >
-              <Save size={14} color="#ffffff" />
-              <Text style={[styles.actionBtnText, { color: '#ffffff', fontWeight: '700' }]}>
-                {saving.all ? 'Saving...' : 'Save All'}
-              </Text>
-            </TouchableOpacity>
-          )}
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => fetchForm({ refresh: true })}
-            style={[styles.actionBtn, { borderColor: colors.border }]}
-          >
-            <RefreshCw size={14} color={colors.textSecondary} />
-            <Text style={[styles.actionBtnText, { color: colors.textSecondary }]}>Refresh</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={handleSignOut}
-            style={[styles.actionBtn, styles.actionBtnDanger]}
-          >
-            <LogOut size={14} color={COLORS.danger} />
-            <Text style={[styles.actionBtnText, { color: COLORS.danger }]}>Sign Out</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Global Feedback Messages */}
         {saveSuccess.all ? (
           <View style={[styles.banner, styles.bannerSuccess]}>
@@ -542,13 +477,6 @@ export default function TenantProfileScreen() {
         {/* Hero Overview & Tenancy Card */}
         <Card style={styles.heroCard} padded={false}>
           <View style={[styles.heroHeader, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.12)' : '#f0f7ff' }]}>
-            <View style={styles.avatarWrap}>
-              <View style={styles.avatarCircle}>
-                <Text style={styles.avatarInitial}>{initial}</Text>
-              </View>
-              <View style={styles.activeDot} />
-            </View>
-
             <View style={styles.heroInfo}>
               <View style={styles.heroNameRow}>
                 <Text style={[styles.heroName, { color: colors.textPrimary }]} numberOfLines={1}>
@@ -654,49 +582,11 @@ export default function TenantProfileScreen() {
           </View>
         </Card>
 
-        {/* Section Jump Nav Pills */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.navChipsContainer}>
-          {SECTION_NAV.map((sec) => {
-            const Icon = sec.icon;
-            const isSelected = activeSection === sec.key;
-            return (
-              <TouchableOpacity
-                key={sec.key}
-                activeOpacity={0.7}
-                onPress={() => scrollToSection(sec.key)}
-                style={[
-                  styles.navChip,
-                  {
-                    backgroundColor: isSelected ? '#2563eb' : isDark ? colors.card : '#ffffff',
-                    borderColor: isSelected ? '#2563eb' : colors.border,
-                  },
-                ]}
-              >
-                <Icon size={13} color={isSelected ? '#ffffff' : colors.textSecondary} />
-                <Text
-                  style={[
-                    styles.navChipText,
-                    {
-                      color: isSelected ? '#ffffff' : colors.textSecondary,
-                      fontWeight: isSelected ? '700' : '500',
-                    },
-                  ]}
-                >
-                  {sec.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-
         {/* 1. PERSONAL DETAILS (READ-ONLY / SYNCED FROM AADHAAR) */}
         <View onLayout={(e) => onSectionLayout('personal', e)}>
           <Card>
             <View style={styles.sectionHead}>
               <View style={styles.sectionTitleRow}>
-                <View style={[styles.sectionIconBox, { backgroundColor: isDark ? 'rgba(37,99,235,0.2)' : '#eff6ff' }]}>
-                  <User size={18} color="#2563eb" />
-                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Personal Details</Text>
                   <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
@@ -741,19 +631,18 @@ export default function TenantProfileScreen() {
             )}
 
             <View style={styles.detailGrid}>
-              <DetailRow label="Full Legal Name" value={profile.fullName} icon={User} badge={isVerified ? "Verified" : "Onboarding"} />
-              <DetailRow label="Primary Mobile (Login)" value={profile.phone} icon={Phone} badge="Login & OTP" subtext="Registered for account login & OTPs" />
+              <DetailRow label="Full Legal Name" value={profile.fullName} badge={isVerified ? "Verified" : "Onboarding"} />
+              <DetailRow label="Primary Mobile (Login)" value={profile.phone} badge="Login & OTP" subtext="Registered for account login & OTPs" />
               <DetailRow
                 label="Aadhaar Linked Mobile"
                 value={aadhaarPhone || (isVerified ? 'Not linked on card' : 'Pending Aadhaar verification')}
-                icon={ShieldCheck}
                 badge={aadhaarPhone ? "Aadhaar Linked" : undefined}
                 subtext="Mobile linked with UIDAI Aadhaar record"
               />
-              <DetailRow label="Email Address" value={profile.email} icon={Mail} />
+              <DetailRow label="Email Address" value={profile.email} />
               <DetailRow label="Gender" value={profile.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : ''} />
-              <DetailRow label="Date of Birth" value={formatDate(profile.dateOfBirth)} icon={Calendar} />
-              <DetailRow label="Permanent Address" value={profile.permanentAddress} icon={MapPin} />
+              <DetailRow label="Date of Birth" value={formatDate(profile.dateOfBirth)} />
+              <DetailRow label="Permanent Address" value={profile.permanentAddress} />
             </View>
           </Card>
         </View>
@@ -763,9 +652,6 @@ export default function TenantProfileScreen() {
           <Card>
             <View style={styles.sectionHead}>
               <View style={styles.sectionTitleRow}>
-                <View style={[styles.sectionIconBox, { backgroundColor: isDark ? 'rgba(225,29,72,0.2)' : '#ffe4e6' }]}>
-                  <Heart size={18} color="#e11d48" />
-                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Family & Emergency Contacts</Text>
                   <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
@@ -851,14 +737,14 @@ export default function TenantProfileScreen() {
             ) : (
               <View style={styles.detailGrid}>
                 <Text style={[styles.subGroupHeading, { color: colors.textTertiary }]}>Father / Guardian</Text>
-                <DetailRow label="Father / Guardian Name" value={profile.fatherName} icon={User} />
-                <DetailRow label="Father / Guardian Phone" value={profile.fatherPhone} icon={Phone} />
+                <DetailRow label="Father / Guardian Name" value={profile.fatherName} />
+                <DetailRow label="Father / Guardian Phone" value={profile.fatherPhone} />
 
                 <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                 <Text style={[styles.subGroupHeading, { color: colors.textTertiary }]}>Emergency Contact</Text>
-                <DetailRow label="Emergency Contact Name" value={profile.emergencyContactName} icon={Users} />
-                <DetailRow label="Emergency Contact Phone" value={profile.emergencyContactPhone} icon={Phone} />
+                <DetailRow label="Emergency Contact Name" value={profile.emergencyContactName} />
+                <DetailRow label="Emergency Contact Phone" value={profile.emergencyContactPhone} />
               </View>
             )}
 
@@ -871,9 +757,6 @@ export default function TenantProfileScreen() {
           <Card>
             <View style={styles.sectionHead}>
               <View style={styles.sectionTitleRow}>
-                <View style={[styles.sectionIconBox, { backgroundColor: isDark ? 'rgba(217,119,6,0.2)' : '#fef3c7' }]}>
-                  <GraduationCap size={18} color="#d97706" />
-                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Education</Text>
                   <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
@@ -955,11 +838,11 @@ export default function TenantProfileScreen() {
               </View>
             ) : (
               <View style={styles.detailGrid}>
-                <DetailRow label="Institution / College" value={edu.institution} icon={Building2} />
+                <DetailRow label="Institution / College" value={edu.institution} />
                 <DetailRow label="Level" value={eduLevelLabel} />
                 <DetailRow label="Course / Degree" value={edu.course} />
                 <DetailRow label="Year of Study" value={edu.yearOfStudy} />
-                <DetailRow label="College City" value={edu.city} icon={MapPin} />
+                <DetailRow label="College City" value={edu.city} />
               </View>
             )}
 
@@ -1319,6 +1202,7 @@ export default function TenantProfileScreen() {
                 <DigiLockerVerifyCard
                   initialAadhaar={profile?.aadhaarNumber || ''}
                   onVerified={() => fetchForm({ refresh: true })}
+                  user={storedUser}
                 />
               </View>
             ) : null}
@@ -1596,12 +1480,13 @@ function KycDetailsView({ title = 'Aadhaar KYC Status', kyc, onOpenPhoto }) {
   );
 }
 
-function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
+function DigiLockerVerifyCard({ initialAadhaar, onVerified, user }) {
   const { colors, isDark } = useTheme();
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [pendingClientId, setPendingClientId] = useState(null);
   const [completing, setCompleting] = useState(false);
+  const [hasOpenedPayment, setHasOpenedPayment] = useState(false);
 
   // Checkout sheet & coupon state
   const [showCheckout, setShowCheckout] = useState(false);
@@ -1686,9 +1571,31 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
           toast.info('Complete verification in your browser and return to Pantro');
         }
       } else {
-        // Open web checkout or UPI
-        toast.info(`Please complete checkout for ₹${checkoutData?.amountRupees || '11.80'}`);
+        // Open Razorpay Checkout for DigiLocker Verification
         setShowCheckout(false);
+        setHasOpenedPayment(true);
+        const directUrl = checkoutData?.checkoutUrl || checkoutData?.url || checkoutData?.paymentUrl;
+        if (directUrl) {
+          await Linking.openURL(directUrl);
+        } else {
+          const keyId = checkoutData?.keyId || checkoutData?.key || checkoutData?.razorpayKeyId || 'rzp_live_ILsQ4Vuby8zP1b';
+          const orderId = checkoutData?.razorpayOrderId || checkoutData?.orderId;
+          const amountPaise = checkoutData?.totalPaise || checkoutData?.amountPaise || 590;
+          const params = new URLSearchParams({
+            key_id: keyId,
+            ...(orderId ? { order_id: orderId } : {}),
+            name: "Pantro",
+            description: "DigiLocker Verification Fee",
+            amount: String(amountPaise),
+            currency: "INR",
+            "prefill[name]": user?.name || user?.fullName || "",
+            "prefill[email]": user?.email || "",
+            "prefill[contact]": String(user?.phone || "").replace(/\D/g, "").slice(-10),
+          });
+          const embeddedUrl = `https://api.razorpay.com/v1/checkout/embedded?${params.toString()}`;
+          await Linking.openURL(embeddedUrl);
+        }
+        toast.info('Complete payment on Razorpay and return to Pantro');
       }
     } catch (e) {
       toast.error(getErrorMessage(e));
@@ -1713,21 +1620,26 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
   };
 
   useEffect(() => {
-    if (!pendingClientId) return;
     const sub = AppState.addEventListener('change', async (nextState) => {
       if (nextState === 'active') {
-        try {
-          await kycComplete(pendingClientId);
-          toast.success('Aadhaar verified successfully!');
-          setPendingClientId(null);
-          onVerified?.();
-        } catch {
-          // not ready yet
+        if (pendingClientId) {
+          try {
+            await kycComplete(pendingClientId);
+            toast.success('Aadhaar verified successfully!');
+            setPendingClientId(null);
+            onVerified?.();
+          } catch {
+            // not ready yet
+          }
+        } else if (hasOpenedPayment) {
+          try {
+            await startVerification();
+          } catch {}
         }
       }
     });
     return () => sub.remove();
-  }, [pendingClientId, onVerified, toast]);
+  }, [pendingClientId, hasOpenedPayment, onVerified, toast]);
 
   return (
     <View style={[styles.dlCard, { borderColor: colors.border, backgroundColor: isDark ? 'rgba(37,99,235,0.08)' : '#eff6ff' }]}>
@@ -1743,38 +1655,38 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
       {showCheckout ? (
         <View style={{ marginTop: SPACING.sm, padding: SPACING.sm, borderRadius: 12, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : '#ffffff', borderWidth: 1, borderColor: colors.border }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-            <Text style={{ fontSize: 12, color: colors.textSecondary }}>DigiLocker Verification Fee</Text>
-            <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textPrimary }}>₹10.00</Text>
+            <Text style={{ fontSize: 13, color: colors.textSecondary }}>DigiLocker Verification Fee</Text>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }}>₹5.00</Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-            <Text style={{ fontSize: 12, color: colors.textSecondary }}>18% GST (SAC 998313)</Text>
-            <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textPrimary }}>₹1.80</Text>
+            <Text style={{ fontSize: 13, color: colors.textSecondary }}>18% GST (SAC 998313)</Text>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }}>₹0.90</Text>
           </View>
           {appliedCoupon ? (
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-              <Text style={{ fontSize: 12, fontWeight: '600', color: '#059669' }}>Coupon ({appliedCoupon})</Text>
-              <Text style={{ fontSize: 12, fontWeight: '700', color: '#059669' }}>-₹{((checkoutData?.gstBreakdown?.discountPaise || 1180) / 100).toFixed(2)}</Text>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: '#059669' }}>Coupon ({appliedCoupon})</Text>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: '#059669' }}>-₹{((checkoutData?.gstBreakdown?.discountPaise || 590) / 100).toFixed(2)}</Text>
             </View>
           ) : null}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingTop: 8 }}>
-            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.textPrimary }}>Total Payable</Text>
-            <Text style={{ fontSize: 14, fontWeight: '800', color: '#2563eb' }}>
-              ₹{checkoutData?.amountRupees || (checkoutData?.freeEligible ? '0.00' : '11.80')}
+            <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>Total Payable</Text>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: '#2563eb' }}>
+              ₹{checkoutData?.amountRupees || (checkoutData?.freeEligible ? '0.00' : '5.90')}
             </Text>
           </View>
 
           {/* Featured Coupons */}
           {coupons.length > 0 ? (
             <View style={{ marginTop: 10 }}>
-              <Text style={{ fontSize: 11, fontWeight: '700', color: colors.textSecondary, marginBottom: 4 }}>AVAILABLE OFFERS</Text>
+              <Text style={{ fontSize: 12, fontWeight: '700', color: colors.textSecondary, marginBottom: 4 }}>AVAILABLE OFFERS</Text>
               {coupons.map((c) => (
                 <TouchableOpacity
                   key={c.code}
                   onPress={() => handleApplyCoupon(c.code)}
-                  style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 6, backgroundColor: '#fef3c7', borderRadius: 8, marginBottom: 4 }}
+                  style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 8, backgroundColor: '#fef3c7', borderRadius: 8, marginBottom: 4 }}
                 >
-                  <Text style={{ fontSize: 11, fontWeight: '700', color: '#92400e' }}>{c.code} ({c.discountPercent}% OFF)</Text>
-                  <Text style={{ fontSize: 11, fontWeight: '700', color: '#b45309' }}>{appliedCoupon === c.code ? 'Applied ✓' : 'Tap to Apply'}</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: '#92400e' }}>{c.code} ({c.discountPercent}% OFF)</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: '#b45309' }}>{appliedCoupon === c.code ? 'Applied ✓' : 'Tap to Apply'}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -1789,7 +1701,7 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
             <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700', textAlign: 'center' }]}>
               {checkoutData?.freeEligible || checkoutData?.amountRupees === '0.00'
                 ? 'Claim 100% OFF & Verify (₹0 FREE)'
-                : `Pay ₹${checkoutData?.amountRupees || '11.80'} & Open DigiLocker`}
+                : `Pay ₹${checkoutData?.amountRupees || '5.90'} & Open DigiLocker`}
             </Text>
           </TouchableOpacity>
         </View>
@@ -1805,6 +1717,19 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified }) {
             <ShieldCheck size={14} color="#ffffff" />
             <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700' }]}>
               {loading ? 'Opening DigiLocker...' : pendingClientId ? 'Re-open DigiLocker' : 'Verify with DigiLocker'}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+
+        {hasOpenedPayment && !pendingClientId ? (
+          <TouchableOpacity
+            style={[styles.smallBtn, styles.smallBtnPrimary, { alignSelf: 'flex-start' }]}
+            onPress={startVerification}
+            disabled={loading}
+          >
+            <ShieldCheck size={14} color="#ffffff" />
+            <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700' }]}>
+              {loading ? 'Checking payment...' : 'I Paid — Open DigiLocker'}
             </Text>
           </TouchableOpacity>
         ) : null}
@@ -1948,14 +1873,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(225, 29, 72, 0.08)',
   },
   actionBtnText: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13),
     fontWeight: '600',
   },
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    padding: SPACING.sm,
+    padding: SPACING.sm + 2,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
   },
@@ -1965,7 +1890,7 @@ const styles = StyleSheet.create({
   },
   bannerSuccessText: {
     flex: 1,
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13),
     color: '#059669',
     fontWeight: '600',
   },
@@ -1975,7 +1900,7 @@ const styles = StyleSheet.create({
   },
   bannerDangerText: {
     flex: 1,
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13),
     color: '#e11d48',
     fontWeight: '600',
   },
@@ -2030,7 +1955,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   heroName: {
-    fontSize: responsiveFontSize(FONT_SIZES.lg),
+    fontSize: responsiveFontSize(20),
     fontWeight: '800',
     letterSpacing: -0.3,
   },
@@ -2038,15 +1963,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginTop: 4,
+    marginTop: 6,
     flexWrap: 'wrap',
   },
   microChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: BORDER_RADIUS.full,
   },
   microChipSuccess: {
@@ -2055,7 +1980,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(5, 150, 105, 0.25)',
   },
   microChipSuccessText: {
-    fontSize: responsiveFontSize(10),
+    fontSize: responsiveFontSize(12),
     fontWeight: '700',
     color: COLORS.success,
   },
@@ -2065,46 +1990,46 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(217, 119, 6, 0.25)',
   },
   microChipWarningText: {
-    fontSize: responsiveFontSize(10),
+    fontSize: responsiveFontSize(12),
     fontWeight: '700',
     color: COLORS.warning,
   },
   microChipText: {
-    fontSize: responsiveFontSize(10),
+    fontSize: responsiveFontSize(12),
     fontWeight: '600',
   },
   contactItemsWrap: {
-    marginTop: 6,
-    gap: 4,
+    marginTop: 8,
+    gap: 6,
   },
   contactItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 6,
   },
   contactText: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13.5),
     fontWeight: '500',
   },
   loginPill: {
     backgroundColor: 'rgba(37, 99, 235, 0.12)',
-    paddingHorizontal: 5,
-    paddingVertical: 1,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 4,
   },
   loginPillText: {
-    fontSize: responsiveFontSize(9),
+    fontSize: responsiveFontSize(11),
     fontWeight: '700',
     color: '#2563eb',
   },
   aadhaarPill: {
     backgroundColor: 'rgba(5, 150, 105, 0.12)',
-    paddingHorizontal: 5,
-    paddingVertical: 1,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 4,
   },
   aadhaarPillText: {
-    fontSize: responsiveFontSize(9),
+    fontSize: responsiveFontSize(11),
     fontWeight: '700',
     color: COLORS.success,
   },
@@ -2115,24 +2040,24 @@ const styles = StyleSheet.create({
   },
   statBox: {
     width: '50%',
-    padding: SPACING.sm + 2,
+    padding: SPACING.md,
     borderBottomWidth: 1,
     borderColor: 'rgba(255,255,255,0.06)',
   },
   statBoxLabel: {
-    fontSize: responsiveFontSize(10),
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   statBoxValue: {
-    fontSize: responsiveFontSize(FONT_SIZES.sm),
+    fontSize: responsiveFontSize(15.5),
     fontWeight: '700',
-    marginTop: 2,
+    marginTop: 3,
   },
   statBoxSub: {
-    fontSize: responsiveFontSize(11),
-    marginTop: 1,
+    fontSize: responsiveFontSize(12.5),
+    marginTop: 2,
   },
   progressSection: {
     padding: SPACING.md,
@@ -2142,20 +2067,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   progressLabel: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13.5),
     fontWeight: '600',
   },
   progressValue: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13.5),
     fontWeight: '700',
   },
   progressHint: {
-    fontSize: responsiveFontSize(11),
+    fontSize: responsiveFontSize(12.5),
     marginTop: 6,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   navChipsContainer: {
     gap: 8,
@@ -2171,7 +2096,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   navChipText: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13),
   },
   sectionHead: {
     flexDirection: 'row',
@@ -2186,21 +2111,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionIconBox: {
-    width: 34,
-    height: 34,
+    width: 36,
+    height: 36,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
   },
   sectionTitle: {
-    fontSize: responsiveFontSize(FONT_SIZES.md),
+    fontSize: responsiveFontSize(16.5),
     fontWeight: '700',
   },
   sectionSub: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13),
     marginTop: 2,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   editActionRow: {
     flexDirection: 'row',
@@ -2210,9 +2135,9 @@ const styles = StyleSheet.create({
   smallBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 9,
-    paddingVertical: 5,
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
   },
@@ -2225,14 +2150,14 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(225, 29, 72, 0.25)',
   },
   smallBtnText: {
-    fontSize: responsiveFontSize(11),
+    fontSize: responsiveFontSize(12.5),
     fontWeight: '600',
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
+    gap: 5,
+    paddingHorizontal: 9,
     paddingVertical: 4,
     borderRadius: BORDER_RADIUS.full,
     borderWidth: 1,
@@ -2242,7 +2167,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(5, 150, 105, 0.25)',
   },
   badgeVerifiedText: {
-    fontSize: responsiveFontSize(10),
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '700',
     color: COLORS.success,
   },
@@ -2251,13 +2176,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   badgeReadOnlyText: {
-    fontSize: responsiveFontSize(10),
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '600',
   },
   infoBanner: {
     flexDirection: 'row',
     gap: SPACING.sm,
-    padding: SPACING.sm,
+    padding: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
     marginBottom: SPACING.md,
@@ -2267,39 +2192,39 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(5, 150, 105, 0.25)',
   },
   infoBannerTitleVerified: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13.5),
     fontWeight: '700',
     color: '#059669',
   },
   infoBannerSubVerified: {
-    fontSize: responsiveFontSize(11),
+    fontSize: responsiveFontSize(12.5),
     color: '#047857',
     marginTop: 2,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   infoBannerWarning: {
     backgroundColor: 'rgba(217, 119, 6, 0.08)',
     borderColor: 'rgba(217, 119, 6, 0.25)',
   },
   infoBannerTitleWarning: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13.5),
     fontWeight: '700',
     color: '#d97706',
   },
   infoBannerSubWarning: {
-    fontSize: responsiveFontSize(11),
+    fontSize: responsiveFontSize(12.5),
     color: '#b45309',
     marginTop: 2,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   detailGrid: {
-    gap: 8,
+    gap: 10,
   },
   detailRowCard: {
-    padding: SPACING.sm,
+    padding: SPACING.sm + 4,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    gap: 3,
+    gap: 4,
   },
   detailRowHeader: {
     flexDirection: 'row',
@@ -2312,29 +2237,29 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   detailRowLabel: {
-    fontSize: responsiveFontSize(10),
+    fontSize: responsiveFontSize(12),
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   detailRowBadge: {
     backgroundColor: 'rgba(37, 99, 235, 0.12)',
-    paddingHorizontal: 5,
-    paddingVertical: 1,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 4,
   },
   detailRowBadgeText: {
-    fontSize: responsiveFontSize(9),
+    fontSize: responsiveFontSize(11),
     fontWeight: '700',
     color: '#2563eb',
   },
   detailRowValue: {
-    fontSize: responsiveFontSize(FONT_SIZES.sm),
+    fontSize: responsiveFontSize(14.5),
     fontWeight: '600',
   },
   detailRowSubtext: {
-    fontSize: responsiveFontSize(10),
-    marginTop: 1,
+    fontSize: responsiveFontSize(12),
+    marginTop: 2,
   },
   italic: {
     fontStyle: 'italic',
@@ -2344,12 +2269,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   subGroupHeading: {
-    fontSize: responsiveFontSize(11),
+    fontSize: responsiveFontSize(13),
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.7,
-    marginTop: 4,
-    marginBottom: 4,
+    marginTop: 6,
+    marginBottom: 6,
   },
   divider: {
     height: 1,
@@ -2390,7 +2315,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   kycStatusTitle: {
-    fontSize: responsiveFontSize(FONT_SIZES.sm),
+    fontSize: responsiveFontSize(14.5),
     fontWeight: '700',
   },
   kycDetailRow: {
@@ -2400,10 +2325,10 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   kycDetailLabel: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13),
   },
   kycDetailValue: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13),
     fontWeight: '600',
   },
   dlWrapper: {
@@ -2422,11 +2347,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   dlTitle: {
-    fontSize: responsiveFontSize(FONT_SIZES.sm),
+    fontSize: responsiveFontSize(14.5),
     fontWeight: '700',
   },
   dlSub: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13),
     lineHeight: 18,
   },
   docsRow: {
@@ -2451,13 +2376,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   docPhotoLabel: {
-    fontSize: responsiveFontSize(11),
+    fontSize: responsiveFontSize(12.5),
     fontWeight: '700',
     marginBottom: 4,
     textAlign: 'center',
   },
   docPhotoSub: {
-    fontSize: responsiveFontSize(10),
+    fontSize: responsiveFontSize(11.5),
   },
   docPhotoThumbWrap: {
     borderRadius: BORDER_RADIUS.sm,
@@ -2478,7 +2403,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(37,99,235,0.1)',
   },
   docPhotoBarText: {
-    fontSize: responsiveFontSize(10),
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '600',
     color: '#2563eb',
   },
@@ -2493,7 +2418,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   viewDocsBtnText: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13.5),
     fontWeight: '700',
     color: '#2563eb',
   },
@@ -2522,18 +2447,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sigStatusTitle: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13.5),
     fontWeight: '700',
     color: '#059669',
   },
   sigStatusSub: {
-    fontSize: responsiveFontSize(10),
+    fontSize: responsiveFontSize(11.5),
     color: '#047857',
     marginTop: 1,
   },
   sigStatusWarningText: {
     flex: 1,
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(13),
     color: '#d97706',
   },
   sigThumbBox: {
@@ -2562,11 +2487,11 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   sessionName: {
-    fontSize: responsiveFontSize(FONT_SIZES.sm),
+    fontSize: responsiveFontSize(14.5),
     fontWeight: '600',
   },
   sessionSub: {
-    fontSize: responsiveFontSize(FONT_SIZES.xs),
+    fontSize: responsiveFontSize(12.5),
     marginTop: 2,
   },
   lightboxOverlay: {
@@ -2615,7 +2540,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   corporateFootnote: {
-    fontSize: responsiveFontSize(10.5),
+    fontSize: responsiveFontSize(12),
     textAlign: 'center',
   },
 });
