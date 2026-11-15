@@ -17,6 +17,10 @@ import {
   Wallet,
   Zap,
   Sparkles,
+  Lock,
+  Receipt,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react-native';
 import { usePaymentObserver } from '../../hooks/usePaymentObserver';
 import { tenantService } from '../../services/tenantService';
@@ -91,6 +95,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
 
   const [view, setView] = useState('method'); // method | upi | proof | cash | cash-otp | online
   const [method, setMethod] = useState('');
+  const [itemsExpanded, setItemsExpanded] = useState(true);
 
   // UPI / proof state
   const [upiLink, setUpiLink] = useState('');
@@ -208,6 +213,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
     setCashfreeOrder(null);
     setCashfreeDone(false);
     setCashfreeError('');
+    setItemsExpanded(true);
     resetDetection?.();
   }, []);
 
@@ -507,100 +513,241 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
   const roseBorder = isDark ? 'rgba(239, 68, 68, 0.3)' : '#fecaca';
 
   return (
-    <ModalSheet visible={visible} onClose={close} title={target.title || 'Pay'}>
+    <ModalSheet visible={visible} onClose={close} title={target.title || 'Checkout & Pay'}>
       <View style={{ gap: SPACING.md }}>
-        {/* ── Total ─────────────────────────────────────────────── */}
-        <View style={[styles.totalBox, { backgroundColor: blueBg, borderColor: blueBorder }]}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
-            <View>
-              <Text style={[styles.totalLabel, { color: isDark ? '#93c5fd' : '#1d4ed8' }]}>
-                {view === 'upi' ? 'TOTAL PAYABLE (VIA UPI)' : 'TOTAL DUES'}
-              </Text>
-              <Text style={[styles.totalAmount, { color: isDark ? '#ffffff' : '#1e3a8a' }]}>
-                {formatCurrency(view === 'upi' ? upiPayable : baseAmount)}
-              </Text>
-            </View>
-            <View style={{ alignItems: 'flex-end', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#ffffff', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}>
-              <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary }}>
-                Dues: <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{formatCurrency(baseAmount)}</Text>
-              </Text>
-              <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary, marginTop: 2 }}>
-                Fee: <Text style={{ fontWeight: '700', color: '#2563eb' }}>{view === 'upi' ? '+₹5' : '+₹5 for UPI only'}</Text>
-              </Text>
-            </View>
+        {/* ── Checkout Security & Step Header ─── */}
+        <View style={styles.checkoutSecurityBar}>
+          <View style={styles.securityBadge}>
+            <Lock size={12} color="#059669" />
+            <Text style={styles.securityBadgeText}>256-Bit SSL Encrypted Checkout</Text>
           </View>
-          {target.summary ? (
-            <Text style={[styles.totalSub, { color: colors.textSecondary, marginTop: 6 }]}>{target.summary}</Text>
+          <View style={styles.stepBadge}>
+            <Text style={styles.stepBadgeText}>
+              {view === 'method' ? 'Step 1 of 2: Method' : 'Step 2 of 2: Pay'}
+            </Text>
+          </View>
+        </View>
+
+        {/* ── Itemized Order & Dues Summary Card ─── */}
+        <View style={[styles.checkoutSummaryCard, { backgroundColor: isDark ? colors.cardSecondary : '#f8fafc', borderColor: colors.border }]}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setItemsExpanded((v) => !v)}
+            style={styles.summaryHeaderRow}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={styles.receiptIconBox}>
+                <Receipt size={14} color="#2864B2" />
+              </View>
+              <Text style={[styles.summaryCardTitle, { color: colors.textPrimary }]}>
+                ITEMIZED DUES SUMMARY
+              </Text>
+              <View style={styles.itemCountBadge}>
+                <Text style={styles.itemCountBadgeText}>
+                  {items.length > 0 ? `${items.length} item${items.length !== 1 ? 's' : ''}` : '1 item'}
+                </Text>
+              </View>
+            </View>
+            {items.length > 0 ? (
+              itemsExpanded ? <ChevronUp size={16} color={colors.textSecondary} /> : <ChevronDown size={16} color={colors.textSecondary} />
+            ) : null}
+          </TouchableOpacity>
+
+          {itemsExpanded && items.length > 0 ? (
+            <View style={styles.itemListContainer}>
+              {items.map((it, idx) => {
+                const isRent = it.type === 'rent';
+                const isDep = it.type === 'deposit';
+                const itTitle = it.title || (isRent ? `Rent ${it.month}/${it.year}` : isDep ? 'Security Deposit' : 'Pending Due');
+                return (
+                  <View key={it.id || idx} style={styles.itemRow}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                      <View style={[styles.itemTypeDot, { backgroundColor: isRent ? '#2864B2' : isDep ? '#10b981' : '#f59e0b' }]} />
+                      <View style={{ flex: 1, minWidth: 0 }}>
+                        <Text style={[styles.itemTitleText, { color: colors.textPrimary }]} numberOfLines={1}>
+                          {itTitle}
+                        </Text>
+                        {it.subtitle ? (
+                          <Text style={[styles.itemSubText, { color: colors.textSecondary }]} numberOfLines={1}>
+                            {it.subtitle}
+                          </Text>
+                        ) : null}
+                      </View>
+                    </View>
+                    <Text style={[styles.itemAmountText, { color: colors.textPrimary }]}>
+                      {formatCurrency(Number(it.amount) || 0)}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
           ) : null}
 
           {depositToggle && depositToggle.amount > 0 ? (
-            <View style={{ marginTop: SPACING.sm, width: '100%' }}>
+            <View style={{ marginTop: 6, paddingTop: 6, borderTopWidth: 1, borderTopColor: colors.border }}>
               <SwitchRow
-                label={`Also pay ${formatCurrency(depositToggle.amount)} security deposit`}
+                label={`Include ${formatCurrency(depositToggle.amount)} security deposit`}
                 value={!!depositToggle.checked}
                 onValueChange={(v) => depositToggle.onChange?.(v)}
               />
             </View>
           ) : null}
+
+          {/* Price Line Breakdown */}
+          <View style={[styles.priceBreakdownBox, { borderTopColor: colors.border }]}>
+            <View style={styles.priceRow}>
+              <Text style={[styles.priceRowLabel, { color: colors.textSecondary }]}>Base Dues Subtotal</Text>
+              <Text style={[styles.priceRowVal, { color: colors.textPrimary }]}>{formatCurrency(baseAmount)}</Text>
+            </View>
+            <View style={styles.priceRow}>
+              <Text style={[styles.priceRowLabel, { color: colors.textSecondary }]}>
+                Convenience Fee {view === 'method' ? '(UPI only)' : ''}
+              </Text>
+              <Text style={[styles.priceRowVal, { color: isUpi ? '#2864B2' : '#059669', fontWeight: '700' }]}>
+                {isUpi ? '+₹5.00' : view === 'method' ? '₹5 (UPI only • ₹0 others)' : '₹0.00 (FREE)'}
+              </Text>
+            </View>
+            <View style={[styles.totalRowDivider, { backgroundColor: colors.border }]} />
+            <View style={styles.grandTotalRow}>
+              <View>
+                <Text style={[styles.grandTotalLabel, { color: colors.textSecondary }]}>TOTAL PAYABLE</Text>
+                <Text style={[styles.grandTotalAmount, { color: isDark ? '#ffffff' : '#1e3a8a' }]}>
+                  {formatCurrency(view === 'upi' ? upiPayable : baseAmount)}
+                </Text>
+              </View>
+              <View style={styles.verifiedReceiptPill}>
+                <ShieldCheck size={13} color="#059669" />
+                <Text style={styles.verifiedReceiptPillText}>Instant Tax Receipt</Text>
+              </View>
+            </View>
+          </View>
         </View>
 
         {/* ── 1. Method selection ──────────────────────────────── */}
         {view === 'method' ? (
           <>
-            <Text style={[styles.prompt, { color: colors.textPrimary }]}>How would you like to pay?</Text>
+            <View style={styles.methodHeaderRow}>
+              <Text style={[styles.methodSectionHeading, { color: colors.textPrimary }]}>
+                Select Payment Method
+              </Text>
+              <Text style={[styles.methodSectionSubtitle, { color: colors.textSecondary }]}>
+                Choose your preferred settlement option
+              </Text>
+            </View>
 
             <View style={styles.methodCol}>
-              <Card onPress={selectUpi} style={styles.methodCardWide}>
-                <View style={[styles.methodIconWide, { backgroundColor: '#eff6ff' }]}>
-                  <Smartphone size={22} color="#2563eb" />
+              {/* Via UPI Card */}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={selectUpi}
+                style={[
+                  styles.checkoutMethodCard,
+                  {
+                    backgroundColor: isDark ? 'rgba(40, 100, 178, 0.12)' : '#f0f7ff',
+                    borderColor: '#2864B2',
+                    borderWidth: 1.5,
+                  },
+                ]}
+              >
+                <View style={styles.recommendBadge}>
+                  <Sparkles size={10} color="#ffffff" />
+                  <Text style={styles.recommendBadgeText}>RECOMMENDED • AUTO SETTLE</Text>
                 </View>
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Via UPI</Text>
-                    <Text style={{ fontSize: responsiveFontSize(14), fontWeight: '800', color: '#2563eb' }}>
-                      {formatCurrency(upiPayable)}
-                    </Text>
-                  </View>
-                  <Text style={[styles.methodSub, { color: colors.textSecondary, marginTop: 2 }]}>
-                    Smart Collect • GPay, PhonePe, Paytm, QR (Incl. ₹5 handling fee)
-                  </Text>
-                </View>
-              </Card>
 
-              <Card onPress={selectCash} style={styles.methodCardWide}>
-                <View style={[styles.methodIconWide, { backgroundColor: '#ecfdf5' }]}>
-                  <Banknote size={22} color="#059669" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Cash</Text>
-                    <Text style={{ fontSize: responsiveFontSize(14), fontWeight: '800', color: '#059669' }}>
-                      {formatCurrency(baseAmount)}
-                    </Text>
+                <View style={styles.methodCardInner}>
+                  <View style={[styles.radioCircle, { borderColor: '#2864B2', backgroundColor: '#2864B2' }]}>
+                    <View style={styles.radioDot} />
                   </View>
-                  <Text style={[styles.methodSub, { color: colors.textSecondary, marginTop: 2 }]}>
-                    Pay in person • ₹0 handling fee (confirmed by OTP)
-                  </Text>
-                </View>
-              </Card>
 
-              {showOnline ? (
-                <Card onPress={selectOnline} style={styles.methodCardWide}>
-                  <View style={[styles.methodIconWide, { backgroundColor: '#f5f3ff' }]}>
-                    <Globe size={22} color="#7c3aed" />
+                  <View style={[styles.methodIconBox, { backgroundColor: '#dbeafe' }]}>
+                    <Smartphone size={22} color="#1d4ed8" />
                   </View>
+
                   <View style={{ flex: 1 }}>
-                    <View style={styles.methodTitleRow}>
-                      <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>Pay Online Gateway</Text>
-                      <View style={styles.instantPill}>
-                        <Text style={styles.instantPillText}>Instant</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Text style={[styles.checkoutMethodTitle, { color: colors.textPrimary }]}>Via UPI & QR</Text>
+                      <Text style={styles.checkoutMethodPriceUpi}>
+                        {formatCurrency(upiPayable)}
+                      </Text>
+                    </View>
+                    <Text style={[styles.checkoutMethodSub, { color: colors.textSecondary }]}>
+                      Smart Collect • GPay, PhonePe, Paytm, QR (Incl. ₹5 handling fee)
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              {/* Cash Card */}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={selectCash}
+                style={[
+                  styles.checkoutMethodCard,
+                  {
+                    backgroundColor: isDark ? 'rgba(16, 185, 129, 0.08)' : '#f0fdf4',
+                    borderColor: isDark ? 'rgba(16, 185, 129, 0.3)' : '#bbf7d0',
+                    borderWidth: 1,
+                  },
+                ]}
+              >
+                <View style={styles.methodCardInner}>
+                  <View style={[styles.radioCircle, { borderColor: '#10b981' }]} />
+
+                  <View style={[styles.methodIconBox, { backgroundColor: '#dcfce7' }]}>
+                    <Banknote size={22} color="#059669" />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Text style={[styles.checkoutMethodTitle, { color: colors.textPrimary }]}>Cash</Text>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={styles.checkoutMethodPriceCash}>
+                          {formatCurrency(baseAmount)}
+                        </Text>
+                        <Text style={styles.zeroFeePill}>₹0 fee</Text>
                       </View>
                     </View>
-                    <Text style={[styles.methodSub, { color: colors.textSecondary }]}>
-                      UPI, Credit/Debit Cards, Netbanking — auto-verified instantly
+                    <Text style={[styles.checkoutMethodSub, { color: colors.textSecondary }]}>
+                      Pay physical cash to owner/manager • OTP verification
                     </Text>
                   </View>
-                </Card>
+                </View>
+              </TouchableOpacity>
+
+              {/* Online Gateway (if available) */}
+              {showOnline ? (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={selectOnline}
+                  style={[
+                    styles.checkoutMethodCard,
+                    {
+                      backgroundColor: isDark ? 'rgba(124, 58, 237, 0.08)' : '#faf5ff',
+                      borderColor: isDark ? 'rgba(124, 58, 237, 0.3)' : '#e9d5ff',
+                      borderWidth: 1,
+                    },
+                  ]}
+                >
+                  <View style={styles.methodCardInner}>
+                    <View style={[styles.radioCircle, { borderColor: '#7c3aed' }]} />
+
+                    <View style={[styles.methodIconBox, { backgroundColor: '#ede9fe' }]}>
+                      <Globe size={22} color="#7c3aed" />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={[styles.checkoutMethodTitle, { color: colors.textPrimary }]}>Online Gateway</Text>
+                        <View style={styles.instantPill}>
+                          <Text style={styles.instantPillText}>Instant</Text>
+                        </View>
+                      </View>
+                      <Text style={[styles.checkoutMethodSub, { color: colors.textSecondary }]}>
+                        Cards & Netbanking via Cashfree
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
               ) : null}
             </View>
 
@@ -1085,6 +1232,24 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
             </View>
           </View>
         ) : null}
+
+        {/* ── Security Trust Footer ─── */}
+        <View style={[styles.checkoutTrustFooter, { borderTopColor: colors.border }]}>
+          <View style={styles.trustFooterItem}>
+            <ShieldCheck size={13} color="#059669" />
+            <Text style={[styles.trustFooterText, { color: colors.textSecondary }]}>100% Safe</Text>
+          </View>
+          <View style={styles.trustFooterDot} />
+          <View style={styles.trustFooterItem}>
+            <Receipt size={13} color="#2864B2" />
+            <Text style={[styles.trustFooterText, { color: colors.textSecondary }]}>Instant Receipt</Text>
+          </View>
+          <View style={styles.trustFooterDot} />
+          <View style={styles.trustFooterItem}>
+            <Lock size={12} color="#64748b" />
+            <Text style={[styles.trustFooterText, { color: colors.textSecondary }]}>RazorpayX</Text>
+          </View>
+        </View>
       </View>
     </ModalSheet>
   );
@@ -1235,4 +1400,262 @@ const styles = StyleSheet.create({
   },
   successTitle: { fontSize: responsiveFontSize(16), fontWeight: '800', textAlign: 'center' },
   successDesc: { fontSize: responsiveFontSize(12.5), textAlign: 'center', lineHeight: 18, paddingHorizontal: SPACING.sm },
+
+  /* ── Checkout Enhancement Styles ─── */
+  checkoutSecurityBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 2,
+    marginBottom: -2,
+  },
+  securityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  securityBadgeText: {
+    fontSize: responsiveFontSize(11),
+    fontWeight: '700',
+    color: '#059669',
+  },
+  stepBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    backgroundColor: 'rgba(40, 100, 178, 0.1)',
+  },
+  stepBadgeText: {
+    fontSize: responsiveFontSize(10.5),
+    fontWeight: '700',
+    color: '#2864B2',
+  },
+  checkoutSummaryCard: {
+    borderWidth: 1,
+    borderRadius: 14,
+    padding: 14,
+    gap: 10,
+  },
+  summaryHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  receiptIconBox: {
+    width: 26,
+    height: 26,
+    borderRadius: 7,
+    backgroundColor: 'rgba(40, 100, 178, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  summaryCardTitle: {
+    fontSize: responsiveFontSize(11),
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  itemCountBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  itemCountBadgeText: {
+    fontSize: responsiveFontSize(10.5),
+    fontWeight: '700',
+    color: '#64748b',
+  },
+  itemListContainer: {
+    gap: 8,
+    paddingTop: 4,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+  },
+  itemTypeDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+  },
+  itemTitleText: {
+    fontSize: responsiveFontSize(12.5),
+    fontWeight: '600',
+  },
+  itemSubText: {
+    fontSize: responsiveFontSize(10.5),
+    marginTop: 1,
+  },
+  itemAmountText: {
+    fontSize: responsiveFontSize(12.5),
+    fontWeight: '700',
+  },
+  priceBreakdownBox: {
+    borderTopWidth: 1,
+    paddingTop: 10,
+    gap: 6,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceRowLabel: {
+    fontSize: responsiveFontSize(11.5),
+  },
+  priceRowVal: {
+    fontSize: responsiveFontSize(12),
+    fontWeight: '600',
+  },
+  totalRowDivider: {
+    height: 1,
+    marginVertical: 4,
+  },
+  grandTotalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  grandTotalLabel: {
+    fontSize: responsiveFontSize(10),
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  grandTotalAmount: {
+    fontSize: responsiveFontSize(24),
+    fontWeight: '900',
+    marginTop: 1,
+  },
+  verifiedReceiptPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: '#ecfdf5',
+    borderWidth: 1,
+    borderColor: '#a7f3d0',
+  },
+  verifiedReceiptPillText: {
+    fontSize: responsiveFontSize(10.5),
+    fontWeight: '700',
+    color: '#065f46',
+  },
+  methodHeaderRow: {
+    marginTop: 2,
+    marginBottom: -2,
+  },
+  methodSectionHeading: {
+    fontSize: responsiveFontSize(13),
+    fontWeight: '800',
+    letterSpacing: 0.4,
+  },
+  methodSectionSubtitle: {
+    fontSize: responsiveFontSize(11),
+    marginTop: 2,
+  },
+  checkoutMethodCard: {
+    borderRadius: 14,
+    padding: 14,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  recommendBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#2864B2',
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
+    borderBottomLeftRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  recommendBadgeText: {
+    fontSize: responsiveFontSize(8.5),
+    fontWeight: '800',
+    color: '#ffffff',
+    letterSpacing: 0.5,
+  },
+  methodCardInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  radioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#cbd5e1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#ffffff',
+  },
+  methodIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkoutMethodTitle: {
+    fontSize: responsiveFontSize(14),
+    fontWeight: '800',
+  },
+  checkoutMethodPriceUpi: {
+    fontSize: responsiveFontSize(14.5),
+    fontWeight: '900',
+    color: '#2864B2',
+  },
+  checkoutMethodPriceCash: {
+    fontSize: responsiveFontSize(14.5),
+    fontWeight: '900',
+    color: '#059669',
+  },
+  zeroFeePill: {
+    fontSize: responsiveFontSize(9.5),
+    fontWeight: '700',
+    color: '#059669',
+    marginTop: 1,
+  },
+  checkoutMethodSub: {
+    fontSize: responsiveFontSize(11),
+    marginTop: 3,
+    lineHeight: 15,
+  },
+  checkoutTrustFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    borderTopWidth: 1,
+    paddingTop: 12,
+    marginTop: 4,
+  },
+  trustFooterItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  trustFooterText: {
+    fontSize: responsiveFontSize(10.5),
+    fontWeight: '600',
+  },
+  trustFooterDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: '#94a3b8',
+  },
 });

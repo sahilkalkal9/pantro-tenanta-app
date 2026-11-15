@@ -23,16 +23,13 @@ export default function AppLayout() {
   }
 
   const bgColor = isDark ? '#070b14' : '#ffffff';
-  const topInset = Platform.OS === 'android'
-    ? Math.max(insets.top, RNStatusBar.currentHeight || 0)
-    : insets.top;
 
   return (
-    <View style={{ flex: 1, backgroundColor: bgColor, paddingTop: topInset }}>
+    <View style={{ flex: 1, backgroundColor: bgColor }}>
       <StatusBar
-        style={isDark ? 'light' : 'dark'}
-        backgroundColor={bgColor}
-        translucent={Platform.OS === 'android'}
+        style="light"
+        backgroundColor="#2864B2"
+        translucent
       />
       <TenantTopbar onMenuToggle={() => setDrawerOpen(true)} />
       <TenantDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />

@@ -235,9 +235,35 @@ export default function DuesScreen() {
     dues
       .filter((d) => selected.includes(d.id))
       .map((d) => {
-        if (d.type === 'rent') return { type: 'rent', rentId: d.rentId, month: d.month, year: d.year, amount: d.amount };
-        if (d.type === 'deposit') return { type: 'deposit', amount: d.amount };
-        return { type: 'penalty', paymentId: d.paymentId, amount: d.amount };
+        if (d.type === 'rent') {
+          return {
+            id: d.id,
+            type: 'rent',
+            rentId: d.rentId,
+            month: d.month,
+            year: d.year,
+            amount: d.amount,
+            title: d.title || `Rent ${d.month}/${d.year}`,
+            subtitle: d.subtitle,
+          };
+        }
+        if (d.type === 'deposit') {
+          return {
+            id: d.id,
+            type: 'deposit',
+            amount: d.amount,
+            title: d.title || 'Security Deposit',
+            subtitle: d.subtitle,
+          };
+        }
+        return {
+          id: d.id,
+          type: 'penalty',
+          paymentId: d.paymentId,
+          amount: d.amount,
+          title: d.title || 'Pending Due',
+          subtitle: d.subtitle,
+        };
       });
 
   const openPay = () => {
@@ -248,7 +274,7 @@ export default function DuesScreen() {
   // The one configuration the shared PaymentSheet is opened with.
   const payConfig = useMemo(
     () => ({
-      title: 'Pay Dues',
+      title: 'Checkout & Pay Dues',
       summary: `${selected.length} due item${selected.length !== 1 ? 's' : ''} selected`,
       amount: selectedTotal,
       items: buildItems(),

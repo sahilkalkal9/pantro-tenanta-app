@@ -139,52 +139,60 @@ export default function TenantTopbar({ onMenuToggle }) {
 
   return (
     <>
-      <View style={[styles.topbar, isDark && styles.topbarDark]}>
-        {/* ── Left: Menu button ─── */}
-        <View style={styles.leftRow}>
-          {!!onMenuToggle && (
-            <TouchableOpacity
-              style={[styles.menuBtn, isDark && styles.menuBtnDark]}
-              onPress={onMenuToggle}
-              activeOpacity={0.7}
-              hitSlop={6}
-              accessibilityLabel="Open navigation menu"
-            >
-              <Menu size={18} color="#ffffff" strokeWidth={2.2} />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* ── Right: Notifications & Profile ─── */}
-        <View style={styles.actionsRow}>
-          {/* Notification Bell */}
-          <TouchableOpacity
-            style={[styles.iconBtn, isDark && styles.iconBtnDark]}
-            onPress={handleOpenNotifications}
-            activeOpacity={0.7}
-            hitSlop={8}
-            aria-label="Notifications"
-          >
-            <Bell size={18} color="#ffffff" strokeWidth={2} />
-            {unreadCount > 0 && (
-              <View style={styles.badgePill}>
-                <Text style={styles.badgeText}>
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </Text>
-              </View>
+      <View
+        style={[
+          styles.topbarContainer,
+          { paddingTop: topInset },
+          isDark && styles.topbarContainerDark,
+        ]}
+      >
+        <View style={styles.topbarRow}>
+          {/* ── Left: Menu button ─── */}
+          <View style={styles.leftRow}>
+            {!!onMenuToggle && (
+              <TouchableOpacity
+                style={[styles.menuBtn, isDark && styles.menuBtnDark]}
+                onPress={onMenuToggle}
+                activeOpacity={0.7}
+                hitSlop={6}
+                accessibilityLabel="Open navigation menu"
+              >
+                <Menu size={18} color="#ffffff" strokeWidth={2.2} />
+              </TouchableOpacity>
             )}
-          </TouchableOpacity>
+          </View>
 
-          {/* Profile Button */}
-          <TouchableOpacity
-            style={styles.avatarBtn}
-            onPress={() => setProfileMenuOpen(true)}
-            activeOpacity={0.7}
-            hitSlop={8}
-            aria-label="Account menu"
-          >
-            <User size={18} color="#ffffff" strokeWidth={2.2} />
-          </TouchableOpacity>
+          {/* ── Right: Notifications & Profile ─── */}
+          <View style={styles.actionsRow}>
+            {/* Notification Bell */}
+            <TouchableOpacity
+              style={[styles.iconBtn, isDark && styles.iconBtnDark]}
+              onPress={handleOpenNotifications}
+              activeOpacity={0.7}
+              hitSlop={8}
+              aria-label="Notifications"
+            >
+              <Bell size={18} color="#ffffff" strokeWidth={2} />
+              {unreadCount > 0 && (
+                <View style={styles.badgePill}>
+                  <Text style={styles.badgeText}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            {/* Profile Button */}
+            <TouchableOpacity
+              style={styles.avatarBtn}
+              onPress={() => setProfileMenuOpen(true)}
+              activeOpacity={0.7}
+              hitSlop={8}
+              aria-label="Account menu"
+            >
+              <User size={18} color="#ffffff" strokeWidth={2.2} />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -389,21 +397,23 @@ export default function TenantTopbar({ onMenuToggle }) {
 }
 
 const styles = StyleSheet.create({
-  topbar: {
-    height: 54,
+  topbarContainer: {
     backgroundColor: '#2864B2',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.12)',
+    zIndex: 40,
+    ...SHADOWS.small,
+  },
+  topbarContainerDark: {
+    backgroundColor: '#2864B2',
+    borderBottomColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  topbarRow: {
+    height: 54,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 14,
-    zIndex: 40,
-    ...SHADOWS.small,
-  },
-  topbarDark: {
-    backgroundColor: '#2864B2',
-    borderBottomColor: 'rgba(0, 0, 0, 0.2)',
   },
   leftRow: {
     flexDirection: 'row',
