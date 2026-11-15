@@ -387,8 +387,13 @@ export default function DuesScreen() {
                 {selected.length > 0 ? `${selected.length} items selected` : 'Select dues to pay'}
               </Text>
               <Text style={[styles.bottomAmount, { color: colors.textPrimary }]}>
-                {formatCurrency(selectedTotal)}
+                {formatCurrency(selectedTotal > 0 ? selectedTotal + 5 : 0)}
               </Text>
+              {selectedTotal > 0 ? (
+                <Text style={{ fontSize: responsiveFontSize(10), color: colors.textSecondary }}>
+                  Incl. ₹5 handling fee
+                </Text>
+              ) : null}
             </View>
             <Button
               title="Pay Dues"

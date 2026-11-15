@@ -125,6 +125,9 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
 
   const items = useMemo(() => target?.items || [], [target]);
   const amount = Number(target?.amount) || 0;
+  const baseAmount = amount;
+  const handlingFee = 5;
+  const totalPayable = baseAmount > 0 ? baseAmount + handlingFee : 0;
   const rentIds = useMemo(() => target?.rentIds || [], [target]);
   const depositAmount = Number(target?.depositAmount) || 0;
   const showOnline = target?.showOnline !== false && (rentIds.length > 0 || depositAmount > 0);
@@ -219,9 +222,9 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
         const acc = (info?.upiAccounts && info.upiAccounts[0]) || null;
         const accId = info?.upiId || acc?.upiId;
         const accName = info?.upiName || acc?.upiName || 'Payment';
-        if (accId && amount > 0) {
+        if (accId && totalPayable > 0) {
           setUpiLink(
-            `upi://pay?pa=${encodeURIComponent(accId)}&pn=${encodeURIComponent(accName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(
+            `upi://pay?pa=${encodeURIComponent(accId)}&pn=${encodeURIComponent(accName)}&am=${totalPayable.toFixed(2)}&cu=INR&tn=${encodeURIComponent(
               target?.title || 'Payment'
             )}`
           );
@@ -471,10 +474,18 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
       <View style={{ gap: SPACING.md }}>
         {/* ── Total ─────────────────────────────────────────────── */}
         <View style={[styles.totalBox, { backgroundColor: blueBg, borderColor: blueBorder }]}>
-          <Text style={[styles.totalLabel, { color: isDark ? '#93c5fd' : '#1d4ed8' }]}>TOTAL TO PAY</Text>
-          <Text style={[styles.totalAmount, { color: isDark ? '#ffffff' : '#1e3a8a' }]}>{formatCurrency(amount)}</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <View>
+              <Text style={[styles.totalLabel, { color: isDark ? '#93c5fd' : '#1d4ed8' }]}>TOTAL PAYABLE</Text>
+              <Text style={[styles.totalAmount, { color: isDark ? '#ffffff' : '#1e3a8a' }]}>{formatCurrency(totalPayable || amount)}</Text>
+            </View>
+            <View style={{ alignItems: 'flex-end', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#ffffff', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}>
+              <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary }}>Due: <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{formatCurrency(baseAmount)}</Text></Text>
+              <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary }}>Handling Fee: <Text style={{ fontWeight: '700', color: '#2563eb' }}>+₹{handlingFee}</Text></Text>
+            </View>
+          </View>
           {target.summary ? (
-            <Text style={[styles.totalSub, { color: colors.textSecondary }]}>{target.summary}</Text>
+            <Text style={[styles.totalSub, { color: colors.textSecondary, marginTop: 6 }]}>{target.summary}</Text>
           ) : null}
 
           {depositToggle && depositToggle.amount > 0 ? (
@@ -499,8 +510,8 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                   <Smartphone size={22} color="#2563eb" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>UPI</Text>
-                  <Text style={[styles.methodSub, { color: colors.textSecondary }]}>GPay, PhonePe, Paytm &amp; screenshot</Text>
+                  <Text style={[styles.methodTitle, { color: colors.textPrimary }]}>⚡ Instant UPI &amp; QR</Text>
+                  <Text style={[styles.methodSub, { color: colors.textSecondary }]}>Smart Collect • GPay, PhonePe, Paytm, CRED</Text>
                 </View>
               </Card>
 
@@ -578,9 +589,9 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
               <View style={[styles.banner, { backgroundColor: blueBg, borderColor: blueBorder }]}>
                 <Zap size={18} color="#2563eb" style={{ marginTop: 1 }} />
                 <Text style={[styles.bannerText, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
-                  Pay <Text style={{ fontWeight: 'bold' }}>{formatCurrency(amount)}</Text> via UPI. Enter your{' '}
+                  Pay <Text style={{ fontWeight: 'bold' }}>{formatCurrency(totalPayable || amount)}</Text> via UPI (₹{handlingFee} fee included). Enter your{' '}
                   <Text style={{ fontWeight: 'bold' }}>12-digit UPI Reference (UTR)</Text> for{' '}
-                  <Text style={{ fontWeight: 'bold' }}>verification & approval</Text>!
+                  <Text style={{ fontWeight: 'bold' }}>instant verification</Text>!
                 </Text>
               </View>
             )}
@@ -635,10 +646,10 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                 </View>
               </TouchableOpacity>
             ) : (
-              <View style={[styles.banner, { backgroundColor: roseBg, borderColor: roseBorder }]}>
-                <AlertCircle size={16} color="#ef4444" style={{ marginTop: 1 }} />
-                <Text style={[styles.bannerText, { color: isDark ? '#fca5a5' : '#991b1b' }]}>
-                  UPI ID not available. Please contact your manager for payment details.
+              <View style={[styles.banner, { backgroundColor: isDark ? 'rgba(245, 158, 11, 0.15)' : '#fffbeb', borderColor: isDark ? 'rgba(245, 158, 11, 0.3)' : '#fde68a' }]}>
+                <Zap size={16} color="#d97706" style={{ marginTop: 1 }} />
+                <Text style={[styles.bannerText, { color: isDark ? '#fcd34d' : '#92400e' }]}>
+                  Smart Collect details syncing... Please retry or use Cash / Bank Transfer.
                 </Text>
               </View>
             )}
@@ -682,7 +693,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
             <View style={[styles.banner, { backgroundColor: blueBg, borderColor: blueBorder }]}>
               <Wallet size={16} color="#2563eb" style={{ marginTop: 1 }} />
               <Text style={[styles.bannerText, { color: isDark ? '#93c5fd' : '#1e40af' }]}>
-                You are paying <Text style={{ fontWeight: 'bold' }}>{formatCurrency(amount)}</Text> via {proofMeta.label}.
+                You are paying <Text style={{ fontWeight: 'bold' }}>{formatCurrency(totalPayable || amount)}</Text> via {proofMeta.label} (₹{handlingFee} handling fee included).
                 Submit the reference and a screenshot so the owner can verify it.
               </Text>
             </View>
