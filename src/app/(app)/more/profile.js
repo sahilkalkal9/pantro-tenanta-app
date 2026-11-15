@@ -1180,6 +1180,7 @@ export default function TenantProfileScreen() {
                   initialAadhaar={profile?.aadhaarNumber || ''}
                   onVerified={() => fetchForm({ refresh: true })}
                   user={storedUser}
+                  profile={profile}
                 />
               </View>
             ) : null}
@@ -1457,7 +1458,7 @@ function KycDetailsView({ title = 'Aadhaar KYC Status', kyc, onOpenPhoto }) {
   );
 }
 
-function DigiLockerVerifyCard({ initialAadhaar, onVerified, user }) {
+function DigiLockerVerifyCard({ initialAadhaar, onVerified, user, profile }) {
   const { colors, isDark } = useTheme();
   const toast = useToast();
   const [loading, setLoading] = useState(false);
@@ -1475,6 +1476,27 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user }) {
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [checkoutData, setCheckoutData] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await kycCheckout({});
+        const data = res?.data || res;
+        if (active) {
+          if (data?.alreadyPaid || data?.freeEligible) {
+            setIsPaid(true);
+          }
+          setCheckoutData(data);
+        }
+      } catch {
+        // silent check on mount
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const fetchCheckout = async (code = null) => {
     try {
@@ -1541,36 +1563,63 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user }) {
   };
 
   const handleConfirmCheckoutAndOpen = async () => {
-    const isFree = checkoutData?.freeEligible || checkoutData?.amountRupees === '0.00' || checkoutData?.totalPaise === 0;
+    setLoading(true);
+    try {
+      let currentCheckout = checkoutData;
+      // Guarantee an active Razorpay order id from backend
+      if (!currentCheckout || !currentCheckout.orderId) {
+        const payload = appliedCoupon ? { couponCode: appliedCoupon } : {};
+        const res = await kycCheckout(payload);
+        currentCheckout = res?.data || res;
+        setCheckoutData(currentCheckout);
+      }
 
-    if (isFree) {
-      await startVerification({
-        couponCode: appliedCoupon || checkoutData?.couponCode,
+      const isFree =
+        currentCheckout?.freeEligible ||
+        currentCheckout?.amountRupees === '0.00' ||
+        currentCheckout?.totalPaise === 0;
+
+      if (isFree || currentCheckout?.alreadyPaid) {
+        setIsPaid(true);
+        setShowCheckout(false);
+        await startVerification({
+          couponCode: appliedCoupon || currentCheckout?.couponCode,
+        });
+        return;
+      }
+
+      // Launch in-app Razorpay modal
+      const keyId = currentCheckout?.keyId || currentCheckout?.key || 'rzp_live_ILsQ4Vuby8zP1b';
+      const orderId = currentCheckout?.orderId || currentCheckout?.razorpayOrderId;
+      const amountPaise = currentCheckout?.amountPaise || currentCheckout?.totalPaise || 590;
+
+      const tenantName = profile?.fullName || user?.name || user?.fullName || 'Tenant';
+      const tenantEmail = profile?.email || user?.email || '';
+      const rawPhone = profile?.phone || user?.phone || '';
+      const cleanPhone = String(rawPhone).replace(/\D/g, '').slice(-10);
+
+      setRazorpayOptions({
+        key: keyId,
+        order_id: orderId,
+        amount: amountPaise,
+        currency: 'INR',
+        name: 'Pantro',
+        description: 'Aadhaar Verification Fee',
+        image: 'https://ik.imagekit.io/fkhvlkpi1/pantro-icon.png',
+        prefill: {
+          name: tenantName,
+          email: tenantEmail,
+          contact: cleanPhone.length === 10 ? cleanPhone : '',
+          method: 'upi',
+        },
+        theme: { color: '#2563eb' },
       });
-      return;
+      setRazorpayModalVisible(true);
+    } catch (e) {
+      toast.error(getErrorMessage(e) || 'Failed to start payment');
+    } finally {
+      setLoading(false);
     }
-
-    // Launch in-app Razorpay modal
-    const keyId = checkoutData?.keyId || checkoutData?.key || 'rzp_live_ILsQ4Vuby8zP1b';
-    const orderId = checkoutData?.orderId || checkoutData?.razorpayOrderId;
-    const amountPaise = checkoutData?.amountPaise || checkoutData?.totalPaise || 590;
-
-    setRazorpayOptions({
-      key: keyId,
-      order_id: orderId,
-      amount: amountPaise,
-      currency: 'INR',
-      name: 'Pantro',
-      description: 'Aadhaar Verification Fee',
-      image: 'https://ik.imagekit.io/fkhvlkpi1/pantro-icon.png',
-      prefill: {
-        name: user?.name || user?.fullName || '',
-        email: user?.email || '',
-        contact: String(user?.phone || '').replace(/\D/g, '').slice(-10),
-      },
-      theme: { color: '#2563eb' },
-    });
-    setRazorpayModalVisible(true);
   };
 
   const handleRazorpaySuccess = async (rzpData) => {

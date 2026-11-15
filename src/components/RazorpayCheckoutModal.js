@@ -6,16 +6,66 @@ import {
   Pressable,
   StyleSheet,
   Linking,
+  Platform,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { X, Lock } from "lucide-react-native";
 import { responsiveFontSize } from "../theme";
 
+const CUSTOM_USER_AGENT =
+  Platform.OS === "android"
+    ? "Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
+    : "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1";
+
+/**
+ * Parses and dispatches external URLs (UPI intents, Google Pay, PhonePe, Paytm, CRED, etc.)
+ * to the native device apps. Returns true if the URL was handled as an external app intent.
+ */
+const handleExternalUri = (url) => {
+  if (!url) return false;
+
+  // Let standard web schemes (HTTP, HTTPS, about, data, javascript) stay in WebView
+  if (
+    url.startsWith("http://") ||
+    url.startsWith("https://") ||
+    url.startsWith("about:") ||
+    url.startsWith("data:") ||
+    url.startsWith("javascript:")
+  ) {
+    return false;
+  }
+
+  // Handle Android intent URLs (e.g. intent://pay?...#Intent;scheme=upi;package=...;end)
+  if (url.startsWith("intent://")) {
+    try {
+      const schemeMatch = url.match(/scheme=([^;]+)/);
+      const scheme = schemeMatch ? schemeMatch[1] : "upi";
+      const body = url.replace(/^intent:\/\//, "").split("#Intent")[0];
+      const targetUrl = `${scheme}://${body}`;
+
+      Linking.openURL(targetUrl).catch(() => {
+        Linking.openURL(url).catch((err) => {
+          console.warn("[RazorpayModal] Intent open fallback failed:", err);
+        });
+      });
+    } catch {
+      Linking.openURL(url).catch(() => {});
+    }
+    return true;
+  }
+
+  // Handle direct app schemes (upi://, phonepe://, tez://, gpay://, paytmmp://, paytm://, credpay://, bhim://, mobikwik://, etc.)
+  Linking.openURL(url).catch((err) => {
+    console.warn("[RazorpayModal] External app URL open failed:", url, err);
+  });
+  return true;
+};
+
 /**
  * RazorpayCheckoutModal — In-app Razorpay checkout driven via official checkout.js
- * inside a secure WebView. Handles card, UPI, netbanking, and wallet flows.
- * Intercepts native UPI app intents (GPay, PhonePe, Paytm, etc.).
+ * inside a secure WebView. Handles Cards, UPI (GPay, PhonePe, Paytm, CRED, QR), Netbanking, and Wallets.
+ * Intercepts native UPI app intents and opens them seamlessly.
  */
 export default function RazorpayCheckoutModal({
   visible,
@@ -35,9 +85,15 @@ export default function RazorpayCheckoutModal({
     name: options.name || "Pantro",
     description: options.description || "Pantro Payment",
     image: options.image || "https://ik.imagekit.io/fkhvlkpi1/pantro-icon.png",
-    prefill: options.prefill || {},
+    prefill: {
+      name: options.prefill?.name || "",
+      email: options.prefill?.email || "",
+      contact: options.prefill?.contact || "",
+      method: options.prefill?.method || "upi",
+    },
     theme: { color: options.theme?.color || "#2563eb", backdrop_color: "#07090e" },
     notes: options.notes || {},
+    retry: { enabled: true, max_count: 3 },
   };
 
   if (options.subscription_id) {
@@ -152,12 +208,24 @@ export default function RazorpayCheckoutModal({
         backdropclose: false
       };
 
+      var timeout = setTimeout(function() {
+        if (typeof Razorpay === 'undefined') {
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({
+              event: 'ERROR',
+              message: 'Failed to connect to payment gateway. Please check your network connection.'
+            }));
+          }
+        }
+      }, 12000);
+
       function launch() {
         try {
           if (typeof Razorpay === 'undefined') {
             setTimeout(launch, 200);
             return;
           }
+          clearTimeout(timeout);
           var rzp = new Razorpay(config);
           rzp.on('payment.failed', function(resp) {
             if (window.ReactNativeWebView) {
@@ -213,33 +281,6 @@ export default function RazorpayCheckoutModal({
     }
   };
 
-  const handleShouldStartLoadWithRequest = (request) => {
-    const url = request.url || "";
-    // If UPI or external wallet deep link, open native app
-    if (
-      url.startsWith("upi://") ||
-      url.startsWith("phonepe://") ||
-      url.startsWith("paytmmp://") ||
-      url.startsWith("tez://") ||
-      url.startsWith("credpay://") ||
-      url.startsWith("bhim://")
-    ) {
-      Linking.canOpenURL(url)
-        .then((supported) => {
-          if (supported) {
-            Linking.openURL(url);
-          } else {
-            Linking.openURL(url).catch(() => {});
-          }
-        })
-        .catch(() => {});
-      return false;
-    }
-
-    // Allow internal checkout URLs
-    return true;
-  };
-
   return (
     <Modal
       visible={visible}
@@ -284,9 +325,19 @@ export default function RazorpayCheckoutModal({
             ref={webViewRef}
             source={{ html: htmlContent, baseUrl: "https://api.razorpay.com" }}
             onMessage={handleMessage}
-            onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
+            onShouldStartLoadWithRequest={(request) => {
+              const isExternal = handleExternalUri(request.url);
+              return !isExternal;
+            }}
+            userAgent={CUSTOM_USER_AGENT}
             javaScriptEnabled={true}
             domStorageEnabled={true}
+            javaScriptCanOpenWindowsAutomatically={true}
+            setSupportMultipleWindows={false}
+            thirdPartyCookiesEnabled={true}
+            sharedCookiesEnabled={true}
+            allowsInlineMediaPlayback={true}
+            mediaPlaybackRequiresUserAction={false}
             startInLoadingState={false}
             originWhitelist={["*"]}
             mixedContentMode="always"
