@@ -223,12 +223,13 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
         const accId = info?.upiId || acc?.upiId;
         const accName = info?.upiName || acc?.upiName || 'Payment';
         if (accId && totalPayable > 0) {
+          const cleanId = String(accId).trim();
           setUpiLink(
-            `upi://pay?pa=${encodeURIComponent(accId)}&pn=${encodeURIComponent(accName)}&am=${totalPayable.toFixed(2)}&cu=INR&tn=${encodeURIComponent(
+            `upi://pay?pa=${cleanId}&pn=${encodeURIComponent(accName)}&am=${totalPayable.toFixed(2)}&cu=INR&tn=${encodeURIComponent(
               target?.title || 'Payment'
-            )}`
+            )}&mc=6513&mode=02`
           );
-          setUpiId(accId);
+          setUpiId(cleanId);
           return;
         }
       } catch (err) {
