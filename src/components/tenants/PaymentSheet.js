@@ -227,7 +227,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
           setUpiLink(
             `upi://pay?pa=${cleanId}&pn=${encodeURIComponent(accName)}&am=${totalPayable.toFixed(2)}&cu=INR&tn=${encodeURIComponent(
               target?.title || 'Payment'
-            )}&mc=6513&mode=02`
+            )}`
           );
           setUpiId(cleanId);
           return;
