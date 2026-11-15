@@ -31,7 +31,7 @@ import { formatCurrency, formatDate } from '../../../lib/format';
 import {
   Screen, Card, Button, Badge, Avatar, ProgressBar, Chip, TextField, SelectField,
   EmptyState, ImageKitUploader, TenantPageHeader, Skeleton, CardSkeleton, PantroLoader,
-  Divider,
+  Divider, RazorpayCheckoutModal,
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
@@ -457,6 +457,7 @@ export default function TenantProfileScreen() {
       refreshing={refreshing}
       onRefresh={() => fetchForm({ refresh: true })}
       scrollRef={scrollRef}
+      contentStyle={styles.screenContent}
     >
       <View style={styles.container}>
         {/* Global Feedback Messages */}
@@ -483,30 +484,9 @@ export default function TenantProfileScreen() {
                   {fullName}
                 </Text>
                 <Badge
-                  label={(profile.status || 'active').replace('_', ' ')}
+                  label={(profile.status || 'active').replace('_', ' ').toUpperCase()}
                   color={profile.status === 'active' ? COLORS.success : COLORS.warning}
                 />
-              </View>
-
-              <View style={styles.statusChipsRow}>
-                {form?.profileCompleted ? (
-                  <View style={[styles.microChip, styles.microChipSuccess]}>
-                    <FileCheck size={11} color={COLORS.success} />
-                    <Text style={styles.microChipSuccessText}>Profile complete</Text>
-                  </View>
-                ) : (
-                  <View style={[styles.microChip, styles.microChipWarning]}>
-                    <AlertTriangle size={11} color={COLORS.warning} />
-                    <Text style={styles.microChipWarningText}>Incomplete profile</Text>
-                  </View>
-                )}
-                {profile.gender ? (
-                  <View style={[styles.microChip, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#f1f5f9' }]}>
-                    <Text style={[styles.microChipText, { color: colors.textSecondary }]}>
-                      {profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)}
-                    </Text>
-                  </View>
-                ) : null}
               </View>
 
               <View style={styles.contactItemsWrap}>
@@ -538,6 +518,15 @@ export default function TenantProfileScreen() {
                     </View>
                   </View>
                 ) : null}
+
+                {profile.gender ? (
+                  <View style={styles.contactItem}>
+                    <User size={12} color={colors.textTertiary} />
+                    <Text style={[styles.contactText, { color: colors.textSecondary }]}>
+                      {profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)}
+                    </Text>
+                  </View>
+                ) : null}
               </View>
             </View>
           </View>
@@ -564,10 +553,10 @@ export default function TenantProfileScreen() {
 
           {/* Profile Progress Bar */}
           <View style={[styles.progressSection, { borderTopColor: colors.border, backgroundColor: isDark ? 'rgba(255, 255, 255, 0.02)' : '#f8fafc' }]}>
-            <View style={styles.progressHeaderRow}>
+            <View style={styles.progressHeaderCol}>
               <Text style={[styles.progressLabel, { color: colors.textPrimary }]}>Profile completion status</Text>
               <Text style={[styles.progressValue, { color: colors.textSecondary }]}>
-                {progress.filled} / {progress.total} fields completed ({progress.percent}%)
+                {progress.filled} of {progress.total} fields completed ({progress.percent}%)
               </Text>
             </View>
             <ProgressBar
@@ -585,14 +574,12 @@ export default function TenantProfileScreen() {
         {/* 1. PERSONAL DETAILS (READ-ONLY / SYNCED FROM AADHAAR) */}
         <View onLayout={(e) => onSectionLayout('personal', e)}>
           <Card>
-            <View style={styles.sectionHead}>
-              <View style={styles.sectionTitleRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Personal Details</Text>
-                  <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
-                    Official identification and registered contact details
-                  </Text>
-                </View>
+            <View style={styles.sectionHeadWrap}>
+              <View style={styles.sectionTitleWrap}>
+                <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Personal Details</Text>
+                <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
+                  Official identification and registered contact details
+                </Text>
               </View>
               {isVerified ? (
                 <View style={[styles.statusBadge, styles.badgeVerified]}>
@@ -683,10 +670,10 @@ export default function TenantProfileScreen() {
               ) : (
                 <TouchableOpacity
                   onPress={() => handleEdit('family')}
-                  style={[styles.smallBtn, { borderColor: colors.border }]}
+                  style={styles.iconBtn}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Edit3 size={13} color={colors.textPrimary} />
-                  <Text style={[styles.smallBtnText, { color: colors.textPrimary }]}>Edit</Text>
+                  <Edit3 size={18} color={colors.textPrimary} />
                 </TouchableOpacity>
               )}
             </View>
@@ -788,10 +775,10 @@ export default function TenantProfileScreen() {
               ) : (
                 <TouchableOpacity
                   onPress={() => handleEdit('education')}
-                  style={[styles.smallBtn, { borderColor: colors.border }]}
+                  style={styles.iconBtn}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Edit3 size={13} color={colors.textPrimary} />
-                  <Text style={[styles.smallBtnText, { color: colors.textPrimary }]}>Edit</Text>
+                  <Edit3 size={18} color={colors.textPrimary} />
                 </TouchableOpacity>
               )}
             </View>
@@ -855,9 +842,6 @@ export default function TenantProfileScreen() {
           <Card>
             <View style={styles.sectionHead}>
               <View style={styles.sectionTitleRow}>
-                <View style={[styles.sectionIconBox, { backgroundColor: isDark ? 'rgba(13,148,136,0.2)' : '#ccfbf1' }]}>
-                  <Briefcase size={18} color="#0d9488" />
-                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Employment & Income</Text>
                   <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
@@ -889,10 +873,10 @@ export default function TenantProfileScreen() {
               ) : (
                 <TouchableOpacity
                   onPress={() => handleEdit('employment')}
-                  style={[styles.smallBtn, { borderColor: colors.border }]}
+                  style={styles.iconBtn}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Edit3 size={13} color={colors.textPrimary} />
-                  <Text style={[styles.smallBtnText, { color: colors.textPrimary }]}>Edit</Text>
+                  <Edit3 size={18} color={colors.textPrimary} />
                 </TouchableOpacity>
               )}
             </View>
@@ -961,9 +945,6 @@ export default function TenantProfileScreen() {
           <Card>
             <View style={styles.sectionHead}>
               <View style={styles.sectionTitleRow}>
-                <View style={[styles.sectionIconBox, { backgroundColor: isDark ? 'rgba(5,150,105,0.2)' : '#dcfce7' }]}>
-                  <Banknote size={18} color="#059669" />
-                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Bank & Refund Account</Text>
                   <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
@@ -995,10 +976,10 @@ export default function TenantProfileScreen() {
               ) : (
                 <TouchableOpacity
                   onPress={() => handleEdit('bank')}
-                  style={[styles.smallBtn, { borderColor: colors.border }]}
+                  style={styles.iconBtn}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Edit3 size={13} color={colors.textPrimary} />
-                  <Text style={[styles.smallBtnText, { color: colors.textPrimary }]}>Edit</Text>
+                  <Edit3 size={18} color={colors.textPrimary} />
                 </TouchableOpacity>
               )}
             </View>
@@ -1065,15 +1046,14 @@ export default function TenantProfileScreen() {
               </View>
             ) : (
               <View style={styles.detailGrid}>
-                <DetailRow label="Account Holder" value={bank.accountHolderName} icon={User} />
+                <DetailRow label="Account Holder" value={bank.accountHolderName} />
                 <DetailRow
                   label="Account Number"
                   value={bank.accountNumber ? `•••• •••• ${String(bank.accountNumber).slice(-4)}` : ''}
-                  icon={Lock}
                   mono
                 />
                 <DetailRow label="IFSC Code" value={bank.ifsc} mono />
-                <DetailRow label="Bank Name" value={bank.bankName} icon={Building2} />
+                <DetailRow label="Bank Name" value={bank.bankName} />
                 <DetailRow label="Branch" value={bank.branch} />
                 <DetailRow label="UPI ID" value={bank.upiId} />
               </View>
@@ -1088,9 +1068,6 @@ export default function TenantProfileScreen() {
           <Card>
             <View style={styles.sectionHead}>
               <View style={styles.sectionTitleRow}>
-                <View style={[styles.sectionIconBox, { backgroundColor: isDark ? 'rgba(124,58,237,0.2)' : '#f5f3ff' }]}>
-                  <IdCard size={18} color="#7c3aed" />
-                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Aadhaar & KYC Verification</Text>
                   <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
@@ -1123,10 +1100,10 @@ export default function TenantProfileScreen() {
                 ) : (
                   <TouchableOpacity
                     onPress={() => handleEdit('kyc')}
-                    style={[styles.smallBtn, { borderColor: colors.border }]}
+                    style={styles.iconBtn}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Edit3 size={13} color={colors.textPrimary} />
-                    <Text style={[styles.smallBtnText, { color: colors.textPrimary }]}>Edit Aadhaar</Text>
+                    <Edit3 size={18} color={colors.textPrimary} />
                   </TouchableOpacity>
                 )
               ) : null}
@@ -1486,9 +1463,13 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user }) {
   const [loading, setLoading] = useState(false);
   const [pendingClientId, setPendingClientId] = useState(null);
   const [completing, setCompleting] = useState(false);
-  const [hasOpenedPayment, setHasOpenedPayment] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
 
-  // Checkout sheet & coupon state
+  // In-app Razorpay modal state
+  const [razorpayModalVisible, setRazorpayModalVisible] = useState(false);
+  const [razorpayOptions, setRazorpayOptions] = useState(null);
+
+  // Checkout breakdown & coupon state
   const [showCheckout, setShowCheckout] = useState(false);
   const [coupons, setCoupons] = useState([]);
   const [couponInput, setCouponInput] = useState('');
@@ -1502,25 +1483,34 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user }) {
       const data = res?.data || res;
       setCheckoutData(data);
       if (code) setAppliedCoupon(code);
+      if (data?.alreadyPaid || data?.freeEligible) {
+        setIsPaid(true);
+      }
     } catch (e) {
-      toast.error(getErrorMessage(e) || 'Failed to apply coupon');
+      toast.error(getErrorMessage(e) || 'Failed to fetch verification pricing');
     }
   };
 
-  const startVerification = async () => {
+  const startVerification = async (paymentDetails = null) => {
     setLoading(true);
     try {
       const cleanAadhaar = initialAadhaar ? String(initialAadhaar).replace(/\D/g, '') : undefined;
-      const res = await kycInit({ aadhaarNumber: cleanAadhaar });
-      const payload = res?.data || res;
-      const url = payload?.url || payload?.redirectUrl || res?.url || res?.redirectUrl;
-      const clientId = payload?.clientId || res?.clientId;
+      const payload = {
+        aadhaarNumber: cleanAadhaar,
+        ...(paymentDetails || {}),
+      };
+      const res = await kycInit(payload);
+      const data = res?.data || res;
+      const url = data?.url || data?.redirectUrl || res?.url || res?.redirectUrl;
+      const clientId = data?.clientId || res?.clientId;
 
       if (clientId) {
         setPendingClientId(clientId);
       }
 
       if (url) {
+        setShowCheckout(false);
+        setIsPaid(true);
         await Linking.openURL(url);
         toast.info('Complete verification in your browser and return to Pantro');
       } else {
@@ -1551,57 +1541,52 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user }) {
   };
 
   const handleConfirmCheckoutAndOpen = async () => {
-    setLoading(true);
-    try {
-      const cleanAadhaar = initialAadhaar ? String(initialAadhaar).replace(/\D/g, '') : undefined;
-      const isFree = checkoutData?.freeEligible || checkoutData?.amountRupees === '0.00' || checkoutData?.totalPaise === 0;
+    const isFree = checkoutData?.freeEligible || checkoutData?.amountRupees === '0.00' || checkoutData?.totalPaise === 0;
 
-      if (isFree) {
-        const res = await kycInit({
-          aadhaarNumber: cleanAadhaar,
-          couponCode: appliedCoupon || checkoutData?.couponCode,
-        });
-        const payload = res?.data || res;
-        const url = payload?.url || payload?.redirectUrl || res?.url || res?.redirectUrl;
-        const clientId = payload?.clientId || res?.clientId;
-        if (clientId) setPendingClientId(clientId);
-        if (url) {
-          setShowCheckout(false);
-          await Linking.openURL(url);
-          toast.info('Complete verification in your browser and return to Pantro');
-        }
-      } else {
-        // Open Razorpay Checkout for DigiLocker Verification
-        setShowCheckout(false);
-        setHasOpenedPayment(true);
-        const directUrl = checkoutData?.checkoutUrl || checkoutData?.url || checkoutData?.paymentUrl;
-        if (directUrl) {
-          await Linking.openURL(directUrl);
-        } else {
-          const keyId = checkoutData?.keyId || checkoutData?.key || checkoutData?.razorpayKeyId || 'rzp_live_ILsQ4Vuby8zP1b';
-          const orderId = checkoutData?.razorpayOrderId || checkoutData?.orderId;
-          const amountPaise = checkoutData?.totalPaise || checkoutData?.amountPaise || 590;
-          const params = new URLSearchParams({
-            key_id: keyId,
-            ...(orderId ? { order_id: orderId } : {}),
-            name: "Pantro",
-            description: "DigiLocker Verification Fee",
-            amount: String(amountPaise),
-            currency: "INR",
-            "prefill[name]": user?.name || user?.fullName || "",
-            "prefill[email]": user?.email || "",
-            "prefill[contact]": String(user?.phone || "").replace(/\D/g, "").slice(-10),
-          });
-          const embeddedUrl = `https://api.razorpay.com/v1/checkout/embedded?${params.toString()}`;
-          await Linking.openURL(embeddedUrl);
-        }
-        toast.info('Complete payment on Razorpay and return to Pantro');
-      }
-    } catch (e) {
-      toast.error(getErrorMessage(e));
-    } finally {
-      setLoading(false);
+    if (isFree) {
+      await startVerification({
+        couponCode: appliedCoupon || checkoutData?.couponCode,
+      });
+      return;
     }
+
+    // Launch in-app Razorpay modal
+    const keyId = checkoutData?.keyId || checkoutData?.key || 'rzp_live_ILsQ4Vuby8zP1b';
+    const orderId = checkoutData?.orderId || checkoutData?.razorpayOrderId;
+    const amountPaise = checkoutData?.amountPaise || checkoutData?.totalPaise || 590;
+
+    setRazorpayOptions({
+      key: keyId,
+      order_id: orderId,
+      amount: amountPaise,
+      currency: 'INR',
+      name: 'Pantro',
+      description: 'Aadhaar Verification Fee',
+      image: 'https://ik.imagekit.io/fkhvlkpi1/pantro-icon.png',
+      prefill: {
+        name: user?.name || user?.fullName || '',
+        email: user?.email || '',
+        contact: String(user?.phone || '').replace(/\D/g, '').slice(-10),
+      },
+      theme: { color: '#2563eb' },
+    });
+    setRazorpayModalVisible(true);
+  };
+
+  const handleRazorpaySuccess = async (rzpData) => {
+    setRazorpayModalVisible(false);
+    toast.success('Payment successful!');
+    setIsPaid(true);
+    setShowCheckout(false);
+    await startVerification({
+      orderId: rzpData?.razorpay_order_id || checkoutData?.orderId,
+      paymentId: rzpData?.razorpay_payment_id,
+      signature: rzpData?.razorpay_signature,
+    });
+  };
+
+  const handleRazorpayFailure = (errorDesc) => {
+    toast.error(errorDesc || 'Payment was not completed. Please try again.');
   };
 
   const handleCompleteVerification = async () => {
@@ -1631,15 +1616,11 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user }) {
           } catch {
             // not ready yet
           }
-        } else if (hasOpenedPayment) {
-          try {
-            await startVerification();
-          } catch {}
         }
       }
     });
     return () => sub.remove();
-  }, [pendingClientId, hasOpenedPayment, onVerified, toast]);
+  }, [pendingClientId, onVerified, toast]);
 
   return (
     <View style={[styles.dlCard, { borderColor: colors.border, backgroundColor: isDark ? 'rgba(37,99,235,0.08)' : '#eff6ff' }]}>
@@ -1652,10 +1633,10 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user }) {
       </Text>
 
       {/* Checkout breakdown sheet */}
-      {showCheckout ? (
-        <View style={{ marginTop: SPACING.sm, padding: SPACING.sm, borderRadius: 12, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : '#ffffff', borderWidth: 1, borderColor: colors.border }}>
+      {showCheckout && !isPaid ? (
+        <View style={{ marginTop: SPACING.sm, padding: SPACING.sm + 4, borderRadius: 12, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : '#ffffff', borderWidth: 1, borderColor: colors.border }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-            <Text style={{ fontSize: 13, color: colors.textSecondary }}>DigiLocker Verification Fee</Text>
+            <Text style={{ fontSize: 13, color: colors.textSecondary }}>Aadhaar Verification Fee</Text>
             <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }}>₹5.00</Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
@@ -1694,42 +1675,29 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user }) {
 
           {/* Action button */}
           <TouchableOpacity
-            style={[styles.smallBtn, styles.smallBtnPrimary, { marginTop: 10, alignSelf: 'stretch', justifyContent: 'center' }]}
+            style={[styles.smallBtn, styles.smallBtnPrimary, { marginTop: 12, alignSelf: 'stretch', justifyContent: 'center', paddingVertical: 10 }]}
             onPress={handleConfirmCheckoutAndOpen}
             disabled={loading}
           >
             <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700', textAlign: 'center' }]}>
               {checkoutData?.freeEligible || checkoutData?.amountRupees === '0.00'
-                ? 'Claim 100% OFF & Verify (₹0 FREE)'
-                : `Pay ₹${checkoutData?.amountRupees || '5.90'} & Open DigiLocker`}
+                ? 'Claim 100% OFF & Verify'
+                : `Pay ₹${checkoutData?.amountRupees || '5.90'}`}
             </Text>
           </TouchableOpacity>
         </View>
       ) : null}
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: SPACING.xs }}>
-        {!showCheckout ? (
+        {!showCheckout || isPaid ? (
           <TouchableOpacity
             style={[styles.smallBtn, styles.smallBtnPrimary, { alignSelf: 'flex-start' }]}
-            onPress={startVerification}
+            onPress={() => startVerification()}
             disabled={loading || completing}
           >
             <ShieldCheck size={14} color="#ffffff" />
             <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700' }]}>
               {loading ? 'Opening DigiLocker...' : pendingClientId ? 'Re-open DigiLocker' : 'Verify with DigiLocker'}
-            </Text>
-          </TouchableOpacity>
-        ) : null}
-
-        {hasOpenedPayment && !pendingClientId ? (
-          <TouchableOpacity
-            style={[styles.smallBtn, styles.smallBtnPrimary, { alignSelf: 'flex-start' }]}
-            onPress={startVerification}
-            disabled={loading}
-          >
-            <ShieldCheck size={14} color="#ffffff" />
-            <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700' }]}>
-              {loading ? 'Checking payment...' : 'I Paid — Open DigiLocker'}
             </Text>
           </TouchableOpacity>
         ) : null}
@@ -1751,6 +1719,14 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user }) {
           </TouchableOpacity>
         ) : null}
       </View>
+
+      <RazorpayCheckoutModal
+        visible={razorpayModalVisible}
+        options={razorpayOptions}
+        onClose={() => setRazorpayModalVisible(false)}
+        onSuccess={handleRazorpaySuccess}
+        onFailure={handleRazorpayFailure}
+      />
     </View>
   );
 }
@@ -1834,9 +1810,13 @@ function SectionFeedback({ error, success }) {
 // ── Styles ──────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  screenContent: {
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.md,
+    paddingBottom: 90,
+  },
   container: {
     gap: SPACING.md,
-    paddingBottom: SPACING.xxl,
   },
   actionBar: {
     flexDirection: 'row',
@@ -1951,10 +1931,12 @@ const styles = StyleSheet.create({
   heroNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.xs,
-    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: SPACING.sm,
   },
   heroName: {
+    flex: 1,
     fontSize: responsiveFontSize(20),
     fontWeight: '800',
     letterSpacing: -0.3,
@@ -2063,6 +2045,9 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     borderTopWidth: 1,
   },
+  progressHeaderCol: {
+    marginBottom: 8,
+  },
   progressHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -2105,10 +2090,29 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     marginBottom: SPACING.sm,
   },
+  sectionHeadWrap: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+    marginBottom: SPACING.sm,
+  },
+  sectionTitleWrap: {
+    flex: 1,
+    minWidth: 170,
+  },
   sectionTitleRow: {
     flexDirection: 'row',
     gap: SPACING.sm,
     flex: 1,
+  },
+  iconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionIconBox: {
     width: 36,
