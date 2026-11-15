@@ -633,19 +633,12 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                 <Text style={[styles.muted, { color: colors.textSecondary }]}>Generating UPI link…</Text>
               </View>
             ) : upiId ? (
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={copyUpiId}
-                style={[styles.upiIdRow, { backgroundColor: blueBg, borderColor: blueBorder }]}
-              >
-                <Text style={[styles.upiIdText, { color: colors.textPrimary }]} numberOfLines={1} selectable>
-                  UPI ID: <Text style={{ fontFamily: 'monospace', fontWeight: '700' }}>{upiId}</Text>
+              <View style={[styles.upiIdRow, { backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : '#ecfdf5', borderColor: isDark ? 'rgba(16, 185, 129, 0.2)' : '#a7f3d0' }]}>
+                <ShieldCheck size={16} color="#059669" />
+                <Text style={{ fontSize: responsiveFontSize(12), color: isDark ? '#6ee7b7' : '#065f46', fontWeight: '700', marginLeft: 6 }}>
+                  🔒 Exact Amount Locked: {formatCurrency(totalPayable || amount)}
                 </Text>
-                <View style={styles.copyRow}>
-                  <Copy size={13} color="#2563eb" />
-                  <Text style={styles.copyText}>Copy</Text>
-                </View>
-              </TouchableOpacity>
+              </View>
             ) : (
               <View style={[styles.banner, { backgroundColor: isDark ? 'rgba(245, 158, 11, 0.15)' : '#fffbeb', borderColor: isDark ? 'rgba(245, 158, 11, 0.3)' : '#fde68a' }]}>
                 <Zap size={16} color="#d97706" style={{ marginTop: 1 }} />

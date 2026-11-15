@@ -82,7 +82,11 @@ function parseDuesData(d, pRes) {
       type: 'rent',
       rentId: r._id,
       title: `Rent — ${MONTHS[r.month] || r.month} ${r.year}`,
-      subtitle: r.isMissing ? 'Month not yet billed' : (r.status || 'unpaid').replace('_', ' '),
+      subtitle: r.isMissing
+        ? 'Month not yet billed'
+        : r.status === 'partial' || (Number(r.paidAmount) > 0 && pending > 0)
+        ? `Partially Paid: ${formatCurrency(r.paidAmount || 0)} of ${formatCurrency(r.rentAmount)} (Remaining: ${formatCurrency(pending)})`
+        : (r.status || 'unpaid').replace('_', ' '),
       amount: pending,
       rentAmount: Number(r.rentAmount) || 0,
       lateFee: Number(r.lateFeeAccrued) || 0,
