@@ -30,9 +30,14 @@ export default function TenantBottomBar({ state, descriptors, navigation }) {
       style={[
         styles.container,
         {
-          backgroundColor: isDark ? '#070b14' : '#ffffff',
-          borderTopColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.8)',
+          backgroundColor: isDark ? 'rgba(7, 11, 20, 0.94)' : 'rgba(255, 255, 255, 0.92)',
+          borderTopColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.85)',
           paddingBottom: Math.max(insets.bottom, 6),
+          shadowColor: isDark ? '#000000' : '#0f172a',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: isDark ? 0.35 : 0.06,
+          shadowRadius: 16,
+          elevation: 10,
         },
       ]}
     >
@@ -71,9 +76,10 @@ export default function TenantBottomBar({ state, descriptors, navigation }) {
             }
           };
 
-          const activeColor = isDark ? '#60a5fa' : '#2563eb';
+          const activeColor = isDark ? '#60a5fa' : '#2864B2';
           const inactiveColor = isDark ? '#94a3b8' : '#64748b';
-          const activeBg = isDark ? 'rgba(37, 99, 235, 0.16)' : '#eff6ff';
+          const activeBg = isDark ? 'rgba(40, 100, 178, 0.22)' : 'rgba(40, 100, 178, 0.10)';
+          const activeBorder = isDark ? 'rgba(96, 165, 250, 0.3)' : 'rgba(40, 100, 178, 0.25)';
 
           return (
             <TouchableOpacity
@@ -86,7 +92,7 @@ export default function TenantBottomBar({ state, descriptors, navigation }) {
               activeOpacity={0.7}
               style={[
                 styles.tabItem,
-                isFocused && { backgroundColor: activeBg },
+                isFocused && { backgroundColor: activeBg, borderWidth: 1, borderColor: activeBorder, borderRadius: 10 },
               ]}
             >
               {Icon ? (

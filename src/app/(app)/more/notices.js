@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Bell, Megaphone } from 'lucide-react-native';
 import { tenantService } from '../../../services/tenantService';
 import { useToast } from '../../../hooks/useToast';
@@ -62,22 +62,41 @@ export default function NoticesScreen() {
   }
 
   return (
-    <Screen refreshing={refreshing} onRefresh={() => fetchNotices({ refresh: true })}>
-      <TenantPageHeader title="Notices" subtitle="Important updates from management" icon={Megaphone} iconTone="amber" />
+    <Screen refreshing={refreshing} onRefresh={() => fetchNotices({ refresh: true })} contentStyle={{ paddingTop: SPACING.sm }}>
+      <TenantPageHeader title="Notices" subtitle="Important updates from management" />
 
       {notices.length === 0 ? (
         <EmptyState icon={Bell} title="No notices" message="No notices for you yet. Check back later." />
       ) : (
         <>
-          <SegmentedControl
-            options={[
+          <View style={styles.tabsWrap}>
+            {[
               { value: 'all', label: `All (${notices.length})` },
               { value: 'important', label: `Important (${importantCount})` },
-            ]}
-            value={filter}
-            onChange={setFilter}
-            style={{ marginBottom: SPACING.md }}
-          />
+            ].map((opt) => {
+              const active = filter === opt.value;
+              return (
+                <TouchableOpacity
+                  key={opt.value}
+                  activeOpacity={0.8}
+                  onPress={() => setFilter(opt.value)}
+                  style={[
+                    styles.tabBtn,
+                    active ? styles.tabBtnActive : styles.tabBtnInactive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.tabBtnText,
+                      active ? styles.tabBtnTextActive : styles.tabBtnTextInactive,
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
 
           {filtered.length === 0 ? (
             <EmptyState icon={Bell} title="No important notices" message="No important notices at this time." />
@@ -135,6 +154,38 @@ function NoticeItem({ notice }) {
 }
 
 const styles = StyleSheet.create({
+  tabsWrap: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: SPACING.md,
+  },
+  tabBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabBtnActive: {
+    backgroundColor: '#2864B2',
+    borderColor: '#2864B2',
+  },
+  tabBtnInactive: {
+    backgroundColor: 'transparent',
+    borderColor: '#2864B2',
+  },
+  tabBtnText: {
+    fontSize: responsiveFontSize(12),
+    fontWeight: '700',
+  },
+  tabBtnTextActive: {
+    color: '#ffffff',
+  },
+  tabBtnTextInactive: {
+    color: '#2864B2',
+  },
   card: { marginBottom: SPACING.sm },
   row: { flexDirection: 'row', gap: SPACING.md },
   icon: { width: 38, height: 38, borderRadius: BORDER_RADIUS.md, alignItems: 'center', justifyContent: 'center' },

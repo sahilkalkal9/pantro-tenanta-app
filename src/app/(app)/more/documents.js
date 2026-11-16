@@ -133,12 +133,10 @@ export default function DocumentsScreen({ navigation }) {
   const docUrl = police.docUrl;
 
   return (
-    <Screen refreshing={refreshing} onRefresh={() => fetchData({ refresh: true })}>
+    <Screen refreshing={refreshing} onRefresh={() => fetchData({ refresh: true })} contentStyle={{ paddingTop: SPACING.sm }}>
       <TenantPageHeader
         title="Documents & Verification"
         subtitle="Your verified identity and background clearance"
-        icon={ShieldCheck}
-        iconTone="blue"
       />
 
       {/* Background Verification Card */}
@@ -392,7 +390,7 @@ export default function DocumentsScreen({ navigation }) {
           : (profile?.moveInDate ? formatDate(new Date(new Date(profile.moveInDate).setMonth(new Date(profile.moveInDate).getMonth() + 11))) : '—');
 
         return (
-          <Card>
+          <Card style={{ marginBottom: SPACING.md }}>
             <View style={[styles.head, { borderBottomColor: colors.border }]}>
               <View style={[styles.icon, { backgroundColor: 'rgba(37, 99, 235, 0.10)' }]}>
                 <FileText size={16} color={COLORS.primary} />
@@ -462,7 +460,7 @@ export default function DocumentsScreen({ navigation }) {
       })()}
 
       {/* KYC Documents Card */}
-      <Card>
+      <Card style={{ marginBottom: SPACING.md }}>
         <View style={[styles.head, { borderBottomColor: colors.border }]}>
           <View style={[styles.icon, { backgroundColor: 'rgba(37, 99, 235, 0.10)' }]}>
             <IdCard size={16} color={COLORS.primary} />

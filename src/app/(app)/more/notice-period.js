@@ -102,8 +102,8 @@ export default function NoticePeriodScreen() {
   const canSubmit = !latest || ['rejected', 'cancelled'].includes(latest.status);
 
   return (
-    <Screen refreshing={refreshing} onRefresh={() => fetchAll({ refresh: true })}>
-      <TenantPageHeader title="Notice Period" subtitle="Submit a request to vacate" icon={LogOut} iconTone="rose" />
+    <Screen refreshing={refreshing} onRefresh={() => fetchAll({ refresh: true })} contentStyle={{ paddingTop: SPACING.sm }}>
+      <TenantPageHeader title="Notice Period" subtitle="Submit a request to vacate" />
 
       {refunds.map((ref) => (
         <Card key={ref._id || ref.id} style={[styles.refundCard, { borderLeftColor: COLORS.success }]}>

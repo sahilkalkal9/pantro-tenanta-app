@@ -69,12 +69,10 @@ export default function SupportScreen() {
   };
 
   return (
-    <Screen refreshing={refreshing} onRefresh={() => fetchProfile({ refresh: true })}>
+    <Screen refreshing={refreshing} onRefresh={() => fetchProfile({ refresh: true })} contentStyle={{ paddingTop: SPACING.sm }}>
       <TenantPageHeader
         title="Help & Support"
         subtitle="Need assistance with your stay, payments, or room? We're here to help."
-        icon={LifeBuoy}
-        iconTone="violet"
       />
 
       {/* 24/7 Emergency Contact */}
@@ -200,69 +198,6 @@ export default function SupportScreen() {
             </Text>
           </View>
           <ChevronRight size={18} color={colors.textTertiary} />
-        </View>
-      </Card>
-
-      {/* Platform & Technology Partner Info */}
-      <Card style={styles.card} onPress={() => Linking.openURL('https://www.pantro.in')}>
-        <View style={styles.row}>
-          <View style={[styles.icon, { backgroundColor: 'rgba(20, 184, 166, 0.15)' }]}>
-            <Sparkles size={20} color="#0d9488" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <View style={[styles.partnerHeaderRow, { marginBottom: 8 }]}>
-              <Text style={[styles.title, { color: colors.textPrimary }]}>Platform & Technology</Text>
-              <Text style={[styles.sub, { color: colors.textTertiary }]}>Official technology partner information</Text>
-            </View>
-
-            <View style={[styles.partnerBox, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.12)' : '#eff6ff', borderColor: isDark ? 'rgba(37, 99, 235, 0.3)' : '#bfdbfe' }]}>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.partnerCompany, { color: colors.textPrimary }]}>
-                  A Product of Wabsyte Studio (OPC) Private Limited
-                </Text>
-                <Text style={[styles.partnerDesc, { color: colors.textSecondary }]}>
-                  Modern PropTech Software for PG, Hostel, RK & Flat Management.
-                </Text>
-                <View style={styles.partnerMetaRow}>
-                  <Text style={[styles.partnerMetaLabel, { color: colors.textFaint }]}>Platform</Text>
-                  <Text style={[styles.partnerMetaValue, { color: colors.textSecondary }]}>Pantro Tenant Portal</Text>
-                </View>
-                <View style={styles.partnerMetaRow}>
-                  <Text style={[styles.partnerMetaLabel, { color: colors.textFaint }]}>License</Text>
-                  <Text style={[styles.partnerMetaValue, { color: colors.textSecondary }]}>© Wabsyte Studio (OPC) Private Limited</Text>
-                </View>
-              </View>
-              <View style={styles.verifiedBadge}>
-                <ShieldCheck size={14} color="#2563eb" />
-                <Text style={styles.verifiedText}>Verified Platform</Text>
-              </View>
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => Linking.openURL('https://www.pantro.in')}
-              style={styles.visitSiteBtn}
-            >
-              <Text style={styles.visitSiteText}>Visit pantro.in →</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={[styles.partnerBox, { backgroundColor: isDark ? 'rgba(217, 119, 6, 0.12)' : '#fef3c7', borderColor: isDark ? 'rgba(217, 119, 6, 0.3)' : '#fde68a' }]}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.partnerCompany, { color: colors.textPrimary }]}>
-              Zero Platform Fees on Rent Collection
-            </Text>
-            <Text style={[styles.partnerDesc, { color: colors.textSecondary }]}>
-              Collect rent directly from tenants to your bank account — no gateway commission deducted by Pantro.
-            </Text>
-          </View>
-          <View style={styles.verifiedBadge}>
-            <IndianRupee size={14} color="#d97706" />
-            <Text style={[styles.verifiedText, { color: '#b45309' }]}>Direct Settlement</Text>
-          </View>
         </View>
       </Card>
     </Screen>

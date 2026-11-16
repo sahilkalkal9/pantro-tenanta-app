@@ -209,57 +209,83 @@ export default function ComplaintsScreen() {
   }
 
   return (
-    <Screen refreshing={refreshing} onRefresh={refreshAll}>
+    <Screen refreshing={refreshing} onRefresh={refreshAll} contentStyle={{ paddingTop: SPACING.sm }}>
       <TenantPageHeader
         title="Complaints"
         subtitle="Raise and track your complaints"
-        icon={Wrench}
-        iconTone="amber"
-        style={{ marginBottom: SPACING.xs }}
+        right={
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={openCreate}
+            style={styles.headerPlusBtn}
+          >
+            <Plus size={20} color="#ffffff" strokeWidth={2.5} />
+          </TouchableOpacity>
+        }
       />
-      <View style={styles.headerActions}>
-        <Button title="Refresh" size="sm" variant="light" icon={RefreshCw} onPress={refreshAll} />
-        <Button title="Raise Complaint" size="sm" icon={Plus} onPress={openCreate} />
-      </View>
 
-      <View style={styles.statGrid}>
-        {STATUS_CARDS.map((s) => {
-          const tone = STAT_TONES[s.key] || STAT_TONES.open;
-          const { bg, fg } = isDark ? tone.dark : tone.light;
-          const Icon = STATUS_ICONS[s.key];
-          return (
-            <Card key={s.key} style={[styles.statCard, { backgroundColor: bg, borderColor: colors.border }]}>
-              <View style={styles.statHeaderRow}>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{s.label}</Text>
-                <View style={[styles.statIconBox, { backgroundColor: bg }]}>
-                  <Icon size={14} color={fg} strokeWidth={2.2} />
-                </View>
-              </View>
-              <Text style={[styles.statValue, { color: colors.textPrimary }]}>{stats[s.key]}</Text>
-            </Card>
-          );
-        })}
-      </View>
-
-      <Card style={styles.filterCard}>
+      {/* Search Bar at the top */}
+      <View style={styles.searchWrap}>
         <SearchBar
           value={search}
           onChangeText={(v) => {
             setSearch(v);
             setPage(1);
           }}
-          placeholder="Search by title, category, or description..."
-          style={{ marginBottom: SPACING.sm }}
+          placeholder="Search complaints by title, category, or description..."
         />
-        <PillTabs
-          tabs={tabs}
-          active={filter}
-          onChange={(k) => {
-            setFilter(k);
-            setPage(1);
-          }}
-        />
-      </Card>
+      </View>
+
+      {/* 4 Status Counters without icons in a clean row */}
+      <View style={styles.statGrid}>
+        {STATUS_CARDS.map((s) => {
+          const tone = STAT_TONES[s.key] || STAT_TONES.open;
+          const { bg, fg } = isDark ? tone.dark : tone.light;
+          return (
+            <View
+              key={s.key}
+              style={[
+                styles.statCard,
+                { backgroundColor: bg, borderColor: isDark ? 'rgba(255,255,255,0.08)' : colors.border },
+              ]}
+            >
+              <Text style={[styles.statLabel, { color: fg }]}>{s.label}</Text>
+              <Text style={[styles.statValue, { color: colors.textPrimary }]}>{stats[s.key]}</Text>
+            </View>
+          );
+        })}
+      </View>
+
+      {/* Filter Tabs using the 10px rounded outline/filled tabs UI */}
+      <View style={styles.tabsWrap}>
+        {tabs.map((t) => {
+          const isSelected = filter === t.key;
+          return (
+            <TouchableOpacity
+              key={t.key}
+              activeOpacity={0.8}
+              onPress={() => {
+                setFilter(t.key);
+                setPage(1);
+              }}
+              style={[
+                styles.tabBtn,
+                isSelected ? styles.tabBtnActive : styles.tabBtnInactive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.tabBtnText,
+                  isSelected ? styles.tabBtnTextActive : styles.tabBtnTextInactive,
+                ]}
+                numberOfLines={1}
+              >
+                {t.label} ({t.count})
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       {loading ? (
         <CardSkeleton count={3} />
@@ -519,70 +545,81 @@ function PageButton({ label, icon: Icon, kind = 'ghost', disabled, onPress }) {
 }
 
 const styles = StyleSheet.create({
-  headerActions: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
+  headerPlusBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#2864B2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2864B2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  searchWrap: {
     marginBottom: SPACING.md,
   },
   statGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.md,
+    gap: 8,
     marginBottom: SPACING.md,
   },
-  statCard: { width: '48%', flexGrow: 1, padding: SPACING.md },
+  statCard: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   statLabel: {
-    fontSize: responsiveFontSize(11),
-    fontWeight: FONT_WEIGHTS.semibold,
+    fontSize: responsiveFontSize(10.5),
+    fontWeight: FONT_WEIGHTS.bold,
     textTransform: 'uppercase',
-    letterSpacing: 0.88,
+    letterSpacing: 0.5,
+    textAlign: 'center',
   },
   statValue: {
-    fontSize: responsiveFontSize(FONT_SIZES.xxl),
+    fontSize: responsiveFontSize(FONT_SIZES.lg),
     fontWeight: '800',
-    letterSpacing: -0.4,
-    marginTop: 10,
+    marginTop: 4,
     fontVariant: ['tabular-nums'],
   },
-  statHeaderRow: {
+  tabsWrap: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: SPACING.md,
   },
-  statIconBox: {
-    width: 26,
-    height: 26,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  filterCard: { marginBottom: SPACING.md },
-  tabsShell: {
-    borderRadius: 13,
-    borderWidth: 1,
-    padding: 4,
-  },
-  tabsRow: { gap: 4, flexDirection: 'row' },
-  tab: {
-    minWidth: 68,
+  tabBtn: {
     flexGrow: 1,
-    flexDirection: 'row',
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    borderRadius: 9,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
   },
-  tabLabel: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.semibold, letterSpacing: -0.12 },
-  tabCount: {
-    borderRadius: BORDER_RADIUS.full,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    fontSize: responsiveFontSize(10),
+  tabBtnActive: {
+    backgroundColor: '#2864B2',
+    borderColor: '#2864B2',
+  },
+  tabBtnInactive: {
+    backgroundColor: 'transparent',
+    borderColor: '#2864B2',
+  },
+  tabBtnText: {
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '700',
-    overflow: 'hidden',
+  },
+  tabBtnTextActive: {
+    color: '#ffffff',
+  },
+  tabBtnTextInactive: {
+    color: '#2864B2',
   },
   pagination: {
     flexDirection: 'row',

@@ -187,10 +187,12 @@ export default function TenantDrawer({ visible, onClose }) {
               <View style={styles.brandRow}>
                 <Image source={PANTRO_ICON} style={styles.brandLogo} resizeMode="contain" />
                 <View style={{ flex: 1, minWidth: 0, justifyContent: 'center' }}>
-                  <Text style={[styles.brandTagline, { color: textPrimary }]} numberOfLines={2}>
-                    Your Property, Our Management
+                  <Text style={[styles.brandTitle, { color: textPrimary }]}>
+                    Pantro
                   </Text>
-                  <Text style={[styles.brandSub, { color: '#2563eb' }]}>Tenant Portal</Text>
+                  <Text style={[styles.brandTagline, { color: textSecondary }]} numberOfLines={2}>
+                    Your Stay, Our Responsibility
+                  </Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -249,40 +251,46 @@ export default function TenantDrawer({ visible, onClose }) {
 
             {/* Footer Actions */}
             <View style={[styles.footer, { borderTopColor: borderColor }]}>
-              {/* Theme Toggle Button */}
-              <TouchableOpacity
-                activeOpacity={0.75}
-                onPress={toggleTheme}
-                style={[
-                  styles.themeToggleBtn,
-                  {
-                    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#f8fafc',
-                    borderColor: borderColor,
-                  },
-                ]}
-              >
-                <View style={styles.themeLeft}>
+              {/* Theme Toggle & Sign Out in One Single Row */}
+              <View style={styles.footerActionRow}>
+                {/* Theme Toggle Button */}
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  onPress={toggleTheme}
+                  style={[
+                    styles.themeToggleBtnHalf,
+                    {
+                      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#f8fafc',
+                      borderColor: borderColor,
+                    },
+                  ]}
+                >
                   {isDark ? (
-                    <Moon size={16} color="#38bdf8" strokeWidth={2.2} />
+                    <Moon size={15} color="#38bdf8" strokeWidth={2.2} />
                   ) : (
-                    <Sun size={16} color="#f59e0b" strokeWidth={2.2} />
+                    <Sun size={15} color="#f59e0b" strokeWidth={2.2} />
                   )}
-                  <Text style={[styles.themeLabel, { color: textPrimary }]}>
+                  <Text style={[styles.themeLabelHalf, { color: textPrimary }]}>
                     {isDark ? 'Dark Mode' : 'Light Mode'}
                   </Text>
-                </View>
-                <Text style={styles.themeSwitchText}>Switch</Text>
-              </TouchableOpacity>
+                </TouchableOpacity>
 
-              {/* Sign Out Button */}
-              <TouchableOpacity
-                activeOpacity={0.75}
-                onPress={handleSignOut}
-                style={styles.signOutBtn}
-              >
-                <LogOut size={16} color="#e11d48" strokeWidth={2.2} />
-                <Text style={styles.signOutText}>Sign Out</Text>
-              </TouchableOpacity>
+                {/* Sign Out Button */}
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  onPress={handleSignOut}
+                  style={[
+                    styles.signOutBtnHalf,
+                    {
+                      backgroundColor: isDark ? 'rgba(225, 29, 72, 0.12)' : '#fff1f2',
+                      borderColor: isDark ? 'rgba(225, 29, 72, 0.22)' : '#ffe4e6',
+                    },
+                  ]}
+                >
+                  <LogOut size={15} color="#e11d48" strokeWidth={2.2} />
+                  <Text style={styles.signOutTextHalf}>Sign Out</Text>
+                </TouchableOpacity>
+              </View>
 
               {/* Corporate Footer Branding */}
               <View style={styles.brandingBox}>
@@ -333,19 +341,19 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   brandLogo: {
-    width: 52,
-    height: 52,
-    borderRadius: 12,
+    width: 60,
+    height: 60,
+    borderRadius: 14,
+  },
+  brandTitle: {
+    fontSize: responsiveFontSize(16),
+    fontWeight: '800',
+    letterSpacing: -0.3,
   },
   brandTagline: {
-    fontSize: responsiveFontSize(13),
-    fontWeight: '800',
-    letterSpacing: -0.2,
-    lineHeight: 17,
-  },
-  brandSub: {
     fontSize: responsiveFontSize(11),
-    fontWeight: '700',
+    fontWeight: '600',
+    lineHeight: 15,
     marginTop: 2,
   },
   closeBtn: {
@@ -421,44 +429,41 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.xs,
     paddingBottom: SPACING.xs,
     borderTopWidth: 1,
-    gap: 6,
   },
-  themeToggleBtn: {
+  footerActionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  themeToggleBtnHalf: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 9,
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    paddingHorizontal: 8,
+    borderRadius: 10,
     borderWidth: 1,
   },
-  themeLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  themeLabel: {
-    fontSize: responsiveFontSize(12),
-    fontWeight: '600',
-  },
-  themeSwitchText: {
-    fontSize: responsiveFontSize(10),
+  themeLabelHalf: {
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '700',
-    color: '#64748b',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
-  signOutBtn: {
+  signOutBtnHalf: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 9,
-    backgroundColor: 'rgba(225, 29, 72, 0.08)',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    borderWidth: 1,
   },
-  signOutText: {
-    fontSize: responsiveFontSize(12),
+  signOutTextHalf: {
+    fontSize: responsiveFontSize(11.5),
     fontWeight: '700',
     color: '#e11d48',
   },

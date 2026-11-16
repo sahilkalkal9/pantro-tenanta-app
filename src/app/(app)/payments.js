@@ -270,15 +270,10 @@ export default function PaymentsScreen() {
   const handleRefresh = () => fetchData({ refresh: true });
 
   return (
-    <Screen refreshing={refreshing} onRefresh={handleRefresh}>
+    <Screen refreshing={refreshing} onRefresh={handleRefresh} contentStyle={{ paddingTop: SPACING.sm }}>
       <TenantPageHeader
         title="Transactions"
         subtitle="Your complete payment history with approval status"
-        right={
-          <Button variant="secondary" size="sm" onPress={handleRefresh} style={{ marginLeft: 8 }}>
-            Refresh
-          </Button>
-        }
       />
 
       <View style={styles.statRow}>
@@ -322,9 +317,7 @@ export default function PaymentsScreen() {
         </Card>
       )}
 
-      {/* ── Owner Payment Options (UPI & Bank Accounts) ── */}
-      <PaymentMethodsCard info={payInfo} loading={payInfoLoading} onPreviewQr={setPreviewQr} />
-
+      {/* ── Transaction History Section ── */}
       {allTransactions.length === 0 ? (
         <EmptyState
           title="No transactions yet"
@@ -334,7 +327,6 @@ export default function PaymentsScreen() {
         />
       ) : (
         <>
-          {/* Transaction History Section Header */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Transaction History</Text>
             <Text style={styles.sectionSub}>Every rent payment and proof submission, with full details</Text>
@@ -346,33 +338,17 @@ export default function PaymentsScreen() {
               return (
                 <TouchableOpacity
                   key={opt.value}
-                  activeOpacity={0.75}
+                  activeOpacity={0.8}
                   onPress={() => setFilter(opt.value)}
                   style={[
                     styles.filterTabPill,
-                    {
-                      backgroundColor: active
-                        ? '#2563eb'
-                        : isDark
-                        ? colors.cardSecondary
-                        : '#f1f5f9',
-                      borderColor: active
-                        ? '#2563eb'
-                        : isDark
-                        ? 'rgba(255, 255, 255, 0.12)'
-                        : '#e2e8f0',
-                    },
+                    active ? styles.filterTabPillActive : styles.filterTabPillInactive,
                   ]}
                 >
                   <Text
                     style={[
                       styles.filterTabPillText,
-                      {
-                        color: active
-                          ? '#ffffff'
-                          : colors.textSecondary,
-                        fontWeight: active ? '700' : '600',
-                      },
+                      active ? styles.filterTabPillTextActive : styles.filterTabPillTextInactive,
                     ]}
                   >
                     {opt.label}
@@ -1133,20 +1109,35 @@ const styles = StyleSheet.create({
   // New styles for web parity
   filterTabsWrap: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 8,
     marginVertical: SPACING.md,
   },
   filterTabPill: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 10,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  filterTabPillActive: {
+    backgroundColor: '#2864B2',
+    borderColor: '#2864B2',
+  },
+  filterTabPillInactive: {
+    backgroundColor: 'transparent',
+    borderColor: '#2864B2',
+  },
   filterTabPillText: {
-    fontSize: responsiveFontSize(12),
+    fontSize: responsiveFontSize(11.5),
+    fontWeight: '700',
+  },
+  filterTabPillTextActive: {
+    color: '#ffffff',
+  },
+  filterTabPillTextInactive: {
+    color: '#2864B2',
   },
   sectionHeader: { marginTop: SPACING.lg, marginBottom: SPACING.md, paddingHorizontal: SPACING.md },
   sectionTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },

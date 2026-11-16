@@ -181,17 +181,6 @@ export default function TenantTopbar({ onMenuToggle }) {
                 </View>
               )}
             </TouchableOpacity>
-
-            {/* Profile Button */}
-            <TouchableOpacity
-              style={styles.avatarBtn}
-              onPress={() => setProfileMenuOpen(true)}
-              activeOpacity={0.7}
-              hitSlop={8}
-              aria-label="Account menu"
-            >
-              <User size={18} color="#ffffff" strokeWidth={2.2} />
-            </TouchableOpacity>
           </View>
         </View>
       </View>

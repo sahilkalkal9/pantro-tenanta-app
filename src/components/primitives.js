@@ -22,17 +22,30 @@ import { useTheme } from '../hooks/useTheme';
 import { responsiveFontSize } from "../theme";
 
 /* ------------------------------------------------------------------ */
-/* Card                                                                */
+/* Card (Liquid Glassmorphism)                                         */
 /* ------------------------------------------------------------------ */
-export function Card({ children, style, onPress, padded = true }) {
-  const { colors } = useTheme();
+export function Card({ children, style, onPress, padded = true, glass = true }) {
+  const { colors, isDark } = useTheme();
   const content = (
     <View
       style={[
         styles.card,
         {
-          backgroundColor: colors.card,
-          borderColor: colors.border,
+          backgroundColor: glass
+            ? isDark
+              ? 'rgba(14, 21, 38, 0.82)'
+              : 'rgba(255, 255, 255, 0.88)'
+            : colors.card,
+          borderColor: glass
+            ? isDark
+              ? 'rgba(255, 255, 255, 0.08)'
+              : 'rgba(226, 232, 240, 0.85)'
+            : colors.border,
+          shadowColor: isDark ? '#000000' : '#0f172a',
+          shadowOpacity: isDark ? 0.35 : 0.06,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: 4 },
+          elevation: 2,
         },
         padded && styles.cardPadded,
         style,

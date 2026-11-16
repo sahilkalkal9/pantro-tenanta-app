@@ -146,18 +146,15 @@ export default function RoomScreen() {
   const canRequest = profile.status === 'active' && !hasPending;
 
   return (
-    <Screen refreshing={refreshing} onRefresh={() => fetchAll({ refresh: true })}>
+    <Screen refreshing={refreshing} onRefresh={() => fetchAll({ refresh: true })} contentStyle={{ paddingTop: SPACING.sm }}>
       <TenantPageHeader
         title="Room"
         subtitle="Your room and room change requests"
-        icon={BedDouble}
-        iconTone="violet"
       />
 
       <Card style={styles.card}>
         <View style={styles.cardHead}>
           <View style={styles.headLeft}>
-            <DoorOpen size={18} color="#7c3aed" />
             <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Current Room</Text>
           </View>
           <Badge
@@ -168,27 +165,22 @@ export default function RoomScreen() {
         </View>
 
         <View style={styles.grid}>
-          <InfoTile icon={Building2} tone="blue" label="Property" value={property?.name} />
-          <InfoTile icon={IndianRupee} tone="emerald" label="Monthly Rent" value={formatCurrency(profile.monthlyRent)} />
+          <InfoTile label="Property" value={property?.name} />
+          <InfoTile label="Monthly Rent" value={formatCurrency(profile.monthlyRent)} />
           <InfoTile
-            icon={DoorOpen}
-            tone="violet"
             label="Room"
             value={room?.roomNumber ? `${room.roomNumber} (${isRk ? 'Shared' : (room.sharingType || room.type || '—')})` : null}
           />
-          <InfoTile icon={BedDouble} tone="teal" label="Bed">
+          <InfoTile label="Bed">
             {isRk ? (
               'Shared'
             ) : (
-              <View style={styles.tileBedRow}>
-                <BedDouble size={13} color={COLORS.gray400} />
-                <Text style={[styles.tileValue, { color: colors.textPrimary, marginTop: 0 }]}>
-                  {formatBedNumber(bed?.bedNumber, room?.roomNumber) || '—'}
-                </Text>
-              </View>
+              <Text style={[styles.tileValue, { color: colors.textPrimary, marginTop: 4 }]}>
+                {formatBedNumber(bed?.bedNumber, room?.roomNumber) || '—'}
+              </Text>
             )}
           </InfoTile>
-          <InfoTile icon={Calendar} tone="cyan" label="Move In Date" value={formatDate(profile.moveInDate)} />
+          <InfoTile label="Move In Date" value={formatDate(profile.moveInDate)} />
         </View>
 
         {canRequest && (
@@ -216,7 +208,6 @@ export default function RoomScreen() {
       <Card style={styles.card}>
         <View style={styles.cardHead}>
           <View style={styles.headLeft}>
-            <MoveRight size={18} color="#4f46e5" />
             <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>My Requests</Text>
           </View>
           <Text style={[styles.count, { color: colors.textTertiary }]}>
@@ -310,19 +301,17 @@ export default function RoomScreen() {
   );
 }
 
-// Sleek glass tile used for the room info grid (mirrors the web InfoTile).
-function InfoTile({ icon: Icon, tone = 'blue', label, value, children }) {
-  const { colors, isDark } = useTheme();
-  const t = INFO_TONES[tone] || INFO_TONES.blue;
+// Sleek 2-column tile used for the room info grid without icons
+function InfoTile({ label, value, children }) {
+  const { colors } = useTheme();
   return (
     <View style={[styles.tile, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <View style={[styles.tileIcon, { backgroundColor: t.bg, borderColor: t.border }]}>
-        <Icon size={18} color={isDark ? t.colorDark : t.color} />
-      </View>
       <View style={styles.tileBody}>
         <Text style={[styles.tileLabel, { color: colors.textTertiary }]}>{label}</Text>
         {children || (
-          <Text style={[styles.tileValue, { color: colors.textPrimary }]}>{value || '—'}</Text>
+          <Text style={[styles.tileValue, { color: colors.textPrimary }]} numberOfLines={1}>
+            {value || '—'}
+          </Text>
         )}
       </View>
     </View>
@@ -336,20 +325,33 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: responsiveFontSize(FONT_SIZES.md), fontWeight: FONT_WEIGHTS.bold, color: COLORS.textPrimary },
   cardSub: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary, lineHeight: 19 },
   count: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textTertiary },
-  grid: { marginTop: SPACING.sm, gap: 12 },
-  tile: {
-    width: '100%',
+  grid: {
+    marginTop: SPACING.sm,
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    padding: 14,
-    borderRadius: 14,
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  tile: {
+    width: '48%',
+    flexGrow: 1,
+    padding: 12,
+    borderRadius: 12,
     borderWidth: 1,
   },
-  tileIcon: { width: 40, height: 40, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  tileBody: { flex: 1, minWidth: 0 },
-  tileLabel: { fontSize: responsiveFontSize(11), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textTertiary, textTransform: 'uppercase', letterSpacing: 0.9 },
-  tileValue: { fontSize: responsiveFontSize(13.5), fontWeight: FONT_WEIGHTS.semibold, color: COLORS.textPrimary, marginTop: 2 },
+  tileBody: { minWidth: 0 },
+  tileLabel: {
+    fontSize: responsiveFontSize(10.5),
+    fontWeight: FONT_WEIGHTS.semibold,
+    color: COLORS.textTertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  tileValue: {
+    fontSize: responsiveFontSize(14),
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.textPrimary,
+    marginTop: 4,
+  },
   tileBedRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   noteWarn: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.warning },
   noteMuted: { fontSize: responsiveFontSize(FONT_SIZES.sm), color: COLORS.textSecondary },

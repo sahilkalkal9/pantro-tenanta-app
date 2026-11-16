@@ -35,6 +35,7 @@ export default function RentScreen() {
   const [rejectedProofs, setRejectedProofs] = useState([]);
   const [loading, setLoading] = useState(!cachedPayload);
   const [refreshing, setRefreshing] = useState(false);
+  const [mainTab, setMainTab] = useState('rent'); // 'rent' or 'deposit'
   const [filter, setFilter] = useState('all');
   const [error, setError] = useState(null);
 
@@ -197,12 +198,10 @@ export default function RentScreen() {
   const depositPaid = Number(securityDeposit?.collected) || 0;
 
   return (
-    <Screen refreshing={refreshing} onRefresh={() => fetchData({ refresh: true })}>
+    <Screen refreshing={refreshing} onRefresh={() => fetchData({ refresh: true })} contentStyle={{ paddingTop: SPACING.sm }}>
       <TenantPageHeader
         title="Rent & Payments"
         subtitle="View and pay your rent & security deposit"
-        icon={LayoutDashboard}
-        iconTone="blue"
       />
 
       {error && (
@@ -238,133 +237,214 @@ export default function RentScreen() {
         </Card>
       )}
 
-      {securityDeposit && ((Number(securityDeposit.expected) || 0) > 0 || depositPaid > 0) && (
-        <Card style={styles.block}>
-          <View style={styles.cardHead}>
-            <View style={[styles.iconBox, { backgroundColor: `${COLORS.success}15` }]}>
-              <ShieldCheck size={20} color={COLORS.success} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Security Deposit</Text>
-              <Text style={[styles.cardSub, { color: colors.textSecondary }]}>Refundable at move-out</Text>
-            </View>
-          </View>
+      {/* ── 2 Major Tabs: Rent & Security Deposit ── */}
+      <View style={styles.majorTabsWrap}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => setMainTab('rent')}
+          style={[
+            styles.customTabBtn,
+            mainTab === 'rent' ? styles.customTabBtnActive : styles.customTabBtnInactive,
+          ]}
+        >
+          <Text
+            style={[
+              styles.customTabBtnText,
+              mainTab === 'rent' ? styles.customTabBtnTextActive : styles.customTabBtnTextInactive,
+            ]}
+          >
+            Rent Payments
+          </Text>
+        </TouchableOpacity>
 
-          <View style={styles.depositRow}>
-            <View style={[styles.depositCell, { backgroundColor: colors.cardSecondary }]}>
-              <Text style={[styles.cellLabel, { color: colors.textSecondary }]}>Expected</Text>
-              <Text style={[styles.cellValue, { color: colors.textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>{formatCurrency(securityDeposit.expected || 0)}</Text>
-            </View>
-            <View style={[styles.depositCell, { backgroundColor: isDark ? 'rgba(5, 150, 105, 0.15)' : `${COLORS.success}12` }]}>
-              <Text style={[styles.cellLabel, { color: '#059669' }]}>Paid</Text>
-              <Text style={[styles.cellValue, { color: '#059669' }]} numberOfLines={1} adjustsFontSizeToFit>{formatCurrency(depositPaid)}</Text>
-            </View>
-            <View style={[styles.depositCell, depositPending > 0 ? { backgroundColor: isDark ? 'rgba(217, 119, 6, 0.15)' : `${COLORS.warning}12` } : { backgroundColor: colors.cardSecondary }]}>
-              <Text style={[styles.cellLabel, depositPending > 0 ? { color: '#d97706' } : { color: colors.textSecondary }]}>
-                {depositPending > 0 ? 'Pending' : 'Balance'}
-              </Text>
-              <Text style={[styles.cellValue, depositPending > 0 ? { color: '#d97706' } : { color: colors.textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
-                {formatCurrency(depositPending > 0 ? depositPending : securityDeposit.balance || 0)}
-              </Text>
-            </View>
-          </View>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => setMainTab('deposit')}
+          style={[
+            styles.customTabBtn,
+            mainTab === 'deposit' ? styles.customTabBtnActive : styles.customTabBtnInactive,
+          ]}
+        >
+          <Text
+            style={[
+              styles.customTabBtnText,
+              mainTab === 'deposit' ? styles.customTabBtnTextActive : styles.customTabBtnTextInactive,
+            ]}
+          >
+            Security Deposit {depositPending > 0 ? `(₹${depositPending})` : ''}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-          {depositPending > 0 && (
-            <>
-              <View style={[styles.warnNote, isDark && { backgroundColor: 'rgba(217, 119, 6, 0.12)', borderColor: 'rgba(217, 119, 6, 0.3)' }]}>
-                <AlertCircle size={14} color="#d97706" />
-                <Text style={[styles.warnNoteText, isDark && { color: '#fbbf24' }]}>
-                  You still owe {formatCurrency(depositPending)} security deposit.
+      {/* ── Tab Content: RENT ── */}
+      {mainTab === 'rent' && (
+        <View style={styles.tabContentWrap}>
+          {unpaidRents.length > 1 && (
+            <Card style={styles.multiCard}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Pay multiple months together</Text>
+                <Text style={[styles.cardSub, { color: colors.textSecondary }]}>
+                  {unpaidRents.length} unpaid months • Total: {formatCurrency(
+                    unpaidRents.reduce((s, r) => s + Math.max(0, Number(r.pendingAmount ?? r.rentAmount) || 0), 0)
+                  )}
                 </Text>
               </View>
-              <Button
-                title="Pay Deposit Now"
-                icon={ShieldCheck}
-                size="sm"
-                onPress={() => startPay({ type: 'deposit' })}
-                style={{ marginTop: SPACING.sm }}
-              />
-            </>
+              <Button title="Pay all at once" size="sm" icon={Wallet} onPress={() => startPay({ type: 'multi' })} />
+            </Card>
           )}
-        </Card>
-      )}
 
-      {additionalFeesPaid.length > 0 && (
-        <Card style={styles.block}>
-          <View style={styles.cardHead}>
-            <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(124, 58, 237, 0.15)' : '#7c3aed15' }]}>
-              <Receipt size={20} color={isDark ? '#a78bfa' : '#7c3aed'} />
+          {totalLateFee > 0 && (
+            <View style={[styles.warnNote, isDark && { backgroundColor: 'rgba(217, 119, 6, 0.12)', borderColor: 'rgba(217, 119, 6, 0.3)' }]}>
+              <AlertCircle size={14} color="#d97706" />
+              <Text style={[styles.warnNoteText, isDark && { color: '#fbbf24' }]}>
+                Late fees accrued so far: {formatCurrency(totalLateFee)}
+              </Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>One-time Fees</Text>
-              <Text style={[styles.cardSub, { color: colors.textSecondary }]}>Fees paid at move-in</Text>
-            </View>
+          )}
+
+          {/* Sub-tabs: All, Unpaid, Paid, Overdue */}
+          <View style={styles.subTabsWrap}>
+            {FILTERS_WITH_COUNTS.map((opt) => {
+              const isSelected = filter === opt.value;
+              return (
+                <TouchableOpacity
+                  key={opt.value}
+                  activeOpacity={0.8}
+                  onPress={() => setFilter(opt.value)}
+                  style={[
+                    styles.subTabBtn,
+                    isSelected ? styles.subTabBtnActive : styles.subTabBtnInactive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.subTabBtnText,
+                      isSelected ? styles.subTabBtnTextActive : styles.subTabBtnTextInactive,
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
-          {additionalFeesPaid.map((fee, idx) => (
-            <View key={`${fee.name}-${idx}`} style={[styles.feeRow, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.feeName, { color: colors.textSecondary }]}>{fee.name}</Text>
-              <Text style={[styles.feeAmount, { color: colors.textPrimary }]}>{formatCurrency(fee.amount || 0)}</Text>
-            </View>
-          ))}
-        </Card>
-      )}
 
-      {unpaidRents.length > 1 && (
-        <Card style={styles.multiCard}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Pay multiple months together</Text>
-            <Text style={[styles.cardSub, { color: colors.textSecondary }]}>
-              {unpaidRents.length} unpaid months • Total: {formatCurrency(
-                unpaidRents.reduce((s, r) => s + Math.max(0, Number(r.pendingAmount ?? r.rentAmount) || 0), 0)
-              )}
-            </Text>
-          </View>
-          <Button title="Pay multiple at once" size="sm" icon={Wallet} onPress={() => startPay({ type: 'multi' })} />
-        </Card>
-      )}
+          {rents.length === 0 ? (
+            <EmptyState
+              icon={CreditCard}
+              title="No rent records"
+              message="No rent records found for your account."
+            />
+          ) : filteredRents.length === 0 ? (
+            <EmptyState icon={CreditCard} title="No matching records" message="No rent records match the selected filter." />
+          ) : (
+            filteredRents.map((rent) => (
+              <RentStatusCard key={rent._id || `${rent.month}-${rent.year}`} rent={rent} onPay={() => startPay({ type: 'single', rent })} />
+            ))
+          )}
 
-      {totalLateFee > 0 && (
-        <View style={[styles.warnNote, isDark && { backgroundColor: 'rgba(217, 119, 6, 0.12)', borderColor: 'rgba(217, 119, 6, 0.3)' }]}>
-          <AlertCircle size={14} color="#d97706" />
-          <Text style={[styles.warnNoteText, isDark && { color: '#fbbf24' }]}>
-            Late fees accrued so far: {formatCurrency(totalLateFee)}
-          </Text>
+          {nextMonthsUpToNotice.length > 0 && (
+            <Card style={styles.block}>
+              <Text style={[styles.upcomingLabel, { color: colors.textTertiary }]}>UPCOMING MONTHS (BEFORE NOTICE ENDS)</Text>
+              {nextMonthsUpToNotice.map((nm, i) => (
+                <View key={`${nm.month}-${nm.year}-${i}`} style={[styles.feeRow, { borderBottomColor: colors.border }, i === nextMonthsUpToNotice.length - 1 && { borderBottomWidth: 0 }]}>
+                  <Text style={[styles.feeName, { color: colors.textSecondary }]}>{formatMonthYear(nm.month, nm.year)}</Text>
+                  <Text style={[styles.feeAmount, { color: colors.textPrimary }]}>{formatCurrency(nm.rentAmount || 0)}</Text>
+                </View>
+              ))}
+            </Card>
+          )}
         </View>
       )}
 
-      {nextMonthsUpToNotice.length > 0 && (
-        <Card style={styles.block}>
-          <Text style={[styles.upcomingLabel, { color: colors.textTertiary }]}>UPCOMING MONTHS (BEFORE NOTICE ENDS)</Text>
-          {nextMonthsUpToNotice.map((nm, i) => (
-            <View key={`${nm.month}-${nm.year}-${i}`} style={[styles.feeRow, { borderBottomColor: colors.border }, i === nextMonthsUpToNotice.length - 1 && { borderBottomWidth: 0 }]}>
-              <Text style={[styles.feeName, { color: colors.textSecondary }]}>{formatMonthYear(nm.month, nm.year)}</Text>
-              <Text style={[styles.feeAmount, { color: colors.textPrimary }]}>{formatCurrency(nm.rentAmount || 0)}</Text>
-            </View>
-          ))}
-        </Card>
-      )}
+      {/* ── Tab Content: SECURITY DEPOSIT ── */}
+      {mainTab === 'deposit' && (
+        <View style={styles.tabContentWrap}>
+          {securityDeposit ? (
+            <Card style={[styles.block, styles.depositCompactCard]}>
+              <View style={styles.compactCardHead}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Security Deposit Summary</Text>
+                  <Text style={[styles.cardSub, { color: colors.textSecondary }]}>Refundable at move-out as per agreement rules</Text>
+                </View>
+              </View>
 
-      {rents.length === 0 ? (
-        <EmptyState
-          icon={CreditCard}
-          title="No rent records"
-          message="No rent records found for your account."
-        />
-      ) : (
-        <>
-          <SegmentedControl
-            options={FILTERS_WITH_COUNTS}
-            value={filter}
-            onChange={setFilter}
-            style={{ marginVertical: SPACING.md }}
-          />
+              <View style={styles.depositRow}>
+                <View style={[styles.depositCell, { backgroundColor: colors.cardSecondary }]}>
+                  <Text style={[styles.cellLabel, { color: colors.textSecondary }]}>Expected</Text>
+                  <Text style={[styles.cellValue, { color: colors.textPrimary }]} numberOfLines={1} adjustsFontSizeToFit>
+                    {formatCurrency(securityDeposit.expected || 0)}
+                  </Text>
+                </View>
+                <View style={[styles.depositCell, { backgroundColor: isDark ? 'rgba(5, 150, 105, 0.15)' : `${COLORS.success}12` }]}>
+                  <Text style={[styles.cellLabel, { color: '#059669' }]}>Paid</Text>
+                  <Text style={[styles.cellValue, { color: '#059669' }]} numberOfLines={1} adjustsFontSizeToFit>
+                    {formatCurrency(depositPaid)}
+                  </Text>
+                </View>
+                <View
+                  style={[
+                    styles.depositCell,
+                    depositPending > 0
+                      ? { backgroundColor: isDark ? 'rgba(217, 119, 6, 0.15)' : `${COLORS.warning}12` }
+                      : { backgroundColor: colors.cardSecondary },
+                  ]}
+                >
+                  <Text style={[styles.cellLabel, depositPending > 0 ? { color: '#d97706' } : { color: colors.textSecondary }]}>
+                    {depositPending > 0 ? 'Pending' : 'Balance'}
+                  </Text>
+                  <Text
+                    style={[styles.cellValue, depositPending > 0 ? { color: '#d97706' } : { color: colors.textPrimary }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
+                    {formatCurrency(depositPending > 0 ? depositPending : securityDeposit.balance || 0)}
+                  </Text>
+                </View>
+              </View>
 
-          {filteredRents.length === 0 ? (
-            <EmptyState icon={CreditCard} title="No matching records" message="No rent records match the selected filter." />
+              {depositPending > 0 && (
+                <>
+                  <View style={[styles.warnNote, { marginTop: SPACING.md, marginBottom: SPACING.sm }, isDark && { backgroundColor: 'rgba(217, 119, 6, 0.12)', borderColor: 'rgba(217, 119, 6, 0.3)' }]}>
+                    <AlertCircle size={14} color="#d97706" />
+                    <Text style={[styles.warnNoteText, isDark && { color: '#fbbf24' }]}>
+                      You still owe {formatCurrency(depositPending)} security deposit.
+                    </Text>
+                  </View>
+                  <Button
+                    title="Pay Deposit Now"
+                    icon={ShieldCheck}
+                    size="sm"
+                    onPress={() => startPay({ type: 'deposit' })}
+                    style={{ marginTop: SPACING.xs }}
+                  />
+                </>
+              )}
+            </Card>
           ) : (
-            filteredRents.map((rent) => <RentStatusCard key={rent._id || `${rent.month}-${rent.year}`} rent={rent} onPay={() => startPay({ type: 'single', rent })} />)
+            <Card style={styles.block}>
+              <Text style={[styles.cardSub, { color: colors.textSecondary }]}>No security deposit records found.</Text>
+            </Card>
           )}
-        </>
+
+          {additionalFeesPaid.length > 0 && (
+            <Card style={styles.block}>
+              <View style={styles.compactCardHead}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>One-time Move-in Fees</Text>
+                  <Text style={[styles.cardSub, { color: colors.textSecondary }]}>Paid at the start of your stay</Text>
+                </View>
+              </View>
+              {additionalFeesPaid.map((fee, idx) => (
+                <View key={`${fee.name}-${idx}`} style={[styles.feeRow, { borderBottomColor: colors.border }]}>
+                  <Text style={[styles.feeName, { color: colors.textSecondary }]}>{fee.name}</Text>
+                  <Text style={[styles.feeAmount, { color: colors.textPrimary }]}>{formatCurrency(fee.amount || 0)}</Text>
+                </View>
+              ))}
+            </Card>
+          )}
+        </View>
       )}
 
       {/* ── Payment Sheet (shared with Dues & Dashboard) ── */}
@@ -374,7 +454,6 @@ export default function RentScreen() {
         onSuccess={() => fetchData({ refresh: true })}
         target={payConfig}
       />
-
     </Screen>
   );
 }
@@ -455,6 +534,79 @@ const styles = StyleSheet.create({
   rejectBannerText: {
     fontSize: responsiveFontSize(12),
     lineHeight: 17,
+  },
+  majorTabsWrap: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: SPACING.md,
+  },
+  customTabBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  customTabBtnActive: {
+    backgroundColor: '#2864B2',
+    borderColor: '#2864B2',
+  },
+  customTabBtnInactive: {
+    backgroundColor: 'transparent',
+    borderColor: '#2864B2',
+  },
+  customTabBtnText: {
+    fontSize: responsiveFontSize(13),
+    fontWeight: '700',
+  },
+  customTabBtnTextActive: {
+    color: '#ffffff',
+  },
+  customTabBtnTextInactive: {
+    color: '#2864B2',
+  },
+  tabContentWrap: {
+    width: '100%',
+  },
+  subTabsWrap: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: SPACING.md,
+  },
+  subTabBtn: {
+    flex: 1,
+    paddingVertical: 7,
+    paddingHorizontal: 4,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  subTabBtnActive: {
+    backgroundColor: '#2864B2',
+    borderColor: '#2864B2',
+  },
+  subTabBtnInactive: {
+    backgroundColor: 'transparent',
+    borderColor: '#2864B2',
+  },
+  subTabBtnText: {
+    fontSize: responsiveFontSize(11.5),
+    fontWeight: '700',
+  },
+  subTabBtnTextActive: {
+    color: '#ffffff',
+  },
+  subTabBtnTextInactive: {
+    color: '#2864B2',
+  },
+  depositCompactCard: {
+    padding: SPACING.md,
+  },
+  compactCardHead: {
+    marginBottom: SPACING.sm,
   },
 });
 

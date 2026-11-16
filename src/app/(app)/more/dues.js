@@ -328,7 +328,7 @@ export default function DuesScreen() {
             />
           }
         >
-          <TenantPageHeader title="Dues" subtitle="Everything you need to pay" icon={Wallet} iconTone="rose" />
+          <TenantPageHeader title="Dues" subtitle="Everything you need to pay" />
 
           {/* ── Rejected Proofs Alert Banner ─────────────────── */}
           {rejectedCount > 0 && (
@@ -625,7 +625,7 @@ function DueItem({ due, selected, onToggle, onClarify }) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  content: { padding: SPACING.md, paddingBottom: 100 },
+  content: { paddingHorizontal: SPACING.md, paddingTop: SPACING.sm, paddingBottom: 110 },
   rejectBanner: { marginBottom: SPACING.md, borderWidth: 1, borderRadius: BORDER_RADIUS.lg, padding: SPACING.md },
   rejectBannerTitle: { fontSize: responsiveFontSize(FONT_SIZES.sm), fontWeight: FONT_WEIGHTS.bold, marginBottom: 2 },
   rejectBannerText: { fontSize: responsiveFontSize(FONT_SIZES.xs), lineHeight: 18 },

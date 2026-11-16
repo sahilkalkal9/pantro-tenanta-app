@@ -1752,15 +1752,35 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user, profile }) {
         </View>
       ) : null}
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: SPACING.xs }}>
+      <View style={{ width: '100%', gap: 10, marginTop: SPACING.sm }}>
         {!showCheckout || isPaid ? (
           <TouchableOpacity
-            style={[styles.smallBtn, styles.smallBtnPrimary, { alignSelf: 'flex-start' }]}
+            style={{
+              width: '100%',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              paddingVertical: 12,
+              paddingHorizontal: 16,
+              borderRadius: 12,
+              backgroundColor: '#2864B2',
+              shadowColor: '#2864B2',
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.28,
+              shadowRadius: 6,
+              elevation: 4,
+            }}
             onPress={() => startVerification()}
             disabled={loading || completing}
+            activeOpacity={0.85}
           >
-            <ShieldCheck size={14} color="#ffffff" />
-            <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700' }]}>
+            {loading ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <ShieldCheck size={18} color="#ffffff" strokeWidth={2.4} />
+            )}
+            <Text style={{ color: '#ffffff', fontSize: responsiveFontSize(14), fontWeight: '700', letterSpacing: 0.2 }}>
               {loading ? 'Opening DigiLocker...' : pendingClientId ? 'Re-open DigiLocker' : 'Verify with DigiLocker'}
             </Text>
           </TouchableOpacity>
@@ -1768,17 +1788,33 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user, profile }) {
 
         {pendingClientId ? (
           <TouchableOpacity
-            style={[styles.smallBtn, { backgroundColor: '#059669', alignSelf: 'flex-start' }]}
+            style={{
+              width: '100%',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              paddingVertical: 12,
+              paddingHorizontal: 16,
+              borderRadius: 12,
+              backgroundColor: '#059669',
+              shadowColor: '#059669',
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.25,
+              shadowRadius: 6,
+              elevation: 4,
+            }}
             onPress={handleCompleteVerification}
             disabled={completing}
+            activeOpacity={0.85}
           >
             {completing ? (
               <ActivityIndicator size="small" color="#ffffff" />
             ) : (
-              <CheckCircle2 size={14} color="#ffffff" />
+              <CheckCircle2 size={18} color="#ffffff" strokeWidth={2.4} />
             )}
-            <Text style={[styles.smallBtnText, { color: '#ffffff', fontWeight: '700' }]}>
-              {completing ? 'Checking...' : 'I Completed Verification'}
+            <Text style={{ color: '#ffffff', fontSize: responsiveFontSize(14), fontWeight: '700', letterSpacing: 0.2 }}>
+              {completing ? 'Checking Verification...' : 'I Completed Verification'}
             </Text>
           </TouchableOpacity>
         ) : null}
