@@ -596,8 +596,8 @@ const styles = StyleSheet.create({
   },
   tabBtn: {
     flexGrow: 1,
-    paddingVertical: 7,
-    paddingHorizontal: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
     borderRadius: 10,
     borderWidth: 1.5,
     alignItems: 'center',

@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   LayoutDashboard,
@@ -19,11 +19,60 @@ export const NAV_TABS = [
   { key: 'profile', name: 'profile', label: 'Profile', icon: User },
 ];
 
+let globalPreviousTabIndex = 0;
+let globalActiveTabIndex = 0;
+
+export const getActiveTabIndex = (currentRouteName, state, descriptors) => {
+  if (!currentRouteName) return 0;
+  if (currentRouteName === 'dashboard') return 0;
+  if (
+    currentRouteName === 'dues' ||
+    (currentRouteName === 'more' &&
+      descriptors?.[state?.routes?.[state?.index]?.key]?.route?.params?.screen === 'dues')
+  ) {
+    return 1;
+  }
+  if (currentRouteName === 'rent') return 2;
+  if (currentRouteName === 'payments') return 3;
+  if (
+    currentRouteName === 'profile' ||
+    (currentRouteName === 'more' &&
+      descriptors?.[state?.routes?.[state?.index]?.key]?.route?.params?.screen === 'profile')
+  ) {
+    return 4;
+  }
+  return 0;
+};
+
 export default function TenantBottomBar({ state, descriptors, navigation }) {
   const { isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
+  const [rowWidth, setRowWidth] = useState(screenWidth - 16);
 
-  const currentRouteName = state?.routes?.[state.index]?.name;
+  const currentRouteName = state?.routes?.[state?.index]?.name;
+  const activeIdx = getActiveTabIndex(currentRouteName, state, descriptors);
+
+  const translateXAnim = useRef(new Animated.Value(globalActiveTabIndex)).current;
+
+  useEffect(() => {
+    if (activeIdx >= 0) {
+      if (globalActiveTabIndex !== activeIdx) {
+        globalPreviousTabIndex = globalActiveTabIndex;
+        globalActiveTabIndex = activeIdx;
+      }
+      Animated.spring(translateXAnim, {
+        toValue: activeIdx,
+        damping: 22,
+        stiffness: 180,
+        mass: 0.9,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [activeIdx, translateXAnim]);
+
+  const tabWidth = rowWidth / 5;
+  const pillWidth = Math.max(0, tabWidth - 6);
 
   return (
     <View
@@ -41,17 +90,68 @@ export default function TenantBottomBar({ state, descriptors, navigation }) {
         },
       ]}
     >
-      <View style={styles.tabsRow}>
-        {NAV_TABS.map((tab) => {
-          const matchingRoute = state?.routes?.find((r) => r.name === tab.name);
-          const isFocused =
-            currentRouteName === tab.name ||
-            (tab.name === 'dues' && currentRouteName === 'more' && descriptors?.[state.routes[state.index].key]?.route?.params?.screen === 'dues') ||
-            (tab.name === 'profile' && currentRouteName === 'more' && descriptors?.[state.routes[state.index].key]?.route?.params?.screen === 'profile');
+      <View
+        style={styles.tabsRow}
+        onLayout={(e) => {
+          const w = e.nativeEvent.layout.width;
+          if (w > 0 && Math.abs(w - rowWidth) > 1) {
+            setRowWidth(w);
+          }
+        }}
+      >
+        {/* Animated Sliding Liquid Glass Capsule (Owner App style) */}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.slidingCapsule,
+            {
+              width: pillWidth,
+              backgroundColor: isDark ? 'rgba(40, 100, 178, 0.22)' : 'rgba(40, 100, 178, 0.10)',
+              borderColor: isDark ? 'rgba(96, 165, 250, 0.35)' : 'rgba(40, 100, 178, 0.25)',
+              transform: [
+                {
+                  translateX: translateXAnim.interpolate({
+                    inputRange: [0, 1, 2, 3, 4],
+                    outputRange: [
+                      3,
+                      tabWidth + 3,
+                      tabWidth * 2 + 3,
+                      tabWidth * 3 + 3,
+                      tabWidth * 4 + 3,
+                    ],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          {/* Subtle top specular reflection line */}
+          <View
+            style={[
+              styles.capsuleSpecular,
+              { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.8)' },
+            ]}
+          />
+        </Animated.View>
 
+        {NAV_TABS.map((tab, index) => {
+          const matchingRoute = state?.routes?.find((r) => r.name === tab.name);
+          const isFocused = activeIdx === index;
           const Icon = tab.icon;
 
           const onPress = () => {
+            if (index !== globalActiveTabIndex) {
+              globalPreviousTabIndex = globalActiveTabIndex;
+              globalActiveTabIndex = index;
+              Animated.spring(translateXAnim, {
+                toValue: index,
+                damping: 22,
+                stiffness: 180,
+                mass: 0.9,
+                useNativeDriver: true,
+              }).start();
+            }
+
             if (matchingRoute) {
               const event = navigation.emit({
                 type: 'tabPress',
@@ -78,8 +178,6 @@ export default function TenantBottomBar({ state, descriptors, navigation }) {
 
           const activeColor = isDark ? '#60a5fa' : '#2864B2';
           const inactiveColor = isDark ? '#94a3b8' : '#64748b';
-          const activeBg = isDark ? 'rgba(40, 100, 178, 0.22)' : 'rgba(40, 100, 178, 0.10)';
-          const activeBorder = isDark ? 'rgba(96, 165, 250, 0.3)' : 'rgba(40, 100, 178, 0.25)';
 
           return (
             <TouchableOpacity
@@ -89,11 +187,8 @@ export default function TenantBottomBar({ state, descriptors, navigation }) {
               accessibilityLabel={tab.label}
               onPress={onPress}
               onLongPress={onLongPress}
-              activeOpacity={0.7}
-              style={[
-                styles.tabItem,
-                isFocused && { backgroundColor: activeBg, borderWidth: 1, borderColor: activeBorder, borderRadius: 10 },
-              ]}
+              activeOpacity={0.75}
+              style={styles.tabItem}
             >
               {Icon ? (
                 <Icon
@@ -142,7 +237,28 @@ const styles = StyleSheet.create({
   tabsRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    gap: 4,
+    position: 'relative',
+  },
+  slidingCapsule: {
+    position: 'absolute',
+    top: 2,
+    bottom: 2,
+    borderRadius: 12,
+    borderWidth: 1,
+    overflow: 'hidden',
+    shadowColor: '#2864B2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  capsuleSpecular: {
+    position: 'absolute',
+    top: 0,
+    left: 8,
+    right: 8,
+    height: 1,
+    borderRadius: 0.5,
   },
   tabItem: {
     flex: 1,
@@ -150,6 +266,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 5,
     borderRadius: 12,
+    zIndex: 1,
   },
   tabLabel: {
     fontSize: responsiveFontSize(10.5),

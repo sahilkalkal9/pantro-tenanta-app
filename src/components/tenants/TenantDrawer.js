@@ -331,14 +331,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
   },
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
+    flex: 1,
   },
   brandLogo: {
     width: 60,

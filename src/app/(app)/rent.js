@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import {
   ShieldCheck, Receipt, Wallet, AlertCircle,
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
   },
   customTabBtn: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: 7,
     paddingHorizontal: 8,
     borderRadius: 10,
     borderWidth: 1.5,
@@ -558,7 +558,7 @@ const styles = StyleSheet.create({
     borderColor: '#2864B2',
   },
   customTabBtnText: {
-    fontSize: responsiveFontSize(13),
+    fontSize: responsiveFontSize(12.5),
     fontWeight: '700',
   },
   customTabBtnTextActive: {
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
   },
   subTabBtn: {
     flex: 1,
-    paddingVertical: 7,
+    paddingVertical: 5,
     paddingHorizontal: 4,
     borderRadius: 10,
     borderWidth: 1.5,

@@ -1109,13 +1109,13 @@ const styles = StyleSheet.create({
   // New styles for web parity
   filterTabsWrap: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginVertical: SPACING.md,
   },
   filterTabPill: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 10,
     borderWidth: 1.5,
     alignItems: 'center',
