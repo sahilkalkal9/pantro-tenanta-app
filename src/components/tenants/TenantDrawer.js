@@ -64,11 +64,11 @@ export default function TenantDrawer({ visible, onClose }) {
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
 
-  // Slide-out drawer: never full screen, leaves at least 24% backdrop visible, capped at 280px
-  const drawerWidth = Math.min(Math.round(screenWidth * 0.76), 280);
+  // Slide-out drawer: never full screen, leaves at least 22% backdrop visible, capped at 295px
+  const drawerWidth = Math.min(Math.round(screenWidth * 0.78), 295);
 
   const [showModal, setShowModal] = useState(visible);
-  const slideAnim = useRef(new Animated.Value(-280)).current;
+  const slideAnim = useRef(new Animated.Value(-300)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -338,24 +338,24 @@ const styles = StyleSheet.create({
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
     flex: 1,
   },
   brandLogo: {
-    width: 60,
-    height: 60,
-    borderRadius: 14,
+    width: 72,
+    height: 72,
+    borderRadius: 16,
   },
   brandTitle: {
-    fontSize: responsiveFontSize(16),
+    fontSize: responsiveFontSize(17),
     fontWeight: '800',
     letterSpacing: -0.3,
   },
   brandTagline: {
-    fontSize: responsiveFontSize(11),
+    fontSize: responsiveFontSize(10.5),
     fontWeight: '600',
-    lineHeight: 15,
-    marginTop: 2,
+    lineHeight: 14,
+    marginTop: 1,
   },
   closeBtn: {
     width: 32,
