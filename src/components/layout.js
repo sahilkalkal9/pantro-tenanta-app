@@ -12,8 +12,10 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  StatusBar as RNStatusBar,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { ChevronLeft, X, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react-native';
@@ -121,9 +123,15 @@ export function ModalSheet({
   height,
   scroll = true,
   fullPage = false,
+  onBack,
 }) {
   const { colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  const topInset = Platform.OS === 'android'
+    ? Math.max(insets.top, RNStatusBar.currentHeight || 0)
+    : insets.top;
 
   useEffect(() => {
     const showSub = Keyboard.addListener(
@@ -157,9 +165,16 @@ export function ModalSheet({
       )}
       <View style={[
         styles.sheetHeader,
-        {
+        fullPage ? {
+          backgroundColor: COLORS.primary,
+          paddingTop: topInset + 6,
+          paddingBottom: 14,
+          paddingHorizontal: SPACING.lg,
+          borderBottomWidth: 1,
+          borderBottomColor: 'rgba(0, 0, 0, 0.12)',
+        } : {
           borderBottomColor: colors.border,
-          paddingTop: fullPage ? (Platform.OS === 'ios' ? 52 : 36) : SPACING.md,
+          paddingTop: SPACING.md,
           paddingBottom: SPACING.md,
           paddingHorizontal: SPACING.lg,
           backgroundColor: isDark ? colors.card : '#ffffff',
@@ -167,28 +182,71 @@ export function ModalSheet({
       ]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
           {fullPage ? (
-            <TouchableOpacity onPress={onClose} hitSlop={12} style={{ padding: 4, marginLeft: -4 }}>
-              <ChevronLeft size={24} color={colors.textPrimary} />
+            <TouchableOpacity
+              onPress={onBack || onClose}
+              hitSlop={12}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: 'rgba(255, 255, 255, 0.18)',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: -4,
+              }}
+              activeOpacity={0.7}
+              accessibilityLabel="Go back"
+            >
+              <ChevronLeft size={22} color="#ffffff" strokeWidth={2.4} />
             </TouchableOpacity>
           ) : null}
           <View style={{ flex: 1 }}>
-            <Text style={[styles.sheetTitle, { color: colors.textPrimary, fontSize: fullPage ? 18 : responsiveFontSize(FONT_SIZES.lg) }]} numberOfLines={1}>
+            <Text
+              style={[
+                styles.sheetTitle,
+                fullPage
+                  ? { color: '#ffffff', fontSize: 18, fontWeight: '800', letterSpacing: 0.3 }
+                  : { color: colors.textPrimary, fontSize: responsiveFontSize(FONT_SIZES.lg) }
+              ]}
+              numberOfLines={1}
+            >
               {title}
             </Text>
             {subtitle ? (
-              <Text style={{ fontSize: responsiveFontSize(11.5), color: colors.textSecondary, marginTop: 1 }}>
+              <Text
+                style={{
+                  fontSize: responsiveFontSize(11.5),
+                  color: fullPage ? 'rgba(255, 255, 255, 0.85)' : colors.textSecondary,
+                  marginTop: 2,
+                  fontWeight: fullPage ? '600' : '400',
+                }}
+                numberOfLines={1}
+              >
                 {subtitle}
               </Text>
             ) : null}
           </View>
         </View>
-        <TouchableOpacity onPress={onClose} hitSlop={10} style={{ padding: 4 }}>
-          <X size={20} color={colors.textSecondary} />
+        <TouchableOpacity
+          onPress={onClose}
+          hitSlop={10}
+          style={fullPage ? {
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: 'rgba(255, 255, 255, 0.18)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          } : { padding: 4 }}
+          activeOpacity={0.7}
+          accessibilityLabel="Close"
+        >
+          <X size={18} color={fullPage ? '#ffffff' : colors.textSecondary} strokeWidth={2.4} />
         </TouchableOpacity>
       </View>
       {scroll ? (
         <ScrollView
-          style={{ flex: fullPage ? 1 : undefined, maxHeight: fullPage ? undefined : Math.max(180, effectiveMaxHeight - 120) }}
+          style={{ flex: fullPage ? 1 : undefined, maxHeight: fullPage ? undefined : Math.max(180, effectiveMaxHeight - 120), backgroundColor: fullPage ? (isDark ? colors.background : '#f8fafc') : undefined }}
           contentContainerStyle={[styles.sheetBody, { paddingBottom: keyboardHeight > 0 ? keyboardHeight + 80 : (fullPage ? 100 : 60) }]}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
@@ -198,7 +256,7 @@ export function ModalSheet({
           {children}
         </ScrollView>
       ) : (
-        <View style={[styles.sheetBody, { flex: fullPage ? 1 : undefined, paddingBottom: keyboardHeight > 0 ? 80 : 30 }]}>{children}</View>
+        <View style={[styles.sheetBody, { flex: fullPage ? 1 : undefined, paddingBottom: keyboardHeight > 0 ? 80 : 30, backgroundColor: fullPage ? (isDark ? colors.background : '#f8fafc') : undefined }]}>{children}</View>
       )}
       {actions ? (
         <View style={[styles.sheetActions, { borderTopColor: colors.border, paddingBottom: Platform.OS === 'ios' ? 24 : SPACING.md }]}>
@@ -228,14 +286,27 @@ export function ModalSheet({
   );
 
   return (
-    <Modal visible={visible} transparent={!fullPage} animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent={!fullPage}
+      animationType="slide"
+      onRequestClose={onClose}
+      statusBarTranslucent={fullPage}
+    >
+      {fullPage && (
+        <StatusBar
+          style="light"
+          backgroundColor={COLORS.primary}
+          translucent={true}
+        />
+      )}
       <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: fullPage ? (isDark ? colors.card : '#ffffff') : undefined }}
+        style={{ flex: 1, backgroundColor: fullPage ? COLORS.primary : undefined }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={fullPage ? { flex: 1, backgroundColor: isDark ? colors.card : '#ffffff' } : styles.sheetBackdrop}>
+        <View style={fullPage ? { flex: 1, backgroundColor: isDark ? colors.background : '#f8fafc' } : styles.sheetBackdrop}>
           {!fullPage && <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />}
-          <View style={[styles.sheetContainer, fullPage ? { flex: 1, borderTopLeftRadius: 0, borderTopRightRadius: 0, backgroundColor: isDark ? colors.card : '#ffffff' } : { backgroundColor: colors.card }]}>
+          <View style={[styles.sheetContainer, fullPage ? { flex: 1, borderTopLeftRadius: 0, borderTopRightRadius: 0, backgroundColor: isDark ? colors.background : '#f8fafc' } : { backgroundColor: colors.card }]}>
             {content}
           </View>
         </View>

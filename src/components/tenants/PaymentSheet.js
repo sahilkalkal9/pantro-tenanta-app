@@ -587,8 +587,9 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
     <ModalSheet
       visible={visible}
       onClose={close}
+      onBack={view !== 'method' ? backToMethods : undefined}
       title={target.title || 'Checkout & Pay'}
-      subtitle="Pantro Secure Settlement • 256-Bit SSL"
+      subtitle={view === 'method' ? 'Pantro Secure Settlement • 256-Bit SSL' : `Step 2: Pay via ${String(method || '').toUpperCase()}`}
       fullPage={true}
     >
       <View style={{ gap: SPACING.md }}>
