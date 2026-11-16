@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pantro Tenant",
     "slug": "pantro-tenant",
-    "version": "1.1.6",
+    "version": "1.1.7",
     "platforms": [
       "ios",
       "android",
@@ -14,7 +14,7 @@
     "userInterfaceStyle": "light",
     "scheme": "pantro-tenant",
     "newArchEnabled": true,
-    "runtimeVersion": "1.1.6",
+    "runtimeVersion": "1.1.7",
     "updates": {
       "url": "https://api.pantro.in/api/ota/expo-manifest?app=tenant",
       "enabled": true,
@@ -29,7 +29,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pantro.tenant",
-      "buildNumber": "16",
+      "buildNumber": "17",
       "entitlements": {
         "aps-environment": "production"
       },
@@ -45,7 +45,7 @@
     },
     "android": {
       "package": "com.pantro.tenant",
-      "versionCode": 15,
+      "versionCode": 16,
       "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
