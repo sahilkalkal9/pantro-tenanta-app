@@ -147,7 +147,7 @@ export default function TenantTopbar({ onMenuToggle }) {
         ]}
       >
         <View style={styles.topbarRow}>
-          {/* ── Left: Menu button ─── */}
+          {/* ── Left: Menu button & Property / Liquid Glass UI ─── */}
           <View style={styles.leftRow}>
             {!!onMenuToggle && (
               <TouchableOpacity
@@ -160,6 +160,22 @@ export default function TenantTopbar({ onMenuToggle }) {
                 <Menu size={18} color="#ffffff" strokeWidth={2.2} />
               </TouchableOpacity>
             )}
+
+            <View style={styles.propertyInfoWrap}>
+              <Text
+                style={styles.propertyTitleText}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {propertyName || 'Pantro'}
+              </Text>
+              <View style={styles.liquidGlassPill}>
+                <View style={styles.liquidGlassDot} />
+                <Text style={styles.liquidGlassText} numberOfLines={1}>
+                  Liquid Glass UI
+                </Text>
+              </View>
+            </View>
           </View>
 
           {/* ── Right: Notifications & Profile ─── */}
@@ -407,6 +423,46 @@ const styles = StyleSheet.create({
   leftRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    minWidth: 0,
+    marginRight: 8,
+  },
+  propertyInfoWrap: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
+    marginLeft: 10,
+  },
+  propertyTitleText: {
+    fontSize: responsiveFontSize(13),
+    fontWeight: '800',
+    color: '#ffffff',
+    letterSpacing: -0.2,
+  },
+  liquidGlassPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    alignSelf: 'flex-start',
+    marginTop: 2,
+  },
+  liquidGlassDot: {
+    width: 4.5,
+    height: 4.5,
+    borderRadius: 2.5,
+    backgroundColor: '#34d399',
+  },
+  liquidGlassText: {
+    fontSize: responsiveFontSize(9.5),
+    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.95)',
+    letterSpacing: 0.2,
   },
   menuBtn: {
     width: 36,
