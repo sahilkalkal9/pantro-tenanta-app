@@ -115,12 +115,14 @@ export function ModalSheet({
   visible,
   onClose,
   title,
+  subtitle,
   children,
   actions,
   height,
   scroll = true,
+  fullPage = false,
 }) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   useEffect(() => {
@@ -143,24 +145,51 @@ export function ModalSheet({
   }, []);
 
   const windowHeight = Dimensions.get('window').height;
-  const baseMaxHeight = height || windowHeight * 0.85;
-  const effectiveMaxHeight = keyboardHeight > 0
+  const baseMaxHeight = fullPage ? '100%' : (height || windowHeight * 0.85);
+  const effectiveMaxHeight = (!fullPage && keyboardHeight > 0)
     ? Math.max(260, windowHeight - keyboardHeight - 50)
     : baseMaxHeight;
 
   const content = (
-    <View style={{ maxHeight: effectiveMaxHeight }}>
-      <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
-      <View style={[styles.sheetHeader, { borderBottomColor: colors.border }]}>
-        <Text style={[styles.sheetTitle, { color: colors.textPrimary }]}>{title}</Text>
-        <TouchableOpacity onPress={onClose} hitSlop={8}>
-          <X size={22} color={colors.textSecondary} />
+    <View style={{ flex: fullPage ? 1 : undefined, maxHeight: fullPage ? undefined : effectiveMaxHeight }}>
+      {!fullPage && (
+        <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
+      )}
+      <View style={[
+        styles.sheetHeader,
+        {
+          borderBottomColor: colors.border,
+          paddingTop: fullPage ? (Platform.OS === 'ios' ? 52 : 36) : SPACING.md,
+          paddingBottom: SPACING.md,
+          paddingHorizontal: SPACING.lg,
+          backgroundColor: isDark ? colors.card : '#ffffff',
+        }
+      ]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+          {fullPage ? (
+            <TouchableOpacity onPress={onClose} hitSlop={12} style={{ padding: 4, marginLeft: -4 }}>
+              <ChevronLeft size={24} color={colors.textPrimary} />
+            </TouchableOpacity>
+          ) : null}
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.sheetTitle, { color: colors.textPrimary, fontSize: fullPage ? 18 : responsiveFontSize(FONT_SIZES.lg) }]} numberOfLines={1}>
+              {title}
+            </Text>
+            {subtitle ? (
+              <Text style={{ fontSize: responsiveFontSize(11.5), color: colors.textSecondary, marginTop: 1 }}>
+                {subtitle}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+        <TouchableOpacity onPress={onClose} hitSlop={10} style={{ padding: 4 }}>
+          <X size={20} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
       {scroll ? (
         <ScrollView
-          style={{ maxHeight: Math.max(180, effectiveMaxHeight - 120) }}
-          contentContainerStyle={[styles.sheetBody, { paddingBottom: keyboardHeight > 0 ? 120 : 60 }]}
+          style={{ flex: fullPage ? 1 : undefined, maxHeight: fullPage ? undefined : Math.max(180, effectiveMaxHeight - 120) }}
+          contentContainerStyle={[styles.sheetBody, { paddingBottom: keyboardHeight > 0 ? keyboardHeight + 80 : (fullPage ? 100 : 60) }]}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
           automaticallyAdjustKeyboardInsets={true}
@@ -169,10 +198,10 @@ export function ModalSheet({
           {children}
         </ScrollView>
       ) : (
-        <View style={[styles.sheetBody, { paddingBottom: keyboardHeight > 0 ? 80 : 30 }]}>{children}</View>
+        <View style={[styles.sheetBody, { flex: fullPage ? 1 : undefined, paddingBottom: keyboardHeight > 0 ? 80 : 30 }]}>{children}</View>
       )}
       {actions ? (
-        <View style={[styles.sheetActions, { borderTopColor: colors.border }]}>
+        <View style={[styles.sheetActions, { borderTopColor: colors.border, paddingBottom: Platform.OS === 'ios' ? 24 : SPACING.md }]}>
           {Array.isArray(actions)
             ? actions.map((act, idx) => {
                 if (!act) return null;
@@ -199,14 +228,16 @@ export function ModalSheet({
   );
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent={!fullPage} animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{ flex: 1, backgroundColor: fullPage ? (isDark ? colors.card : '#ffffff') : undefined }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.sheetBackdrop}>
-          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
-          <View style={[styles.sheetContainer, { backgroundColor: colors.card }]}>{content}</View>
+        <View style={fullPage ? { flex: 1, backgroundColor: isDark ? colors.card : '#ffffff' } : styles.sheetBackdrop}>
+          {!fullPage && <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />}
+          <View style={[styles.sheetContainer, fullPage ? { flex: 1, borderTopLeftRadius: 0, borderTopRightRadius: 0, backgroundColor: isDark ? colors.card : '#ffffff' } : { backgroundColor: colors.card }]}>
+            {content}
+          </View>
         </View>
       </KeyboardAvoidingView>
     </Modal>

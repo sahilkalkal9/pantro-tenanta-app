@@ -100,6 +100,8 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
   // UPI / proof state
   const [upiLink, setUpiLink] = useState('');
   const [upiId, setUpiId] = useState('');
+  const [ownerQrUrl, setOwnerQrUrl] = useState('');
+  const [ownerName, setOwnerName] = useState('');
   const [upiLoading, setUpiLoading] = useState(false);
   const [transactionId, setTransactionId] = useState('');
   const [screenshotUrl, setScreenshotUrl] = useState('');
@@ -134,6 +136,12 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
         }
         if (data?.upiId && !upiId) {
           setUpiId(data.upiId);
+        }
+        if (data?.ownerUpiQrCode) {
+          setOwnerQrUrl(data.ownerUpiQrCode);
+        }
+        if (data?.upiName) {
+          setOwnerName(data.upiName);
         }
       }).catch((e) => {
         console.log('[PaymentSheet] fetch payment info error:', e?.message);
@@ -301,8 +309,12 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
           const res = await tenantService.getDuesUpiLink(items);
           const link = res?.data?.upiDeepLink || res?.upiLink || res?.upiDeepLink || res?.data?.upiQrString || '';
           const id = res?.data?.upiId || res?.upiId || '';
+          const qrImg = res?.data?.ownerUpiQrCode || res?.ownerUpiQrCode || '';
+          const uName = res?.data?.upiName || res?.upiName || '';
           const cfg = res?.data?.checkoutConfig || res?.checkoutConfig;
           if (cfg) setCheckoutConfig(cfg);
+          if (qrImg) setOwnerQrUrl(qrImg);
+          if (uName) setOwnerName(uName);
           if (link) {
             setUpiLink(link);
             setUpiId(id);
@@ -318,9 +330,11 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
         const payInfoRes = await tenantService.getPaymentInfo();
         const info = payInfoRes?.data || payInfoRes;
         if (info?.checkoutConfig) setCheckoutConfig(info.checkoutConfig);
+        if (info?.ownerUpiQrCode) setOwnerQrUrl(info.ownerUpiQrCode);
         const acc = (info?.upiAccounts && info.upiAccounts[0]) || null;
         const accId = info?.upiId || acc?.upiId;
         const accName = info?.upiName || acc?.upiName || 'Payment';
+        if (accName) setOwnerName(accName);
         if (accId && totalPayable > 0) {
           const cleanId = String(accId).trim();
           setUpiLink(
@@ -570,7 +584,13 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
   const roseBorder = isDark ? 'rgba(239, 68, 68, 0.3)' : '#fecaca';
 
   return (
-    <ModalSheet visible={visible} onClose={close} title={target.title || 'Checkout & Pay'}>
+    <ModalSheet
+      visible={visible}
+      onClose={close}
+      title={target.title || 'Checkout & Pay'}
+      subtitle="Pantro Secure Settlement • 256-Bit SSL"
+      fullPage={true}
+    >
       <View style={{ gap: SPACING.md }}>
         {/* ── Checkout Security & Step Header ─── */}
         <View style={styles.checkoutSecurityBar}>
@@ -854,13 +874,15 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                     {isManualUpi ? 'Generating Owner UPI QR…' : 'Generating Smart Collect QR…'}
                   </Text>
                 </View>
-              ) : upiLink ? (
+              ) : upiLink || (isManualUpi && ownerQrUrl) ? (
                 <View style={{ alignItems: 'center', paddingVertical: 14 }}>
                   <Image
                     source={{
-                      uri: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=${encodeURIComponent(upiLink)}`,
+                      uri: (isManualUpi && ownerQrUrl)
+                        ? ownerQrUrl
+                        : `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=${encodeURIComponent(upiLink)}`,
                     }}
-                    style={{ width: 180, height: 180, borderRadius: 12, backgroundColor: '#ffffff' }}
+                    style={{ width: 190, height: 190, borderRadius: 12, backgroundColor: '#ffffff', borderWidth: 1, borderColor: colors.border }}
                     resizeMode="contain"
                   />
                   <View style={styles.qrAmountPill}>
@@ -869,9 +891,16 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                       Locked Amount: {formatCurrency(upiPayable)}
                     </Text>
                   </View>
+                  {isManualUpi && ownerName ? (
+                    <View style={{ marginTop: 8, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, backgroundColor: isDark ? 'rgba(59, 130, 246, 0.15)' : '#eff6ff', borderWidth: 1, borderColor: isDark ? 'rgba(59, 130, 246, 0.3)' : '#bfdbfe' }}>
+                      <Text style={{ fontSize: responsiveFontSize(11.5), color: '#2563eb', fontWeight: '700' }}>
+                        Beneficiary: {ownerName}
+                      </Text>
+                    </View>
+                  ) : null}
                   <Text style={{ fontSize: responsiveFontSize(11.5), color: colors.textSecondary, marginTop: 6, textAlign: 'center' }}>
                     {isManualUpi
-                      ? 'Scan with any UPI app to pay directly to Owner'
+                      ? 'Scan with Google Pay, PhonePe, Paytm, or BHIM to pay Owner directly'
                       : 'Scan with Google Pay, PhonePe, Paytm, or any UPI app'}
                   </Text>
                 </View>
@@ -993,10 +1022,10 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                   label="UPI Transaction ID / 12-digit UTR"
                   placeholder="e.g. 423456789012"
                   value={transactionId}
-                  onChangeText={setTransactionId}
-                  helper={screenshotUrl ? 'Optional if screenshot is attached' : 'Required — owner uses this to verify payment'}
+                  onChangeText={(val) => setTransactionId(val.replace(/\D/g, '').slice(0, 12))}
+                  helper={screenshotUrl ? 'Optional if screenshot is attached' : 'Required — 12-digit UTR from your UPI payment app'}
                   keyboardType="numeric"
-                  autoCapitalize="characters"
+                  maxLength={12}
                 />
 
                 <ImageKitUploader
