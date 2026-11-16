@@ -106,6 +106,41 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
   const [submitting, setSubmitting] = useState(false);
   const [rrnDismissed, setRrnDismissed] = useState(false);
 
+  // Dynamic Checkout Settings from Super Admin (real-time sync)
+  const [checkoutConfig, setCheckoutConfig] = useState({
+    upiMode: 'smart_collect', // 'smart_collect' | 'manual_proof'
+    methods: {
+      upi: true,
+      cash: true,
+      bankTransfer: true,
+      cheque: true,
+      other: true,
+      onlineGateway: false,
+    },
+    platformFee: {
+      enabled: true,
+      amount: 5,
+      gstRate: 18,
+      applyOnlyToUpi: true,
+    },
+  });
+
+  useEffect(() => {
+    if (visible) {
+      tenantService.getPaymentInfo().then((res) => {
+        const data = res?.data || res;
+        if (data?.checkoutConfig) {
+          setCheckoutConfig(data.checkoutConfig);
+        }
+        if (data?.upiId && !upiId) {
+          setUpiId(data.upiId);
+        }
+      }).catch((e) => {
+        console.log('[PaymentSheet] fetch payment info error:', e?.message);
+      });
+    }
+  }, [visible]);
+
   useEffect(() => {
     AsyncStorage.getItem('pantro_auto_rrn_enabled').then((val) => {
       if (val === 'true') setRrnDismissed(true);
@@ -131,14 +166,33 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
   const items = useMemo(() => target?.items || [], [target]);
   const amount = Number(target?.amount) || 0;
   const baseAmount = amount;
+  const feeEnabled = checkoutConfig?.platformFee?.enabled !== false;
+  const configuredFee = feeEnabled ? Number(checkoutConfig?.platformFee?.amount ?? 5) : 0;
   const isUpi = method === 'upi' || view === 'upi';
-  const handlingFee = isUpi ? 5 : 0;
+  const isManualUpi = checkoutConfig?.upiMode === 'manual_proof';
+  const applyOnlyToUpi = checkoutConfig?.platformFee?.applyOnlyToUpi !== false;
+  const handlingFee = (isUpi || !applyOnlyToUpi) ? configuredFee : 0;
   const totalPayable = baseAmount > 0 ? baseAmount + handlingFee : 0;
-  const upiPayable = baseAmount > 0 ? baseAmount + 5 : 0;
+  const upiPayable = baseAmount > 0 ? baseAmount + configuredFee : 0;
   const rentIds = useMemo(() => target?.rentIds || [], [target]);
   const depositAmount = Number(target?.depositAmount) || 0;
-  const showOnline = target?.showOnline !== false && (rentIds.length > 0 || depositAmount > 0);
+
+  const methods = checkoutConfig?.methods || {};
+  const showUpi = methods.upi !== false;
+  const showCash = methods.cash !== false;
+  const showBankTransfer = methods.bankTransfer !== false;
+  const showCheque = methods.cheque !== false;
+  const showOther = methods.other !== false;
+  const showOnline = methods.onlineGateway && target?.showOnline !== false && (rentIds.length > 0 || depositAmount > 0);
   const depositToggle = target?.depositToggle || null;
+
+  const activeOtherMethods = useMemo(() => {
+    const list = [];
+    if (showBankTransfer) list.push('bank_transfer');
+    if (showCheque) list.push('cheque');
+    if (showOther) list.push('other');
+    return list;
+  }, [showBankTransfer, showCheque, showOther]);
 
   const handleLaunchUpiApp = async (appKey) => {
     if (!upiLink) return;
@@ -247,6 +301,8 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
           const res = await tenantService.getDuesUpiLink(items);
           const link = res?.data?.upiDeepLink || res?.upiLink || res?.upiDeepLink || res?.data?.upiQrString || '';
           const id = res?.data?.upiId || res?.upiId || '';
+          const cfg = res?.data?.checkoutConfig || res?.checkoutConfig;
+          if (cfg) setCheckoutConfig(cfg);
           if (link) {
             setUpiLink(link);
             setUpiId(id);
@@ -261,6 +317,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
       try {
         const payInfoRes = await tenantService.getPaymentInfo();
         const info = payInfoRes?.data || payInfoRes;
+        if (info?.checkoutConfig) setCheckoutConfig(info.checkoutConfig);
         const acc = (info?.upiAccounts && info.upiAccounts[0]) || null;
         const accId = info?.upiId || acc?.upiId;
         const accName = info?.upiName || acc?.upiName || 'Payment';
@@ -601,10 +658,12 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
             </View>
             <View style={styles.priceRow}>
               <Text style={[styles.priceRowLabel, { color: colors.textSecondary }]}>
-                Convenience Fee {view === 'method' ? '(UPI only)' : ''}
+                Convenience Fee {view === 'method' ? (applyOnlyToUpi ? '(UPI only)' : '') : ''}
               </Text>
-              <Text style={[styles.priceRowVal, { color: isUpi ? '#2864B2' : '#059669', fontWeight: '700' }]}>
-                {isUpi ? '+₹5.00' : view === 'method' ? '₹5 (UPI only • ₹0 others)' : '₹0.00 (FREE)'}
+              <Text style={[styles.priceRowVal, { color: isUpi && configuredFee > 0 ? '#2864B2' : '#059669', fontWeight: '700' }]}>
+                {configuredFee > 0
+                  ? (isUpi ? `+₹${configuredFee.toFixed(2)}` : view === 'method' ? `₹${configuredFee} (UPI only • ₹0 others)` : '₹0.00 (FREE)')
+                  : '₹0.00 (FREE)'}
               </Text>
             </View>
             <View style={[styles.totalRowDivider, { backgroundColor: colors.border }]} />
@@ -612,7 +671,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
               <View>
                 <Text style={[styles.grandTotalLabel, { color: colors.textSecondary }]}>TOTAL PAYABLE</Text>
                 <Text style={[styles.grandTotalAmount, { color: isDark ? '#ffffff' : '#1e3a8a' }]}>
-                  {formatCurrency(view === 'upi' ? upiPayable : baseAmount)}
+                  {formatCurrency(view === 'upi' ? upiPayable : totalPayable)}
                 </Text>
               </View>
               <View style={styles.verifiedReceiptPill}>
@@ -637,82 +696,92 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
 
             <View style={styles.methodCol}>
               {/* Via UPI Card */}
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={selectUpi}
-                style={[
-                  styles.checkoutMethodCard,
-                  {
-                    backgroundColor: isDark ? 'rgba(40, 100, 178, 0.12)' : '#f0f7ff',
-                    borderColor: '#2864B2',
-                    borderWidth: 1.5,
-                  },
-                ]}
-              >
-                <View style={styles.recommendBadge}>
-                  <Sparkles size={10} color="#ffffff" />
-                  <Text style={styles.recommendBadgeText}>RECOMMENDED • AUTO SETTLE</Text>
-                </View>
-
-                <View style={styles.methodCardInner}>
-                  <View style={[styles.radioCircle, { borderColor: '#2864B2', backgroundColor: '#2864B2' }]}>
-                    <View style={styles.radioDot} />
+              {showUpi ? (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={selectUpi}
+                  style={[
+                    styles.checkoutMethodCard,
+                    {
+                      backgroundColor: isDark ? 'rgba(40, 100, 178, 0.12)' : '#f0f7ff',
+                      borderColor: '#2864B2',
+                      borderWidth: 1.5,
+                    },
+                  ]}
+                >
+                  <View style={styles.recommendBadge}>
+                    <Sparkles size={10} color="#ffffff" />
+                    <Text style={styles.recommendBadgeText}>
+                      {isManualUpi ? 'DIRECT OWNER UPI' : 'RECOMMENDED • AUTO SETTLE'}
+                    </Text>
                   </View>
 
-                  <View style={[styles.methodIconBox, { backgroundColor: '#dbeafe' }]}>
-                    <Smartphone size={22} color="#1d4ed8" />
-                  </View>
+                  <View style={styles.methodCardInner}>
+                    <View style={[styles.radioCircle, { borderColor: '#2864B2', backgroundColor: '#2864B2' }]}>
+                      <View style={styles.radioDot} />
+                    </View>
 
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Text style={[styles.checkoutMethodTitle, { color: colors.textPrimary }]}>Via UPI & QR</Text>
-                      <Text style={styles.checkoutMethodPriceUpi}>
-                        {formatCurrency(upiPayable)}
+                    <View style={[styles.methodIconBox, { backgroundColor: '#dbeafe' }]}>
+                      <Smartphone size={22} color="#1d4ed8" />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={[styles.checkoutMethodTitle, { color: colors.textPrimary }]}>
+                          {isManualUpi ? 'Direct Owner UPI' : 'Via UPI & QR'}
+                        </Text>
+                        <Text style={styles.checkoutMethodPriceUpi}>
+                          {formatCurrency(upiPayable)}
+                        </Text>
+                      </View>
+                      <Text style={[styles.checkoutMethodSub, { color: colors.textSecondary }]}>
+                        {isManualUpi
+                          ? 'Scan & Pay to Owner • Submit UTR & Screenshot for approval'
+                          : `Smart Collect • GPay, PhonePe, Paytm, QR (${configuredFee > 0 ? `Incl. ₹${configuredFee} handling fee` : '₹0 fee'})`}
                       </Text>
                     </View>
-                    <Text style={[styles.checkoutMethodSub, { color: colors.textSecondary }]}>
-                      Smart Collect • GPay, PhonePe, Paytm, QR (Incl. ₹5 handling fee)
-                    </Text>
                   </View>
-                </View>
-              </TouchableOpacity>
+                </TouchableOpacity>
+              ) : null}
 
               {/* Cash Card */}
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={selectCash}
-                style={[
-                  styles.checkoutMethodCard,
-                  {
-                    backgroundColor: isDark ? 'rgba(16, 185, 129, 0.08)' : '#f0fdf4',
-                    borderColor: isDark ? 'rgba(16, 185, 129, 0.3)' : '#bbf7d0',
-                    borderWidth: 1,
-                  },
-                ]}
-              >
-                <View style={styles.methodCardInner}>
-                  <View style={[styles.radioCircle, { borderColor: '#10b981' }]} />
+              {showCash ? (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={selectCash}
+                  style={[
+                    styles.checkoutMethodCard,
+                    {
+                      backgroundColor: isDark ? 'rgba(16, 185, 129, 0.08)' : '#f0fdf4',
+                      borderColor: isDark ? 'rgba(16, 185, 129, 0.3)' : '#bbf7d0',
+                      borderWidth: 1,
+                    },
+                  ]}
+                >
+                  <View style={styles.methodCardInner}>
+                    <View style={[styles.radioCircle, { borderColor: '#10b981' }]} />
 
-                  <View style={[styles.methodIconBox, { backgroundColor: '#dcfce7' }]}>
-                    <Banknote size={22} color="#059669" />
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Text style={[styles.checkoutMethodTitle, { color: colors.textPrimary }]}>Cash</Text>
-                      <View style={{ alignItems: 'flex-end' }}>
-                        <Text style={styles.checkoutMethodPriceCash}>
-                          {formatCurrency(baseAmount)}
-                        </Text>
-                        <Text style={styles.zeroFeePill}>₹0 fee</Text>
-                      </View>
+                    <View style={[styles.methodIconBox, { backgroundColor: '#dcfce7' }]}>
+                      <Banknote size={22} color="#059669" />
                     </View>
-                    <Text style={[styles.checkoutMethodSub, { color: colors.textSecondary }]}>
-                      Pay physical cash to owner/manager • OTP verification
-                    </Text>
+
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={[styles.checkoutMethodTitle, { color: colors.textPrimary }]}>Cash</Text>
+                        <View style={{ alignItems: 'flex-end' }}>
+                          <Text style={styles.checkoutMethodPriceCash}>
+                            {formatCurrency(baseAmount)}
+                          </Text>
+                          <Text style={styles.zeroFeePill}>₹0 fee</Text>
+                        </View>
+                      </View>
+                      <Text style={[styles.checkoutMethodSub, { color: colors.textSecondary }]}>
+                        Pay physical cash to owner/manager • OTP verification
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
+                </TouchableOpacity>
+              ) : null}
 
               {/* Online Gateway (if available) */}
               {showOnline ? (
@@ -751,27 +820,29 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
               ) : null}
             </View>
 
-            <View style={[styles.otherMethods, { borderTopColor: colors.border }]}>
-              <Text style={[styles.otherMethodsLabel, { color: colors.textSecondary }]}>OTHER METHODS (₹0 HANDLING FEE)</Text>
-              <View style={styles.otherMethodsRow}>
-                {OTHER_METHODS.map((key) => (
-                  <TouchableOpacity
-                    key={key}
-                    activeOpacity={0.75}
-                    onPress={() => selectProofMethod(key)}
-                    style={[styles.otherChip, { borderColor: colors.border, backgroundColor: colors.cardSecondary }]}
-                  >
-                    <Text style={[styles.otherChipText, { color: colors.textPrimary }]}>
-                      {PROOF_METHODS[key].label} ({formatCurrency(baseAmount)})
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+            {activeOtherMethods.length > 0 ? (
+              <View style={[styles.otherMethods, { borderTopColor: colors.border }]}>
+                <Text style={[styles.otherMethodsLabel, { color: colors.textSecondary }]}>OTHER METHODS (₹0 HANDLING FEE)</Text>
+                <View style={styles.otherMethodsRow}>
+                  {activeOtherMethods.map((key) => (
+                    <TouchableOpacity
+                      key={key}
+                      activeOpacity={0.75}
+                      onPress={() => selectProofMethod(key)}
+                      style={[styles.otherChip, { borderColor: colors.border, backgroundColor: colors.cardSecondary }]}
+                    >
+                      <Text style={[styles.otherChipText, { color: colors.textPrimary }]}>
+                        {PROOF_METHODS[key].label} ({formatCurrency(baseAmount)})
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
+            ) : null}
           </>
         ) : null}
 
-        {/* ── 2. UPI (No UTR field, QR code + Installed Apps) ─── */}
+        {/* ── 2. UPI (Smart Collect or Direct Owner Manual Proof) ─── */}
         {view === 'upi' ? (
           <View style={{ gap: SPACING.md }}>
             {/* QR Code Card */}
@@ -780,7 +851,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                 <View style={{ height: 210, justifyContent: 'center', alignItems: 'center' }}>
                   <ActivityIndicator size="large" color={COLORS.primary} />
                   <Text style={{ fontSize: responsiveFontSize(12), color: colors.textSecondary, marginTop: 10 }}>
-                    Generating Smart Collect QR…
+                    {isManualUpi ? 'Generating Owner UPI QR…' : 'Generating Smart Collect QR…'}
                   </Text>
                 </View>
               ) : upiLink ? (
@@ -799,7 +870,9 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
                     </Text>
                   </View>
                   <Text style={{ fontSize: responsiveFontSize(11.5), color: colors.textSecondary, marginTop: 6, textAlign: 'center' }}>
-                    Scan with Google Pay, PhonePe, Paytm, or any UPI app
+                    {isManualUpi
+                      ? 'Scan with any UPI app to pay directly to Owner'
+                      : 'Scan with Google Pay, PhonePe, Paytm, or any UPI app'}
                   </Text>
                 </View>
               ) : (
@@ -901,26 +974,70 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
               </View>
             </View>
 
-            {/* Smart Collect Realtime Settlement Banner */}
-            <View style={[styles.banner, { backgroundColor: isDark ? 'rgba(5, 150, 105, 0.12)' : '#ecfdf5', borderColor: isDark ? 'rgba(5, 150, 105, 0.25)' : '#a7f3d0' }]}>
-              <ShieldCheck size={16} color="#059669" style={{ marginTop: 1 }} />
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: responsiveFontSize(12.5), fontWeight: '700', color: isDark ? '#6ee7b7' : '#065f46' }}>
-                  Smart Collect Realtime Settlement Active
-                </Text>
-                <Text style={{ fontSize: responsiveFontSize(11.5), color: isDark ? '#a7f3d0' : '#047857', marginTop: 2, lineHeight: 16 }}>
-                  Payments made via UPI are verified in realtime through Smart Collect and settled directly via RazorpayX. No UTR entry needed!
-                </Text>
-              </View>
-            </View>
+            {/* Reconciliation Flow: Manual Proof (UTR + Screenshot) vs Smart Collect */}
+            {isManualUpi ? (
+              <>
+                <View style={[styles.banner, { backgroundColor: blueBg, borderColor: blueBorder }]}>
+                  <Wallet size={16} color="#2563eb" style={{ marginTop: 1 }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: responsiveFontSize(12.5), fontWeight: '700', color: isDark ? '#93c5fd' : '#1e40af' }}>
+                      Direct Owner UPI Settlement
+                    </Text>
+                    <Text style={{ fontSize: responsiveFontSize(11.5), color: isDark ? '#bfdbfe' : '#1e3a8a', marginTop: 2, lineHeight: 16 }}>
+                      Pay directly to the owner via any UPI app above. Enter the 12-digit UTR number or upload receipt screenshot below so the owner can verify and approve.
+                    </Text>
+                  </View>
+                </View>
 
-            {/* Confirm button */}
-            <Button
-              title="I Have Completed Payment"
-              icon={CheckCircle}
-              onPress={handleConfirmPaidUpi}
-              fullWidth
-            />
+                <TextField
+                  label="UPI Transaction ID / 12-digit UTR"
+                  placeholder="e.g. 423456789012"
+                  value={transactionId}
+                  onChangeText={setTransactionId}
+                  helper={screenshotUrl ? 'Optional if screenshot is attached' : 'Required — owner uses this to verify payment'}
+                  keyboardType="numeric"
+                  autoCapitalize="characters"
+                />
+
+                <ImageKitUploader
+                  label="Payment receipt screenshot (optional if 12-digit UTR entered)"
+                  value={screenshotUrl}
+                  onChange={setScreenshotUrl}
+                  folder="/tenants/payments"
+                />
+
+                <Button
+                  title="Submit for Owner Approval"
+                  icon={CreditCard}
+                  onPress={submitProof}
+                  loading={submitting}
+                  fullWidth
+                />
+              </>
+            ) : (
+              <>
+                {/* Smart Collect Realtime Settlement Banner */}
+                <View style={[styles.banner, { backgroundColor: isDark ? 'rgba(5, 150, 105, 0.12)' : '#ecfdf5', borderColor: isDark ? 'rgba(5, 150, 105, 0.25)' : '#a7f3d0' }]}>
+                  <ShieldCheck size={16} color="#059669" style={{ marginTop: 1 }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: responsiveFontSize(12.5), fontWeight: '700', color: isDark ? '#6ee7b7' : '#065f46' }}>
+                      Smart Collect Realtime Settlement Active
+                    </Text>
+                    <Text style={{ fontSize: responsiveFontSize(11.5), color: isDark ? '#a7f3d0' : '#047857', marginTop: 2, lineHeight: 16 }}>
+                      Payments made via UPI are verified in realtime through Smart Collect and settled directly via RazorpayX. No UTR entry needed!
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Confirm button */}
+                <Button
+                  title="I Have Completed Payment"
+                  icon={CheckCircle}
+                  onPress={handleConfirmPaidUpi}
+                  fullWidth
+                />
+              </>
+            )}
 
             <TouchableOpacity onPress={backToMethods} style={styles.backBtn}>
               <Text style={[styles.backText, { color: colors.textSecondary }]}>← Change payment method</Text>
