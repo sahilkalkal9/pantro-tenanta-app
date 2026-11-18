@@ -37,6 +37,8 @@ export function tenantRouteFromLink(link) {
     '/tenants/profile': '/(app)/profile',
     '/tenants/dashboard': '/(app)/dashboard',
     '/tenants/dues': '/(app)/dues',
+    '/more/electricity': '/(app)/more/electricity',
+    '/tenants/electricity': '/(app)/more/electricity',
     '/owner/dashboard': '/(app)/dashboard',
   };
   return map[pathname] || null;
