@@ -13,7 +13,6 @@ import {
   Screen, TenantPageHeader, Card, Button, EmptyState, SegmentedControl, CardSkeleton,
   PantroLoader,
 } from '../../components';
-import PaymentSheet from '../../components/tenants/PaymentSheet';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../constants/colors';
 import { useTheme } from '../../hooks/useTheme';
 import RentStatusCard from '../../components/tenants/RentStatusCard';
@@ -38,11 +37,6 @@ export default function RentScreen() {
   const [mainTab, setMainTab] = useState('rent'); // 'rent' or 'deposit'
   const [filter, setFilter] = useState('all');
   const [error, setError] = useState(null);
-
-  // Payment State — everything happens inside the shared PaymentSheet.
-  const [payTarget, setPayTarget] = useState(null); // { type: 'single'|'multi'|'deposit', rent? }
-  const [payOpen, setPayOpen] = useState(false);
-  const [includeDeposit, setIncludeDeposit] = useState(false);
 
   const fetchData = useCallback(
     async ({ refresh = false } = {}) => {
@@ -127,69 +121,10 @@ export default function RentScreen() {
     { value: 'overdue', label: `Overdue (${filterCounts.overdue})` },
   ], [filterCounts]);
 
-  // ── Payment (the shared PaymentSheet handles the whole flow) ─────────
-  const startPay = (target) => {
-    setIncludeDeposit(false);
-    setPayTarget(target);
-    setPayOpen(true);
+  // ── Payment (Routes directly to centralized Dues page) ─────────
+  const startPay = () => {
+    router.push('/dues');
   };
-
-  const closePay = () => {
-    setPayOpen(false);
-    setPayTarget(null);
-    setIncludeDeposit(false);
-  };
-
-  // The one configuration the shared PaymentSheet is opened with.
-  const payConfig = useMemo(() => {
-    if (!payTarget) return null;
-
-    // Security deposit on its own.
-    if (payTarget.type === 'deposit') {
-      return {
-        title: 'Pay Security Deposit',
-        summary: 'Refundable at move-out',
-        amount: depositPending,
-        items: [{ type: 'deposit', amount: depositPending }],
-        rentIds: [],
-        depositAmount: depositPending,
-      };
-    }
-
-    const list = payTarget.type === 'single' ? [payTarget.rent] : unpaidRents;
-    const rentItems = list
-      .filter(Boolean)
-      .map((r) => ({
-        type: 'rent',
-        rentId: r._id || r.id,
-        month: r.month,
-        year: r.year,
-        amount: Math.max(0, Number(r.pendingAmount ?? r.rentAmount) || 0),
-      }))
-      .filter((r) => r.amount > 0 || r.rentId);
-
-    const rentTotal = rentItems.reduce((s, r) => s + r.amount, 0);
-    const withDeposit = includeDeposit && depositPending > 0;
-    const items = withDeposit ? [...rentItems, { type: 'deposit', amount: depositPending }] : rentItems;
-
-    const single = payTarget.type === 'single' && payTarget.rent;
-
-    return {
-      title: single ? `Pay Rent — ${formatMonthYear(payTarget.rent.month, payTarget.rent.year)}` : 'Pay Multiple Months',
-      summary: single
-        ? `Rent for ${formatMonthYear(payTarget.rent.month, payTarget.rent.year)}`
-        : `${rentItems.length} unpaid month${rentItems.length === 1 ? '' : 's'} selected`,
-      amount: rentTotal + (withDeposit ? depositPending : 0),
-      items,
-      rentIds: rentItems.map((r) => r.rentId).filter(Boolean),
-      depositAmount: withDeposit ? depositPending : 0,
-      depositToggle:
-        depositPending > 0
-          ? { amount: depositPending, checked: includeDeposit, onChange: setIncludeDeposit }
-          : null,
-    };
-  }, [payTarget, includeDeposit, unpaidRents, depositPending]);
-
 
   if (loading && !payload) {
     return <PantroLoader fullScreen message="Loading rent details…" />;
@@ -446,14 +381,6 @@ export default function RentScreen() {
           )}
         </View>
       )}
-
-      {/* ── Payment Sheet (shared with Dues & Dashboard) ── */}
-      <PaymentSheet
-        visible={payOpen}
-        onClose={closePay}
-        onSuccess={() => fetchData({ refresh: true })}
-        target={payConfig}
-      />
     </Screen>
   );
 }

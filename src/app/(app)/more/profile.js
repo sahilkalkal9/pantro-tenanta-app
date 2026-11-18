@@ -1520,8 +1520,12 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user, profile }) {
       const data = res?.data || res;
       setCheckoutData(data);
       if (code) setAppliedCoupon(code);
-      if (data?.alreadyPaid || data?.freeEligible) {
+      if (data?.alreadyPaid || data?.freeEligible || data?.amountRupees === '0.00' || data?.totalPaise === 0) {
         setIsPaid(true);
+        setShowCheckout(false);
+        await startVerification({
+          couponCode: code || data?.couponCode,
+        });
       }
     } catch (e) {
       toast.error(getErrorMessage(e) || 'Failed to fetch verification pricing');
@@ -1701,16 +1705,20 @@ function DigiLockerVerifyCard({ initialAadhaar, onVerified, user, profile }) {
         <View style={{ marginTop: SPACING.sm, padding: SPACING.sm + 4, borderRadius: 12, backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : '#ffffff', borderWidth: 1, borderColor: colors.border }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
             <Text style={{ fontSize: 13, color: colors.textSecondary }}>Aadhaar Verification Fee</Text>
-            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }}>₹5.00</Text>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }}>
+              ₹{((checkoutData?.gstBreakdown?.basePaise != null ? checkoutData.gstBreakdown.basePaise : 500) / 100).toFixed(2)}
+            </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-            <Text style={{ fontSize: 13, color: colors.textSecondary }}>18% GST (SAC 998313)</Text>
-            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }}>₹0.90</Text>
+            <Text style={{ fontSize: 13, color: colors.textSecondary }}>GST</Text>
+            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary }}>
+              ₹{((checkoutData?.gstBreakdown?.gstPaise != null ? checkoutData.gstBreakdown.gstPaise : 90) / 100).toFixed(2)}
+            </Text>
           </View>
           {appliedCoupon ? (
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
               <Text style={{ fontSize: 13, fontWeight: '600', color: '#059669' }}>Coupon ({appliedCoupon})</Text>
-              <Text style={{ fontSize: 13, fontWeight: '700', color: '#059669' }}>-₹{((checkoutData?.gstBreakdown?.discountPaise || 590) / 100).toFixed(2)}</Text>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: '#059669' }}>-₹{((checkoutData?.gstBreakdown?.discountPaise || 0) / 100).toFixed(2)}</Text>
             </View>
           ) : null}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingTop: 8 }}>

@@ -174,14 +174,40 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
   const items = useMemo(() => target?.items || [], [target]);
   const amount = Number(target?.amount) || 0;
   const baseAmount = amount;
-  const feeEnabled = checkoutConfig?.platformFee?.enabled !== false;
-  const configuredFee = feeEnabled ? Number(checkoutConfig?.platformFee?.amount ?? 5) : 0;
-  const isUpi = method === 'upi' || view === 'upi';
-  const isManualUpi = checkoutConfig?.upiMode === 'manual_proof';
-  const applyOnlyToUpi = checkoutConfig?.platformFee?.applyOnlyToUpi !== false;
-  const handlingFee = (isUpi || !applyOnlyToUpi) ? configuredFee : 0;
+
+  // Tenant Payment Rules & Handling Fee calculation
+  const paymentRules = target?.tenantPaymentRules || checkoutConfig?.tenantPaymentRules || {};
+  const isAllSelected = target?.isAllSelected === true;
+  const hasFreeTx = target?.hasFreeTransaction ?? paymentRules?.hasFreeTransaction ?? (Number(paymentRules?.usedTransactionsThisMonth || 0) < Number(paymentRules?.freeTransactionsCount ?? 1));
+  const feePercent = Number(paymentRules?.handlingFeePercent ?? 1);
+  const feeCap = Number(paymentRules?.handlingFeeMaxCap ?? 10);
+
+  let handlingFee = 0;
+  let feeLabel = '₹0.00 (FREE)';
+  let feeSubtext = '';
+
+  if (isAllSelected) {
+    handlingFee = 0;
+    feeLabel = '₹0.00 (FREE)';
+    feeSubtext = '• Full dues waiver (₹0 handling fee)';
+  } else if (hasFreeTx) {
+    handlingFee = 0;
+    feeLabel = '₹0.00 (FREE)';
+    feeSubtext = '• 1st free transaction quota';
+  } else if (target?.handlingFee !== undefined) {
+    handlingFee = Number(target.handlingFee) || 0;
+    feeLabel = handlingFee > 0 ? `+₹${handlingFee}` : '₹0.00 (FREE)';
+    feeSubtext = handlingFee > 0 ? `• ${feePercent}% handling fee (capped at ₹${feeCap})` : '';
+  } else {
+    handlingFee = Math.min(feeCap, Math.round(baseAmount * (feePercent / 100)));
+    feeLabel = handlingFee > 0 ? `+₹${handlingFee}` : '₹0.00 (FREE)';
+    feeSubtext = handlingFee > 0 ? `• ${feePercent}% handling fee (capped at ₹${feeCap})` : '';
+  }
+
   const totalPayable = baseAmount > 0 ? baseAmount + handlingFee : 0;
-  const upiPayable = baseAmount > 0 ? baseAmount + configuredFee : 0;
+  const upiPayable = totalPayable;
+  const isManualUpi = checkoutConfig?.upiMode === 'manual_proof';
+  const configuredFee = handlingFee;
   const rentIds = useMemo(() => target?.rentIds || [], [target]);
   const depositAmount = Number(target?.depositAmount) || 0;
 
@@ -306,7 +332,9 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
       // 1. The dues UPI endpoint prices rent + deposit + penalty items.
       if (items.length) {
         try {
-          const res = await tenantService.getDuesUpiLink(items);
+          const res = await tenantService.getDuesUpiLink(items, {
+            isAllSelected: target?.isAllSelected ? 'true' : 'false',
+          });
           const link = res?.data?.upiDeepLink || res?.upiLink || res?.upiDeepLink || res?.data?.upiQrString || '';
           const id = res?.data?.upiId || res?.upiId || '';
           const qrImg = res?.data?.ownerUpiQrCode || res?.ownerUpiQrCode || '';
@@ -678,13 +706,18 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
               <Text style={[styles.priceRowVal, { color: colors.textPrimary }]}>{formatCurrency(baseAmount)}</Text>
             </View>
             <View style={styles.priceRow}>
-              <Text style={[styles.priceRowLabel, { color: colors.textSecondary }]}>
-                Convenience Fee {view === 'method' ? (applyOnlyToUpi ? '(UPI only)' : '') : ''}
-              </Text>
-              <Text style={[styles.priceRowVal, { color: isUpi && configuredFee > 0 ? '#2864B2' : '#059669', fontWeight: '700' }]}>
-                {configuredFee > 0
-                  ? (isUpi ? `+₹${configuredFee.toFixed(2)}` : view === 'method' ? `₹${configuredFee} (UPI only • ₹0 others)` : '₹0.00 (FREE)')
-                  : '₹0.00 (FREE)'}
+              <View style={{ flex: 1, paddingRight: 8 }}>
+                <Text style={[styles.priceRowLabel, { color: colors.textSecondary }]}>
+                  Handling Fee
+                </Text>
+                {feeSubtext ? (
+                  <Text style={{ fontSize: 11, color: handlingFee > 0 ? colors.textSecondary : '#059669', fontWeight: '600', marginTop: 1 }}>
+                    {feeSubtext}
+                  </Text>
+                ) : null}
+              </View>
+              <Text style={[styles.priceRowVal, { color: handlingFee > 0 ? '#d97706' : '#059669', fontWeight: '700' }]}>
+                {feeLabel}
               </Text>
             </View>
             <View style={[styles.totalRowDivider, { backgroundColor: colors.border }]} />
@@ -692,7 +725,7 @@ export default function PaymentSheet({ visible, onClose, onSuccess, target }) {
               <View>
                 <Text style={[styles.grandTotalLabel, { color: colors.textSecondary }]}>TOTAL PAYABLE</Text>
                 <Text style={[styles.grandTotalAmount, { color: isDark ? '#ffffff' : '#1e3a8a' }]}>
-                  {formatCurrency(view === 'upi' ? upiPayable : totalPayable)}
+                  {formatCurrency(totalPayable)}
                 </Text>
               </View>
               <View style={styles.verifiedReceiptPill}>

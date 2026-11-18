@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   AlertCircle, Receipt, IndianRupee, User, FileText, DoorOpen, Bell,
   LogOut, Calendar, MessageSquare, Settings, ChevronRight, HelpCircle,
-  Shield, RefreshCw,
+  Shield, RefreshCw, Zap,
 } from 'lucide-react-native';
 import { logout } from '../../../slices/authSlice';
 import {
@@ -22,6 +22,7 @@ const MENU = [
     title: 'Financial',
     items: [
       { icon: AlertCircle, color: COLORS.danger, label: 'Dues', subtitle: 'Everything you need to pay', route: '/more/dues' },
+      { icon: Zap, color: '#f59e0b', label: 'Electricity Bills', subtitle: 'Meter readings, units & bill history', route: '/more/electricity' },
       { icon: Receipt, color: COLORS.secondary, label: 'Transactions', subtitle: 'Payment history & proofs', route: '/payments' },
       { icon: IndianRupee, color: COLORS.success, label: 'Rent & Deposit', subtitle: 'View and pay your rent', route: '/rent' },
     ],

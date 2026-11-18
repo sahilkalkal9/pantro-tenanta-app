@@ -146,9 +146,12 @@ export const tenantService = {
     return unwrapItem(res, 'data');
   },
 
-  async getDuesUpiLink(items) {
+  async getDuesUpiLink(items, extraParams = {}) {
     const res = await api.get('/tenant/dues/upi-link', {
-      params: { items: typeof items === 'string' ? items : JSON.stringify(items) },
+      params: {
+        items: typeof items === 'string' ? items : JSON.stringify(items),
+        ...extraParams,
+      },
     });
     return unwrapItem(res, 'data') || res.data;
   },
@@ -485,6 +488,12 @@ export const tenantService = {
   async getPaymentInfoStatements() {
     const res = await api.get('/tenant/payment-info');
     return unwrapItem(res, 'data');
+  },
+
+  // Electricity bills & meter readings
+  async getMyElectricityBills() {
+    const res = await api.get('/electricity/my-bills');
+    return res?.data?.data || res?.data;
   },
 };
 

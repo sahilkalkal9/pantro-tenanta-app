@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
 import {
   FileText, Eye, IdCard, ExternalLink, ShieldCheck, CheckCircle2, Sparkles,
-  Clock, RefreshCw, Download, ArrowRight,
+  Clock, RefreshCw, Download, ArrowRight, Users,
 } from 'lucide-react-native';
 import { tenantService } from '../../../services/tenantService';
 import { useToast } from '../../../hooks/useToast';
@@ -379,6 +379,92 @@ export default function DocumentsScreen({ navigation }) {
           </Text>
         </View>
       </Card>
+
+      {/* ── Family & Co-Occupant Background Verifications ──────── */}
+      {Array.isArray(verification?.relatedVerifications) && verification.relatedVerifications.length > 0 && (
+        <Card style={{ marginBottom: SPACING.md }}>
+          <View style={[styles.head, { borderBottomColor: colors.border }]}>
+            <View style={[styles.icon, { backgroundColor: 'rgba(16, 185, 129, 0.10)' }]}>
+              <Users size={16} color="#059669" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.headTitle, { color: colors.textPrimary }]}>Family & Co-Occupant Verifications</Text>
+              <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary }}>
+                Official verified records for members living in your unit
+              </Text>
+            </View>
+            <Badge label={`${verification.relatedVerifications.length} Verified`} color={COLORS.success} />
+          </View>
+
+          <View style={{ marginTop: 12, gap: 10 }}>
+            {verification.relatedVerifications.map((rv) => {
+              const rPolice = rv.policeVerification || {};
+              const isRvDone = rPolice.status === 'completed';
+              const isRvClear = rPolice.verdict === 'clear';
+              return (
+                <View
+                  key={rv.id}
+                  style={{
+                    padding: 12,
+                    borderRadius: 12,
+                    backgroundColor: isDark ? colors.cardSecondary : COLORS.gray50,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                      <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: isDark ? '#1e293b' : '#e2e8f0', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                        {rv.photoUrl ? (
+                          <Image source={{ uri: resolveMediaUrl(rv.photoUrl) }} style={{ width: 36, height: 36 }} />
+                        ) : (
+                          <Users size={18} color={colors.textSecondary} />
+                        )}
+                      </View>
+                      <View>
+                        <Text style={{ fontSize: responsiveFontSize(13), fontWeight: '700', color: colors.textPrimary }}>
+                          {rv.name}
+                        </Text>
+                        <Text style={{ fontSize: responsiveFontSize(11), color: colors.textSecondary }}>
+                          {rv.relation} {rv.aadhaarVerification?.maskedAadhaar ? `• ${rv.aadhaarVerification.maskedAadhaar}` : ''}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Badge
+                      label={isRvDone ? (isRvClear ? '✓ Clear' : 'Record Found') : (rPolice.status === 'in_progress' ? 'In Progress' : 'Pending')}
+                      color={isRvDone ? (isRvClear ? COLORS.success : COLORS.error) : COLORS.primary}
+                    />
+                  </View>
+
+                  {isRvDone && rPolice.reportUrl && (
+                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
+                      <TouchableOpacity
+                        style={[styles.downloadBtn, { backgroundColor: '#2563eb', paddingHorizontal: 10, paddingVertical: 5 }]}
+                        activeOpacity={0.8}
+                        onPress={() => Linking.openURL(resolveMediaUrl(rPolice.reportUrl)).catch(() => {})}
+                      >
+                        <Download size={12} color="#fff" />
+                        <Text style={[styles.downloadBtnText, { fontSize: 11 }]}>Certificate (PDF)</Text>
+                      </TouchableOpacity>
+                      {rPolice.docUrl && (
+                        <TouchableOpacity
+                          style={[styles.downloadBtn, { backgroundColor: '#475569', paddingHorizontal: 10, paddingVertical: 5 }]}
+                          activeOpacity={0.8}
+                          onPress={() => Linking.openURL(resolveMediaUrl(rPolice.docUrl)).catch(() => {})}
+                        >
+                          <Download size={12} color="#fff" />
+                          <Text style={[styles.downloadBtnText, { fontSize: 11 }]}>DOC</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        </Card>
+      )}
 
       {/* ── Official 11-Month Rent Agreement Card ────────────── */}
       {(() => {

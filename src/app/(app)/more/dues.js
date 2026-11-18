@@ -21,6 +21,8 @@ import {
   Building2,
   MessageSquare,
   Check,
+  AlertCircle,
+  Sparkles,
 } from 'lucide-react-native';
 import { tenantService } from '../../../services/tenantService';
 import { useToast } from '../../../hooks/useToast';
@@ -162,6 +164,16 @@ export default function DuesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selected, setSelected] = useState([]);
 
+  // Payment Rules & Modal State
+  const [paymentRules, setPaymentRules] = useState({
+    freeTransactionsCount: 1,
+    handlingFeePercent: 1,
+    handlingFeeMaxCap: 10,
+    usedTransactionsThisMonth: 0,
+    hasFreeTransaction: true,
+  });
+  const [partialModalVisible, setPartialModalVisible] = useState(false);
+
   // Payment State — everything happens inside the shared PaymentSheet.
   const [payOpen, setPayOpen] = useState(false);
 
@@ -176,13 +188,19 @@ export default function DuesScreen() {
       if (refresh) setRefreshing(true);
       else if (!tenantService.getCachedDues()) setLoading(true);
       try {
-        const [d, pRes] = await Promise.all([
+        const [d, pRes, infoRes] = await Promise.all([
           tenantService.getMyDues({}, { bypassCache: refresh }),
           tenantService.getPaymentProofs({ limit: 50 }, { bypassCache: refresh }).catch(() => null),
+          tenantService.getPaymentInfo().catch(() => null),
         ]);
         const parsed = parseDuesData(d, pRes);
         setDues(parsed.list);
         setRejectedProofsList(parsed.rejectedProofs);
+
+        const rules = infoRes?.data?.checkoutConfig?.tenantPaymentRules || infoRes?.checkoutConfig?.tenantPaymentRules;
+        if (rules) {
+          setPaymentRules(rules);
+        }
       } catch (e) {
         if (!tenantService.getCachedDues()) {
           toast.error(getErrorMessage(e));
@@ -266,9 +284,51 @@ export default function DuesScreen() {
         };
       });
 
+  const isAllSelected = dues.length > 0 && selected.length === dues.length;
+  const hasFreeTransaction = paymentRules?.hasFreeTransaction ?? true;
+  const feePercent = Number(paymentRules?.handlingFeePercent ?? 1);
+  const feeCap = Number(paymentRules?.handlingFeeMaxCap ?? 10);
+
+  let handlingFee = 0;
+  let feeReason = 'all_dues_waiver';
+  if (isAllSelected) {
+    handlingFee = 0;
+    feeReason = 'all_dues_waiver';
+  } else if (hasFreeTransaction) {
+    handlingFee = 0;
+    feeReason = 'free_monthly_transaction';
+  } else {
+    handlingFee = Math.min(feeCap, Math.round(selectedTotal * (feePercent / 100)));
+    feeReason = 'partial_payment_fee';
+  }
+
   const openPay = () => {
     if (selected.length === 0) return;
+    if (dues.length > 1 && selected.length < dues.length) {
+      setPartialModalVisible(true);
+    } else {
+      setPayOpen(true);
+    }
+  };
+
+  const handleSelectAllAndPay = () => {
+    const allIds = dues.map((d) => d.id);
+    setSelected(allIds);
+    setPartialModalVisible(false);
     setPayOpen(true);
+  };
+
+  const handleContinuePartialPay = () => {
+    setPartialModalVisible(false);
+    setPayOpen(true);
+  };
+
+  const handleToggleSelectAll = () => {
+    if (selected.length === dues.length) {
+      setSelected([]);
+    } else {
+      setSelected(dues.map((d) => d.id));
+    }
   };
 
   // The one configuration the shared PaymentSheet is opened with.
@@ -279,9 +339,14 @@ export default function DuesScreen() {
       amount: selectedTotal,
       items: buildItems(),
       showOnline: false,
+      isAllSelected,
+      handlingFee,
+      feeReason,
+      tenantPaymentRules: paymentRules,
+      hasFreeTransaction,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dues, selected]
+    [dues, selected, selectedTotal, isAllSelected, handlingFee, feeReason, paymentRules, hasFreeTransaction]
   );
 
   // ── Clarification Flow ─────────────────────────────────
@@ -366,12 +431,28 @@ export default function DuesScreen() {
             <>
               {/* ── Total Outstanding Banner ───────────────────── */}
               <View style={[styles.outstandingCard, { backgroundColor: total > 0 ? '#b91c1c' : '#059669' }]}>
-                <View style={styles.outstandingBadge}>
-                  <Text style={styles.outstandingBadgeText}>TOTAL OUTSTANDING</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <View style={styles.outstandingBadge}>
+                    <Text style={styles.outstandingBadgeText}>TOTAL OUTSTANDING</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={handleToggleSelectAll}
+                    style={{
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      borderRadius: 6,
+                      backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>
+                      {selected.length === dues.length ? 'Deselect All' : 'Select All Dues'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
                 <Text style={styles.outstandingAmount}>{formatCurrency(total)}</Text>
                 <Text style={styles.outstandingSub}>
-                  {dues.length} pending item{dues.length !== 1 ? 's' : ''} • Settle via UPI or Cash
+                  {dues.length} pending item{dues.length !== 1 ? 's' : ''} • Clear all together for ₹0 handling fee
                 </Text>
               </View>
 
@@ -412,7 +493,7 @@ export default function DuesScreen() {
         {/* ── Bottom Pay Bar ───────────────────────────────── */}
         {dues.length > 0 && (
           <View style={[styles.bottomBar, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
-            <View>
+            <View style={{ flex: 1, marginRight: SPACING.sm }}>
               <Text style={[styles.bottomLabel, { color: colors.textSecondary }]}>
                 {selected.length > 0 ? `${selected.length} items selected` : 'Select dues to pay'}
               </Text>
@@ -420,8 +501,23 @@ export default function DuesScreen() {
                 {formatCurrency(selectedTotal)}
               </Text>
               {selectedTotal > 0 ? (
-                <Text style={{ fontSize: responsiveFontSize(10), color: '#2563eb', fontWeight: '600' }}>
-                  ₹5 fee applies only for UPI
+                <Text
+                  style={{
+                    fontSize: responsiveFontSize(10.5),
+                    color: isAllSelected
+                      ? '#059669'
+                      : hasFreeTransaction
+                      ? '#059669'
+                      : '#d97706',
+                    fontWeight: '700',
+                    marginTop: 2,
+                  }}
+                >
+                  {isAllSelected
+                    ? '✨ ₹0 fee (All dues waiver)'
+                    : hasFreeTransaction
+                    ? '🎁 ₹0 fee (Free monthly transaction)'
+                    : `+₹${handlingFee} handling fee (${feePercent}%, max ₹${feeCap})`}
                 </Text>
               ) : null}
             </View>
@@ -446,6 +542,86 @@ export default function DuesScreen() {
         }}
         target={payConfig}
       />
+
+      {/* ── Partial Payment Fee Warning Modal ───────────── */}
+      <ModalSheet
+        visible={partialModalVisible}
+        onClose={() => setPartialModalVisible(false)}
+        title="Avoid Handling Fee! 💡"
+      >
+        <View style={{ paddingVertical: SPACING.sm }}>
+          <View
+            style={[
+              styles.infoBanner,
+              {
+                backgroundColor: isDark ? 'rgba(245, 158, 11, 0.12)' : '#fffbeb',
+                borderColor: '#f59e0b',
+              },
+            ]}
+          >
+            <AlertCircle size={20} color="#f59e0b" style={{ marginTop: 2 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.infoBannerTitle, { color: isDark ? '#fbbf24' : '#92400e' }]}>
+                Clear all dues without handling fee!
+              </Text>
+              <Text style={[styles.infoBannerText, { color: isDark ? '#fde68a' : '#78350f', marginTop: 4 }]}>
+                Clear all your pending dues together to enjoy ₹0 handling fee! If you pay only some dues now, you will be charged a little handling fee (1% capped at ₹10) once your free monthly transaction quota is used.
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ marginVertical: SPACING.md, gap: SPACING.sm }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                padding: SPACING.sm,
+                backgroundColor: isDark ? '#1e293b' : '#f1f5f9',
+                borderRadius: BORDER_RADIUS.md,
+              }}
+            >
+              <Text style={{ fontSize: 13, color: colors.textSecondary }}>
+                Selected Partial ({selected.length} dues):
+              </Text>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: colors.textPrimary }}>
+                {formatCurrency(selectedTotal)}
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                padding: SPACING.sm,
+                backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                borderRadius: BORDER_RADIUS.md,
+                borderColor: '#10b981',
+                borderWidth: 1,
+              }}
+            >
+              <Text style={{ fontSize: 13, fontWeight: '700', color: '#059669' }}>
+                Total All Dues ({dues.length} dues):
+              </Text>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: '#059669' }}>
+                {formatCurrency(total)} (₹0 Fee ✨)
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ gap: SPACING.sm, marginTop: SPACING.xs }}>
+            <Button
+              title={`Clear All Dues ${formatCurrency(total)} (₹0 Fee)`}
+              icon={Sparkles}
+              variant="primary"
+              onPress={handleSelectAllAndPay}
+            />
+            <Button
+              title={`Continue with Selected ${formatCurrency(selectedTotal)}`}
+              variant="outline"
+              onPress={handleContinuePartialPay}
+            />
+          </View>
+        </View>
+      </ModalSheet>
 
       {/* ── Clarification Modal ──────────────────────────── */}
       <ModalSheet

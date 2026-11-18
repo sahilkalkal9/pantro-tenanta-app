@@ -44,7 +44,6 @@ import {
   NoticeCard,
   PantroLoader,
 } from '../../components';
-import PaymentSheet from '../../components/tenants/PaymentSheet';
 import { COLORS, SPACING, SHADOWS } from '../../constants/colors';
 import { useTheme } from '../../hooks/useTheme';
 import { responsiveFontSize } from "../../theme";
@@ -96,11 +95,6 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(!cachedDash);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
-
-  // Payment State — every "Pay" tap opens the shared PaymentSheet.
-  const [payTarget, setPayTarget] = useState(null); // the rent being paid
-  const [payOpen, setPayOpen] = useState(false);
-  const [includeDeposit, setIncludeDeposit] = useState(false);
 
   const fetchData = useCallback(async (isRefresh = false) => {
     try {
@@ -175,64 +169,10 @@ export default function DashboardScreen() {
     return parts.join(' · ');
   })();
 
-  const depositPending = securityDeposit
-    ? Math.max(0, (Number(securityDeposit.expected) || 0) - (Number(securityDeposit.collected) || 0))
-    : 0;
-
   // All payments route directly to Dues page
   const openPay = () => {
     router.push('/dues');
   };
-
-  const closePay = () => {
-    setPayOpen(false);
-    setPayTarget(null);
-    setIncludeDeposit(false);
-  };
-
-  // The one configuration the shared PaymentSheet is opened with.
-  const payConfig = useMemo(() => {
-    if (!payTarget) return null;
-
-    const rentId = payTarget._id || payTarget.id || null;
-    const rentAmount = Math.max(
-      0,
-      Number(
-        payTarget.pendingAmount ??
-          (Number(payTarget.rentAmount) || 0) -
-            (Number(payTarget.paidAmount) || 0) +
-            (Number(payTarget.lateFeeAccrued) || 0)
-      ) || 0
-    );
-    const withDeposit = includeDeposit && depositPending > 0;
-
-    const items = [
-      {
-        type: 'rent',
-        rentId,
-        month: payTarget.month,
-        year: payTarget.year,
-        amount: rentAmount,
-      },
-    ];
-    if (withDeposit) items.push({ type: 'deposit', amount: depositPending });
-
-    return {
-      title: 'Pay Rent',
-      summary:
-        payTarget.month && payTarget.year
-          ? `Rent for ${formatMonthYear(payTarget.month, payTarget.year)}`
-          : 'Current rent',
-      amount: rentAmount + (withDeposit ? depositPending : 0),
-      items,
-      rentIds: rentId ? [rentId] : [],
-      depositAmount: withDeposit ? depositPending : 0,
-      depositToggle:
-        depositPending > 0
-          ? { amount: depositPending, checked: includeDeposit, onChange: setIncludeDeposit }
-          : null,
-    };
-  }, [payTarget, includeDeposit, depositPending]);
 
   if (loading) {
     return <PantroLoader fullScreen message="Loading your dashboard…" />;
@@ -660,7 +600,7 @@ export default function DashboardScreen() {
       {currentRent && !isEx && (
         <View style={styles.sectionWrap}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>This Month's Rent</Text>
+            <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>This Month&apos;s Rent</Text>
             <TouchableOpacity
               style={styles.viewAllBtn}
               onPress={() => router.push('/rent')}
@@ -696,7 +636,7 @@ export default function DashboardScreen() {
           <View style={[styles.emptyCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <AlertTriangle size={24} color="#d97706" style={{ marginBottom: 6 }} />
             <Text style={[styles.emptyCardTitle, { color: colors.textPrimary }]}>No complaints</Text>
-            <Text style={[styles.emptyCardSub, { color: colors.textSecondary }]}>You haven't raised any complaints yet.</Text>
+            <Text style={[styles.emptyCardSub, { color: colors.textSecondary }]}>You haven&apos;t raised any complaints yet.</Text>
             <TouchableOpacity
               style={[styles.emptyCardBtn, isDark && { backgroundColor: 'rgba(37, 99, 235, 0.2)' }]}
               onPress={() => router.push('/complaints')}
@@ -749,14 +689,6 @@ export default function DashboardScreen() {
           </View>
         )}
       </View>
-
-      {/* ── Payment Sheet (shared with Dues & Rent) ─── */}
-      <PaymentSheet
-        visible={payOpen}
-        onClose={closePay}
-        onSuccess={() => fetchData(true)}
-        target={payConfig}
-      />
     </ScrollView>
   );
 }
