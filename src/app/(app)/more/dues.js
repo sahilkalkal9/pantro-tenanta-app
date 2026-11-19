@@ -26,6 +26,7 @@ import {
 } from 'lucide-react-native';
 import { tenantService } from '../../../services/tenantService';
 import { useToast } from '../../../hooks/useToast';
+import { subscribeLiveUpdates } from '../../../services/liveSocket';
 import { getErrorMessage } from '../../../lib/normalize';
 import { formatCurrency, formatDateTime } from '../../../lib/format';
 import { resolveMediaUrl } from '../../../lib/api';
@@ -217,6 +218,13 @@ export default function DuesScreen() {
     fetchDues();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const unsub = subscribeLiveUpdates(() => {
+      fetchDues();
+    });
+    return unsub;
+  }, [fetchDues]);
 
   const total = useMemo(() => dues.reduce((s, d) => s + (d.amount || 0), 0), [dues]);
   const selectedTotal = useMemo(

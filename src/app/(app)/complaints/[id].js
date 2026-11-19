@@ -12,6 +12,7 @@ import {
   TenantPageHeader, Skeleton,
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
+import { subscribeLiveUpdates } from '../../../services/liveSocket';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../../../constants/colors';
 import { responsiveFontSize } from "../../../theme";
 
@@ -93,6 +94,13 @@ export default function ComplaintDetailScreen() {
     fetchComplaint();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    const unsub = subscribeLiveUpdates(() => {
+      fetchComplaint({ refresh: true });
+    });
+    return unsub;
+  }, [fetchComplaint]);
 
   const handleClose = async () => {
     setClosing(true);

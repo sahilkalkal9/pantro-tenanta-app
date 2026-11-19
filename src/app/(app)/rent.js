@@ -7,6 +7,7 @@ import {
 } from 'lucide-react-native';
 import { tenantService } from '../../services/tenantService';
 import { useToast } from '../../hooks/useToast';
+import { subscribeLiveUpdates } from '../../services/liveSocket';
 import { getErrorMessage } from '../../lib/normalize';
 import { formatCurrency, formatMonthYear } from '../../lib/format';
 import {
@@ -69,6 +70,13 @@ export default function RentScreen() {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const unsub = subscribeLiveUpdates(() => {
+      fetchData({ refresh: true });
+    });
+    return unsub;
+  }, [fetchData]);
 
   const rents = useMemo(() => {
     const raw = Array.isArray(payload) ? payload : payload?.rents || [];

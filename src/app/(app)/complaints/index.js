@@ -15,6 +15,7 @@ import {
   PantroLoader,
 } from '../../../components';
 import { useTheme } from '../../../hooks/useTheme';
+import { subscribeLiveUpdates } from '../../../services/liveSocket';
 import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, SHADOWS } from '../../../constants/colors';
 import { responsiveFontSize } from "../../../theme";
 
@@ -134,6 +135,14 @@ export default function ComplaintsScreen() {
     fetchComplaints();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filter, search]);
+
+  useEffect(() => {
+    const unsub = subscribeLiveUpdates(() => {
+      fetchComplaints({ bypassCache: true });
+      fetchStats();
+    });
+    return unsub;
+  }, [fetchComplaints, fetchStats]);
 
   const stats = useMemo(() => {
     const counts = { all: allComplaints.length, open: 0, in_progress: 0, resolved: 0, closed: 0 };
